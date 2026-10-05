@@ -5,6 +5,7 @@ import com.leadscope.backend.repository.LeadRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import java.util.Map;
 
 import java.util.List;
 
@@ -57,12 +58,12 @@ public class LeadController {
         return leadRepository.save(lead);
     }
 
-    // PUT /api/leads/1/status?status=CONTACTED  -> change status
-    @PutMapping("/{id}/status")
-    public Lead updateStatus(@PathVariable Long id, @RequestParam String status) {
+    // PUT /api/leads/1/notes   body: { "notes": "Called once, call back Monday" }
+    @PutMapping("/{id}/notes")
+    public Lead updateNotes(@PathVariable Long id, @RequestBody Map<String, String> body) {
         Lead lead = leadRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead not found"));
-        lead.setStatus(status);
+        lead.setNotes(body.get("notes"));
         return leadRepository.save(lead);
     }
 
