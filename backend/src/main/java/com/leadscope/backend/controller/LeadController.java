@@ -18,9 +18,29 @@ public class LeadController {
         this.leadRepository = leadRepository;
     }
 
-    // GET /api/leads  -> all leads
+    // GET /api/leads                      -> all leads
+    // GET /api/leads?city=Noida           -> filter by city
+    // GET /api/leads?status=NEW           -> filter by status
+    // GET /api/leads?city=Noida&status=NEW -> both
+    // GET /api/leads?search=care          -> search by business name
     @GetMapping
-    public List<Lead> getAllLeads() {
+    public List<Lead> getAllLeads(
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String search) {
+
+        if (search != null) {
+            return leadRepository.findByBusinessNameContainingIgnoreCase(search);
+        }
+        if (city != null && status != null) {
+            return leadRepository.findByCityIgnoreCaseAndStatus(city, status);
+        }
+        if (city != null) {
+            return leadRepository.findByCityIgnoreCase(city);
+        }
+        if (status != null) {
+            return leadRepository.findByStatus(status);
+        }
         return leadRepository.findAll();
     }
 
