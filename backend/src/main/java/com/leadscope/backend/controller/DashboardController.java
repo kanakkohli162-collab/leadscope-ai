@@ -39,3 +39,4 @@ public class DashboardController {
         return summary;
     }
 }
+
