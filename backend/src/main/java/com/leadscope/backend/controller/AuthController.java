@@ -1,9 +1,12 @@
 package com.leadscope.backend.controller;
 
+import com.leadscope.backend.dto.AuthResponse;
+import com.leadscope.backend.dto.LoginRequest;
 import com.leadscope.backend.dto.SignupRequest;
 import com.leadscope.backend.dto.UserResponse;
 import com.leadscope.backend.entity.User;
 import com.leadscope.backend.repository.UserRepository;
+import com.leadscope.backend.security.JwtService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -15,37 +18,47 @@ public class AuthController {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
-    // POST /api/auth/signup  -> create a new account
     @PostMapping("/signup")
     public UserResponse signup(@RequestBody SignupRequest request) {
-
-        // 1. Check the input
         if (request.getEmail() == null || request.getEmail().isBlank()
                 || request.getPassword() == null || request.getPassword().length() < 6) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Email and a password of at least 6 characters are required");
         }
-
-        // 2. Stop duplicate accounts
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already registered");
         }
-
-        // 3. Create the user with a scrambled password
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setAgencyName(request.getAgencyName());
-
-        // 4. Save and reply WITHOUT the password
         User saved = userRepository.save(user);
-        return new UserResponse(saved.getId(), saved.getName(), saved.getEmail(), saved.getAgencyName());
+        return toResponse(saved);
+    }
+
+    @PostMapping("/login")
+    public AuthResponse login(@RequestBody LoginRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
+
+        if (request.getPassword() == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+        }
+
+        String token = jwtService.generateToken(user.getEmail());
+        return new AuthResponse(token, toResponse(user));
+    }
+
+    private UserResponse toResponse(User user) {
+        return new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getAgencyName());
     }
 }
