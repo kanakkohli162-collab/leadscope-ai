@@ -5,6 +5,7 @@ import Topbar from './Topbar'
 import PageLoader from '@/components/ui/PageLoader'
 import ChatWidget from '@/features/chat/components/ChatWidget'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
+import { useSessionGuard } from '@/hooks/useSessionGuard'
 import { STORAGE_KEYS } from '@/utils/storage'
 
 /**
@@ -22,6 +23,9 @@ export default function AppLayout() {
   const [collapsed, setCollapsed] = useLocalStorage(STORAGE_KEYS.sidebarCollapsed, false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const { pathname } = useLocation()
+
+  // Checks the saved token with the backend and handles "session expired" for every page
+  useSessionGuard()
 
   // Close the mobile drawer after the user taps a link
   useEffect(() => {

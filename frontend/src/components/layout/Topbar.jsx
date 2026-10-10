@@ -1,7 +1,8 @@
 import { memo } from 'react'
 import { useLocation } from 'react-router-dom'
-import { Search, Bell, ChevronDown, Menu } from 'lucide-react'
+import { Search, Bell, Menu } from 'lucide-react'
 import { getPageTitle } from '@/config/navigation'
+import UserMenu from './UserMenu'
 
 function Topbar({ onOpenMobileNav }) {
   const { pathname } = useLocation()
@@ -37,13 +38,7 @@ function Topbar({ onOpenMobileNav }) {
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
         </button>
 
-        <button type="button" className="flex items-center gap-2 pl-2 pr-1 py-1 rounded-lg hover:bg-slate-100 transition-colors">
-          <div className="w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center text-white text-xs font-semibold">
-            MS
-          </div>
-          <span className="text-sm font-medium text-slate-700 hidden sm:block">Megha Sharma</span>
-          <ChevronDown className="w-4 h-4 text-slate-400" />
-        </button>
+        <UserMenu />
       </div>
     </header>
   )

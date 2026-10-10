@@ -8,6 +8,7 @@ import com.leadscope.backend.entity.User;
 import com.leadscope.backend.repository.UserRepository;
 import com.leadscope.backend.security.JwtService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -34,7 +35,8 @@ public class AuthController {
                     "Email and a password of at least 6 characters are required");
         }
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already registered");
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "An account with this email already exists. Please sign in instead.");
         }
         User user = new User();
         user.setName(request.getName());
@@ -47,15 +49,27 @@ public class AuthController {
 
     @PostMapping("/login")
     public AuthResponse login(@RequestBody LoginRequest request) {
+        // 404 = we don't know this email at all
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "No account found with this email. Please sign up first."));
 
+        // 401 = the email exists but the password doesn't match the BCrypt hash
         if (request.getPassword() == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Incorrect password. Please try again.");
         }
 
         String token = jwtService.generateToken(user.getEmail());
         return new AuthResponse(token, toResponse(user));
+    }
+
+    // GET /api/auth/me -> the logged-in user (needs a valid token)
+    // JwtAuthFilter already checked the token and stored the email; getName() gives it back
+    @GetMapping("/me")
+    public UserResponse me(Authentication authentication) {
+        User user = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Please sign in to continue."));
+        return toResponse(user);
     }
 
     private UserResponse toResponse(User user) {

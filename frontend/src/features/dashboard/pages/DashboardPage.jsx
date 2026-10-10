@@ -5,6 +5,8 @@ import StatCard from '@/components/ui/StatCard'
 import PriorityBadge from '@/components/ui/PriorityBadge'
 import ScoreCircle from '@/components/ui/ScoreCircle'
 import { leads, weeklyChanges } from '@/mocks'
+import { getCurrentUser } from '@/services/authService'
+import { getFirstName } from '@/utils/format'
 import { countBy, getDashboardStats, toChartData } from '@/features/leads/utils/leadStats'
 
 // Computed ONCE when this file loads (the mock data never changes), not on every render.
@@ -14,11 +16,13 @@ const locationData = toChartData(countBy(leads, 'location'))
 const recentLeads = [...leads].sort((a, b) => a.lastContactedDays - b.lastContactedDays).slice(0, 5)
 
 export default function DashboardPage() {
+  const user = getCurrentUser()
+
   return (
     <div className="space-y-6">
       {/* Welcome */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Welcome back, Megha! 👋</h1>
+        <h1 className="text-2xl font-bold text-slate-800">Welcome back, {getFirstName(user.name)}! 👋</h1>
         <p className="text-slate-500 mt-1">Here&apos;s what&apos;s happening with your leads.</p>
       </div>
 
