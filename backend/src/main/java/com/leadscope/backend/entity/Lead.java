@@ -44,6 +44,9 @@ public class Lead {
     private Boolean doNotContact = false;
     private String source = "Google";
 
+    // Owner: which agency (user) this lead belongs to   (NEW)
+    private String ownerEmail;
+
     // Automatic dates
     @CreationTimestamp
     private LocalDateTime createdAt;

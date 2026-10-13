@@ -8,13 +8,13 @@ import java.util.List;
 
 public interface LeadRepository extends JpaRepository<Lead, Long> {
 
-    // Search and filter
+
     List<Lead> findByCityIgnoreCase(String city);
     List<Lead> findByStatus(String status);
     List<Lead> findByCityIgnoreCaseAndStatus(String city, String status);
     List<Lead> findByBusinessNameContainingIgnoreCase(String keyword);
 
-    // Dashboard counts
+  
     long countByPriority(String priority);
     long countByStatus(String status);
     long countByWebsiteIsNull();

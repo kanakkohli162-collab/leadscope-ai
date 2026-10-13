@@ -5,9 +5,9 @@ import com.leadscope.backend.repository.LeadRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import java.util.Map;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/leads")
@@ -19,11 +19,11 @@ public class LeadController {
         this.leadRepository = leadRepository;
     }
 
-    // GET /api/leads                      -> all leads
-    // GET /api/leads?city=Noida           -> filter by city
-    // GET /api/leads?status=NEW           -> filter by status
+    // GET /api/leads                       -> all leads
+    // GET /api/leads?city=Noida            -> filter by city
+    // GET /api/leads?status=NEW            -> filter by status
     // GET /api/leads?city=Noida&status=NEW -> both
-    // GET /api/leads?search=care          -> search by business name
+    // GET /api/leads?search=care           -> search by business name
     @GetMapping
     public List<Lead> getAllLeads(
             @RequestParam(required = false) String city,
@@ -55,6 +55,15 @@ public class LeadController {
     // POST /api/leads  -> add a lead
     @PostMapping
     public Lead addLead(@RequestBody Lead lead) {
+        return leadRepository.save(lead);
+    }
+
+    // PUT /api/leads/1/status?status=CONTACTED  -> change status   (NEW)
+    @PutMapping("/{id}/status")
+    public Lead updateStatus(@PathVariable Long id, @RequestParam String status) {
+        Lead lead = leadRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead not found"));
+        lead.setStatus(status);
         return leadRepository.save(lead);
     }
 

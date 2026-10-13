@@ -21,9 +21,9 @@ public class User {
     private String email;
 
     @Column(nullable = false)
-    private String password;      // stored scrambled with BCrypt, never plain text
+    private String password;
 
-    private String agencyName;    // used to sign outreach messages
+    private String agencyName;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
