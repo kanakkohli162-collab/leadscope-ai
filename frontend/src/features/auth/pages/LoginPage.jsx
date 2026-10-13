@@ -2,32 +2,24 @@ import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Sparkles, Mail, Lock, Eye, EyeOff, User, Building } from 'lucide-react'
 import { login, register, forgotPassword, saveSession } from '@/services/authService'
-import { useToast } from '@/hooks/useToast'
-
-const NOTICE_STYLES = {
-  success: 'bg-green-50 border-green-200 text-green-700',
-  warning: 'bg-amber-50 border-amber-200 text-amber-800',
-}
 
 export default function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const toast = useToast()
   // If PrivateRoute bounced the user here, go back to that page after login
   const redirectTo = location.state?.from?.pathname || '/dashboard'
   const [mode, setMode] = useState('login')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  // A notice is a non-error message: { type: 'success' | 'warning', text }.
-  // Logout and "session expired" pass one in through the router's location.state.
-  const [notice, setNotice] = useState(location.state?.notice || null)
+  const [success, setSuccess] = useState('')
 
   const [form, setForm] = useState({
     name: '',
-    email: '',
-    password: '',
+    email: 'megha@example.com',
+    password: 'password123',
     company: '',
+    designation: '',
   })
 
   const handleChange = (e) => {
@@ -35,44 +27,33 @@ export default function LoginPage() {
     setError('')
   }
 
-  // Sign in ↔ Sign up ↔ Forgot: old messages no longer apply to the new form
-  const switchMode = (nextMode) => {
-    setMode(nextMode)
-    setError('')
-    setNotice(null)
-  }
-
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     setError('')
-    setNotice(null)
+    setSuccess('')
 
     try {
       if (mode === 'login') {
         const res = await login(form.email, form.password)
         saveSession(res.data)
-        toast.success(`Login successful. Welcome back, ${res.data.name || 'there'}!`)
         navigate(redirectTo, { replace: true })
       } else if (mode === 'signup') {
-        await register({
+        const res = await register({
           name: form.name,
           email: form.email,
           password: form.password,
           company: form.company,
+          designation: form.designation,
         })
-        // No auto-login: show the Sign in form with the email kept and the password cleared
-        setMode('login')
-        setForm((f) => ({ ...f, password: '' }))
-        setNotice({
-          type: 'success',
-          text: 'Registration successful! Your account has been created. Please sign in.',
-        })
+        saveSession(res.data)
+        navigate(redirectTo, { replace: true })
       } else if (mode === 'forgot') {
         await forgotPassword(form.email)
+        setSuccess('Password reset link sent to your email (demo mode)')
       }
     } catch (err) {
-      setError(err.message || 'Something went wrong. Please try again.')
+      setError(err.message || 'Something went wrong. Is backend running on :8080?')
     } finally {
       setLoading(false)
     }
@@ -140,8 +121,8 @@ export default function LoginPage() {
             {error && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">{error}</div>
             )}
-            {notice && (
-              <div className={`mb-4 p-3 border text-sm rounded-lg ${NOTICE_STYLES[notice.type] || NOTICE_STYLES.success}`}>{notice.text}</div>
+            {success && (
+              <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg">{success}</div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -183,7 +164,7 @@ export default function LoginPage() {
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="block text-sm font-medium text-slate-700">Password</label>
                     {mode === 'login' && (
-                      <button type="button" onClick={() => switchMode('forgot')}
+                      <button type="button" onClick={() => setMode('forgot')}
                         className="text-xs text-primary-600 hover:text-primary-700 font-medium">
                         Forgot password?
                       </button>
@@ -214,20 +195,26 @@ export default function LoginPage() {
             <div className="mt-6 text-center text-sm text-slate-500">
               {mode === 'login' && (
                 <>Don&apos;t have an account?{' '}
-                  <button onClick={() => switchMode('signup')} className="text-primary-600 hover:text-primary-700 font-semibold">Sign up</button>
+                  <button onClick={() => setMode('signup')} className="text-primary-600 hover:text-primary-700 font-semibold">Sign up</button>
                 </>
               )}
               {mode === 'signup' && (
                 <>Already have an account?{' '}
-                  <button onClick={() => switchMode('login')} className="text-primary-600 hover:text-primary-700 font-semibold">Sign in</button>
+                  <button onClick={() => setMode('login')} className="text-primary-600 hover:text-primary-700 font-semibold">Sign in</button>
                 </>
               )}
               {mode === 'forgot' && (
                 <>Remember password?{' '}
-                  <button onClick={() => switchMode('login')} className="text-primary-600 hover:text-primary-700 font-semibold">Sign in</button>
+                  <button onClick={() => setMode('login')} className="text-primary-600 hover:text-primary-700 font-semibold">Sign in</button>
                 </>
               )}
             </div>
+
+            {mode === 'login' && (
+              <p className="mt-4 text-center text-xs text-slate-400">
+                Demo: megha@example.com / password123
+              </p>
+            )}
           </div>
         </div>
       </div>

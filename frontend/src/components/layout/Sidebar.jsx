@@ -1,11 +1,9 @@
 import { memo, useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import clsx from 'clsx'
-import { Sparkles, PanelLeftClose, PanelLeftOpen, X, LogOut } from 'lucide-react'
+import { Sparkles, PanelLeftClose, PanelLeftOpen, X } from 'lucide-react'
 import { NAV_ITEMS } from '@/config/navigation'
-import { getCurrentUser } from '@/services/authService'
-import { useLogout } from '@/hooks/useLogout'
-import { getInitials } from '@/utils/format'
+import { getCurrentUser, getInitials } from '@/utils/currentUser'
 
 /**
  * Collapsible sidebar.
@@ -21,8 +19,6 @@ import { getInitials } from '@/utils/format'
  */
 function Sidebar({ collapsed, onToggleCollapsed, mobileOpen, onCloseMobile }) {
   const { pathname } = useLocation()
-  const user = getCurrentUser()
-  const logout = useLogout()
 
   // Let users close the drawer with the Escape key (accessibility)
   useEffect(() => {
@@ -137,28 +133,19 @@ function Sidebar({ collapsed, onToggleCollapsed, mobileOpen, onCloseMobile }) {
           </div>
         )}
 
-        {/* User + logout. When collapsed, the avatar and logout icon stack vertically. */}
-        <div className={clsx('px-4 py-4 border-t border-slate-700/50', collapsed && 'lg:px-0')}>
-          <div className={clsx('flex items-center gap-3', collapsed && 'lg:flex-col lg:gap-2')}>
+        {/* User */}
+        <div className={clsx('px-4 py-4 border-t border-slate-700/50', collapsed && 'lg:px-0 lg:flex lg:justify-center')}>
+          <div className="flex items-center gap-3">
             <div
               className="w-9 h-9 rounded-full bg-primary-500 flex items-center justify-center text-sm font-semibold shrink-0"
-              title={collapsed ? user.name : undefined}
+              title={collapsed ? 'Megha Sharma' : undefined}
             >
-              {getInitials(user.name)}
+              MS
             </div>
-            <div className={clsx('min-w-0 flex-1', collapsed && 'lg:hidden')}>
-              <p className="text-sm font-medium truncate">{user.name || 'Account'}</p>
-              <p className="text-xs text-slate-400 truncate">{user.agencyName || user.email}</p>
+            <div className={clsx('min-w-0', collapsed && 'lg:hidden')}>
+              <p className="text-sm font-medium truncate">Megha Sharma</p>
+              <p className="text-xs text-slate-400 truncate">Marketing Manager</p>
             </div>
-            <button
-              type="button"
-              onClick={logout}
-              className="p-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white shrink-0"
-              aria-label="Log out"
-              title="Log out"
-            >
-              <LogOut size={18} />
-            </button>
           </div>
         </div>
       </aside>

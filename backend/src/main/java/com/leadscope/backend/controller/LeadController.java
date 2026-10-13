@@ -3,6 +3,7 @@ package com.leadscope.backend.controller;
 import com.leadscope.backend.entity.Lead;
 import com.leadscope.backend.repository.LeadRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -19,69 +20,52 @@ public class LeadController {
         this.leadRepository = leadRepository;
     }
 
-    // GET /api/leads                       -> all leads
-    // GET /api/leads?city=Noida            -> filter by city
-    // GET /api/leads?status=NEW            -> filter by status
-    // GET /api/leads?city=Noida&status=NEW -> both
-    // GET /api/leads?search=care           -> search by business name
     @GetMapping
-    public List<Lead> getAllLeads(
-            @RequestParam(required = false) String city,
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) String search) {
-
-        if (search != null) {
-            return leadRepository.findByBusinessNameContainingIgnoreCase(search);
-        }
-        if (city != null && status != null) {
-            return leadRepository.findByCityIgnoreCaseAndStatus(city, status);
-        }
-        if (city != null) {
-            return leadRepository.findByCityIgnoreCase(city);
-        }
-        if (status != null) {
-            return leadRepository.findByStatus(status);
-        }
-        return leadRepository.findAll();
+    public List<Lead> getAllLeads(@RequestParam(required = false) String city,
+                                  @RequestParam(required = false) String status,
+                                  @RequestParam(required = false) String search,
+                                  Authentication auth) {
+        String me = auth.getName();
+        if (search != null) return leadRepository.findByOwnerEmailAndBusinessNameContainingIgnoreCase(me, search);
+        if (city != null && status != null) return leadRepository.findByOwnerEmailAndCityIgnoreCaseAndStatus(me, city, status);
+        if (city != null) return leadRepository.findByOwnerEmailAndCityIgnoreCase(me, city);
+        if (status != null) return leadRepository.findByOwnerEmailAndStatus(me, status);
+        return leadRepository.findByOwnerEmail(me);
     }
 
-    // GET /api/leads/1  -> one lead
     @GetMapping("/{id}")
-    public Lead getLeadById(@PathVariable Long id) {
-        return leadRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead not found"));
+    public Lead getLeadById(@PathVariable Long id, Authentication auth) {
+        return findMine(id, auth);
     }
 
-    // POST /api/leads  -> add a lead
     @PostMapping
-    public Lead addLead(@RequestBody Lead lead) {
+    public Lead addLead(@RequestBody Lead lead, Authentication auth) {
+        lead.setId(null);
+        lead.setOwnerEmail(auth.getName());
         return leadRepository.save(lead);
     }
 
-    // PUT /api/leads/1/status?status=CONTACTED  -> change status   (NEW)
     @PutMapping("/{id}/status")
-    public Lead updateStatus(@PathVariable Long id, @RequestParam String status) {
-        Lead lead = leadRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead not found"));
+    public Lead updateStatus(@PathVariable Long id, @RequestParam String status, Authentication auth) {
+        Lead lead = findMine(id, auth);
         lead.setStatus(status);
         return leadRepository.save(lead);
     }
 
-    // PUT /api/leads/1/notes   body: { "notes": "Called once, call back Monday" }
     @PutMapping("/{id}/notes")
-    public Lead updateNotes(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        Lead lead = leadRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead not found"));
+    public Lead updateNotes(@PathVariable Long id, @RequestBody Map<String, String> body, Authentication auth) {
+        Lead lead = findMine(id, auth);
         lead.setNotes(body.get("notes"));
         return leadRepository.save(lead);
     }
 
-    // DELETE /api/leads/1  -> delete a lead
     @DeleteMapping("/{id}")
-    public void deleteLead(@PathVariable Long id) {
-        if (!leadRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead not found");
-        }
-        leadRepository.deleteById(id);
+    public void deleteLead(@PathVariable Long id, Authentication auth) {
+        leadRepository.delete(findMine(id, auth));
+    }
+
+    private Lead findMine(Long id, Authentication auth) {
+        return leadRepository.findByIdAndOwnerEmail(id, auth.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead not found"));
     }
 }

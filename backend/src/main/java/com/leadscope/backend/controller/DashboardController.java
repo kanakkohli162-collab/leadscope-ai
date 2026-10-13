@@ -1,6 +1,7 @@
 package com.leadscope.backend.controller;
 
 import com.leadscope.backend.repository.LeadRepository;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,20 +19,20 @@ public class DashboardController {
         this.leadRepository = leadRepository;
     }
 
-    // GET /api/dashboard/summary -> all dashboard numbers
     @GetMapping("/summary")
-    public Map<String, Object> getSummary() {
-        Map<String, Object> summary = new LinkedHashMap<>();
+    public Map<String, Object> getSummary(Authentication auth) {
+        String me = auth.getName();
 
-        summary.put("totalLeads", leadRepository.count());
-        summary.put("highPriority", leadRepository.countByPriority("HIGH"));
-        summary.put("noWebsite", leadRepository.countByWebsiteIsNull());
-        summary.put("lowRatings", leadRepository.countByRatingLessThan(3.5));
-        summary.put("contacted", leadRepository.countByStatus("CONTACTED"));
-        summary.put("won", leadRepository.countByStatus("WON"));
+        Map<String, Object> summary = new LinkedHashMap<>();
+        summary.put("totalLeads", leadRepository.countByOwnerEmail(me));
+        summary.put("highPriority", leadRepository.countByOwnerEmailAndPriority(me, "HIGH"));
+        summary.put("noWebsite", leadRepository.countByOwnerEmailAndWebsiteIsNull(me));
+        summary.put("lowRatings", leadRepository.countByOwnerEmailAndRatingLessThan(me, 3.5));
+        summary.put("contacted", leadRepository.countByOwnerEmailAndStatus(me, "CONTACTED"));
+        summary.put("won", leadRepository.countByOwnerEmailAndStatus(me, "WON"));
 
         Map<String, Long> leadsByCity = new LinkedHashMap<>();
-        for (Object[] row : leadRepository.countLeadsByCity()) {
+        for (Object[] row : leadRepository.countLeadsByCity(me)) {
             leadsByCity.put((String) row[0], (Long) row[1]);
         }
         summary.put("leadsByCity", leadsByCity);
@@ -39,4 +40,3 @@ public class DashboardController {
         return summary;
     }
 }
-

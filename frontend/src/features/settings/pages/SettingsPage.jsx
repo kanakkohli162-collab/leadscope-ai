@@ -1,7 +1,5 @@
 import { useState } from 'react'
 import { User, Building, MessageSquare, Brain, Bell, Camera } from 'lucide-react'
-import { getCurrentUser } from '@/services/authService'
-import { getInitials } from '@/utils/format'
 
 const tabs = [
   { id: 'profile', label: 'Profile', icon: User },
@@ -13,14 +11,12 @@ const tabs = [
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile')
-  // Start the form with the logged-in user's details (saving comes in a later phase)
-  const user = getCurrentUser()
   const [form, setForm] = useState({
-    name: user.name || '',
-    email: user.email || '',
-    company: user.agencyName || '',
-    designation: '',
-    phone: '',
+    name: 'Megha Sharma',
+    email: 'megha@example.com',
+    company: 'LeadScope AI',
+    designation: 'Marketing Manager',
+    phone: '+91 98765 43210',
   })
 
   const handleChange = (e) => {
@@ -65,7 +61,7 @@ export default function SettingsPage() {
               <div className="flex items-center gap-4">
                 <div className="relative">
                   <div className="w-20 h-20 rounded-full bg-primary-500 flex items-center justify-center text-white text-2xl font-bold">
-                    {getInitials(form.name)}
+                    MS
                   </div>
                   <button className="absolute bottom-0 right-0 w-7 h-7 bg-white border border-slate-200 rounded-full flex items-center justify-center shadow-sm hover:bg-slate-50">
                     <Camera size={12} className="text-slate-600" />
@@ -127,7 +123,7 @@ export default function SettingsPage() {
               <h3 className="font-semibold text-slate-800">Company Information</h3>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Company Name</label>
-                <input defaultValue={user.agencyName || ''} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                <input defaultValue="LeadScope AI" className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Industry</label>

@@ -1,47 +1,66 @@
 import { useDeferredValue, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, MoreHorizontal, Search } from 'lucide-react'
+import { Plus, Search, Trash2 } from 'lucide-react'
 import PriorityBadge from '@/components/ui/PriorityBadge'
-import StatusBadge from '@/components/ui/StatusBadge'
 import ScoreCircle from '@/components/ui/ScoreCircle'
-import { leads } from '@/mocks'
+import { updateLeadStatus, deleteLead } from '@/services/leadService'
 import { countBy, matchesSearch } from '../utils/leadStats'
+import { useLeads } from '../hooks/useLeads'
 
 const statuses = ['All', 'New', 'Contacted', 'Follow-up', 'Interested', 'Converted', 'Not Interested']
 
-// Counts per status never change for static data → compute once, outside the component
-const statusCounts = { All: leads.length, ...countBy(leads, 'status') }
-
 export default function MyLeadsPage() {
+  const { leads, setLeads, loading, error } = useLeads()
   const [activeStatus, setActiveStatus] = useState('All')
   const [search, setSearch] = useState('')
-
-  // useDeferredValue lets typing stay instant; the 50-row filter runs right after
   const deferredSearch = useDeferredValue(search)
 
-  // useMemo → only re-filter when the tab or search text actually changes
+  const statusCounts = useMemo(() => ({ All: leads.length, ...countBy(leads, 'status') }), [leads])
+
   const filtered = useMemo(
     () => leads.filter((l) =>
       (activeStatus === 'All' || l.status === activeStatus) && matchesSearch(l, deferredSearch)),
-    [activeStatus, deferredSearch],
+    [leads, activeStatus, deferredSearch],
   )
+
+  async function changeStatus(id, status) {
+    try {
+      const updated = await updateLeadStatus(id, status)
+      setLeads((prev) => prev.map((l) => (l.id === id ? updated : l)))
+    } catch (e) {
+      alert(e.message)
+    }
+  }
+
+  async function removeLead(id) {
+    if (!window.confirm('Delete this lead?')) return
+    try {
+      await deleteLead(id)
+      setLeads((prev) => prev.filter((l) => l.id !== id))
+    } catch (e) {
+      alert(e.message)
+    }
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-slate-800">My Leads</h1>
-          <p className="text-sm text-slate-500 mt-1">Manage and track all your leads</p>
+          <p className="text-sm text-slate-500 mt-1">Track and update the leads you've saved</p>
         </div>
-        <button className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-medium px-4 py-2.5 rounded-lg transition-colors">
+        <Link
+          to="/lead-discovery"
+          className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-medium px-4 py-2.5 rounded-lg transition-colors"
+        >
           <Plus size={18} />
-          Add Lead
-        </button>
+          Find Leads
+        </Link>
       </div>
 
       {/* Status Tabs */}
       <div className="flex flex-wrap gap-2">
-        {statuses.map(status => (
+        {statuses.map((status) => (
           <button
             key={status}
             onClick={() => setActiveStatus(status)}
@@ -78,12 +97,25 @@ export default function MyLeadsPage() {
                 <th className="text-left px-5 py-3 font-semibold text-slate-600">Location</th>
                 <th className="text-left px-5 py-3 font-semibold text-slate-600">Score</th>
                 <th className="text-left px-5 py-3 font-semibold text-slate-600">Status</th>
-                <th className="text-left px-5 py-3 font-semibold text-slate-600">Last Contacted</th>
+                <th className="text-left px-5 py-3 font-semibold text-slate-600">Last Updated</th>
                 <th className="text-left px-5 py-3 font-semibold text-slate-600">Action</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((lead) => (
+              {loading && (
+                <tr><td colSpan={6} className="px-5 py-8 text-center text-slate-500">Loading your leads…</td></tr>
+              )}
+              {!loading && error && (
+                <tr><td colSpan={6} className="px-5 py-8 text-center text-red-600">{error}</td></tr>
+              )}
+              {!loading && !error && filtered.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-5 py-8 text-center text-slate-500">
+                    No leads yet. <Link to="/lead-discovery" className="text-primary-600 font-medium">Find your first leads →</Link>
+                  </td>
+                </tr>
+              )}
+              {!loading && !error && filtered.map((lead) => (
                 <tr key={lead.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                   <td className="px-5 py-3.5">
                     <Link to={`/lead/${lead.id}`} className="font-medium text-slate-800 hover:text-primary-600">
@@ -98,12 +130,22 @@ export default function MyLeadsPage() {
                     </div>
                   </td>
                   <td className="px-5 py-3.5">
-                    <StatusBadge status={lead.status} />
+                    <select
+                      value={lead.status}
+                      onChange={(e) => changeStatus(lead.id, e.target.value)}
+                      className="border border-slate-200 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    >
+                      {statuses.slice(1).map((s) => <option key={s} value={s}>{s}</option>)}
+                    </select>
                   </td>
                   <td className="px-5 py-3.5 text-slate-500">{lead.lastContacted}</td>
                   <td className="px-5 py-3.5">
-                    <button className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600">
-                      <MoreHorizontal size={16} />
+                    <button
+                      onClick={() => removeLead(lead.id)}
+                      title="Delete lead"
+                      className="p-1.5 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-600"
+                    >
+                      <Trash2 size={16} />
                     </button>
                   </td>
                 </tr>
