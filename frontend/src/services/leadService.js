@@ -84,3 +84,12 @@ export const getDashboardSummary = () => request('/dashboard/summary')
 export const searchBusinesses = async (city, category) =>
   (await request('/search', { method: 'POST', body: JSON.stringify({ city, category }) }))
     .map((l, i) => ({ ...toUiLead(l), id: `result-${i}`, raw: l }))
+
+// ---------- Write Message (AI / template) ----------
+
+/** POST /api/leads/:id/message -> { message, source: "AI" | "Template" } */
+export const generateMessage = (id, service, channel) =>
+  request(`/leads/${id}/message`, {
+    method: 'POST',
+    body: JSON.stringify({ service, channel }),
+  })
