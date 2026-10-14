@@ -1,11 +1,8 @@
 /**
  * Single source of truth for the sidebar links AND the page titles in the Topbar.
- * Before, the same list was duplicated in Sidebar.jsx and Topbar.jsx — adding a
- * page meant editing two files. Now you add one entry here.
  */
 import {
-  LayoutDashboard, Search, Users, Brain, MessageSquare,
-  BarChart3, Download, Bookmark, Settings,
+  LayoutDashboard, Search, Users, MessageSquare, Settings,
 } from 'lucide-react'
 
 export const ROUTES = {
@@ -22,16 +19,12 @@ export const ROUTES = {
   settings: '/settings',
 }
 
+// Only pages that use REAL data are shown in the menu
 export const NAV_ITEMS = [
   { to: ROUTES.dashboard, icon: LayoutDashboard, label: 'Dashboard' },
-  { to: ROUTES.leadDiscovery, icon: Search, label: 'Lead Discovery' },
+  { to: ROUTES.leadDiscovery, icon: Search, label: 'Find Leads' },
   { to: ROUTES.myLeads, icon: Users, label: 'My Leads' },
-  // `match` lets the link stay highlighted for every /ai-analysis/:id page
-  { to: ROUTES.aiAnalysis(1), match: '/ai-analysis', icon: Brain, label: 'AI Analysis' },
-  { to: ROUTES.outreach, icon: MessageSquare, label: 'Outreach Generator' },
-  { to: ROUTES.analytics, icon: BarChart3, label: 'Analytics' },
-  { to: ROUTES.savedSearches, icon: Bookmark, label: 'Saved Searches' },
-  { to: ROUTES.export, icon: Download, label: 'Export Reports' },
+  { to: ROUTES.outreach, icon: MessageSquare, label: 'Write Message' },
   { to: ROUTES.settings, icon: Settings, label: 'Settings' },
 ]
 

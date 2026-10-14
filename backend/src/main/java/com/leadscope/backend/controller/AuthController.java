@@ -7,11 +7,14 @@ import com.leadscope.backend.dto.UserResponse;
 import com.leadscope.backend.entity.User;
 import com.leadscope.backend.repository.UserRepository;
 import com.leadscope.backend.security.JwtService;
+import com.leadscope.backend.service.LoginAttemptService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -20,27 +23,33 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final LoginAttemptService loginAttempts;
 
-    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder,
+                          JwtService jwtService, LoginAttemptService loginAttempts) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.loginAttempts = loginAttempts;
     }
 
     @PostMapping("/signup")
     public UserResponse signup(@RequestBody SignupRequest request) {
-        if (request.getEmail() == null || request.getEmail().isBlank()
+        String email = request.getEmail() == null ? "" : request.getEmail().trim();
+
+        // Basic checks: real-looking email + password of at least 6 characters
+        if (email.isBlank() || !email.contains("@")
                 || request.getPassword() == null || request.getPassword().length() < 6) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Email and a password of at least 6 characters are required");
+                    "A valid email and a password of at least 6 characters are required");
         }
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (userRepository.existsByEmail(email)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "An account with this email already exists. Please sign in instead.");
         }
         User user = new User();
         user.setName(request.getName());
-        user.setEmail(request.getEmail());
+        user.setEmail(email);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setAgencyName(request.getAgencyName());
         User saved = userRepository.save(user);
@@ -49,22 +58,32 @@ public class AuthController {
 
     @PostMapping("/login")
     public AuthResponse login(@RequestBody LoginRequest request) {
-        // 404 = we don't know this email at all
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "No account found with this email. Please sign up first."));
+        String email = request.getEmail() == null ? "" : request.getEmail().trim();
 
-        // 401 = the email exists but the password doesn't match the BCrypt hash
-        if (request.getPassword() == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Incorrect password. Please try again.");
+        // 1) Blocked? (5 wrong tries -> 15 minutes) -> 429
+        loginAttempts.checkBlocked(email);
+
+        // 2) Check email + password together
+        Optional<User> found = userRepository.findByEmail(email);
+        boolean ok = found.isPresent()
+                && request.getPassword() != null
+                && passwordEncoder.matches(request.getPassword(), found.get().getPassword());
+
+        if (!ok) {
+            loginAttempts.recordFailure(email);
+            // Same message for wrong email AND wrong password,
+            // so attackers can't find out which emails are registered
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password.");
         }
 
+        // 3) Success -> clear the counter and give a token
+        loginAttempts.reset(email);
+        User user = found.get();
         String token = jwtService.generateToken(user.getEmail());
         return new AuthResponse(token, toResponse(user));
     }
 
     // GET /api/auth/me -> the logged-in user (needs a valid token)
-    // JwtAuthFilter already checked the token and stored the email; getName() gives it back
     @GetMapping("/me")
     public UserResponse me(Authentication authentication) {
         User user = userRepository.findByEmail(authentication.getName())

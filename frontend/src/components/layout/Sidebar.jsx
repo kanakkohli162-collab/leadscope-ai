@@ -3,34 +3,27 @@ import { NavLink, useLocation } from 'react-router-dom'
 import clsx from 'clsx'
 import { Sparkles, PanelLeftClose, PanelLeftOpen, X } from 'lucide-react'
 import { NAV_ITEMS } from '@/config/navigation'
-import { getCurrentUser, getInitials } from '@/utils/currentUser'
+import { getCurrentUser } from '@/utils/currentUser'
 
-/**
- * Collapsible sidebar.
- *
- * Desktop (lg and up, ≥1024px):
- *   Always visible. `collapsed` switches width between w-64 (icons + labels)
- *   and w-[72px] (icons only). The width change is animated with a CSS
- *   transition, which runs on the GPU and costs no JavaScript per frame.
- *
- * Mobile (< lg):
- *   Hidden off-screen (-translate-x-full). `mobileOpen` slides it in as a
- *   drawer with a dark backdrop. On mobile it always shows full labels.
- */
 function Sidebar({ collapsed, onToggleCollapsed, mobileOpen, onCloseMobile }) {
   const { pathname } = useLocation()
 
-  // Let users close the drawer with the Escape key (accessibility)
+  // Logged-in user (saved in the browser at login)
+  const user = getCurrentUser() || {}
+  const userName = user.name || 'User'
+  const initials = userName.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
+
+  // Close the mobile drawer with the Escape key
   useEffect(() => {
     if (!mobileOpen) return
     const onKey = (e) => e.key === 'Escape' && onCloseMobile()
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey) // cleanup avoids duplicate listeners
+    return () => window.removeEventListener('keydown', onKey)
   }, [mobileOpen, onCloseMobile])
 
   return (
     <>
-      {/* Backdrop — only rendered on mobile while the drawer is open */}
+      {/* Backdrop — mobile only, while the drawer is open */}
       <div
         aria-hidden="true"
         onClick={onCloseMobile}
@@ -47,7 +40,6 @@ function Sidebar({ collapsed, onToggleCollapsed, mobileOpen, onCloseMobile }) {
           'transition-[width,transform] duration-300 ease-in-out',
           'lg:static lg:translate-x-0',
           mobileOpen ? 'translate-x-0' : '-translate-x-full',
-          // on mobile always wide; on desktop depends on `collapsed`
           collapsed ? 'w-64 lg:w-[72px]' : 'w-64',
         )}
       >
@@ -68,7 +60,6 @@ function Sidebar({ collapsed, onToggleCollapsed, mobileOpen, onCloseMobile }) {
             </div>
           </div>
 
-          {/* Mobile: close (X). Desktop: collapse. */}
           <button
             type="button"
             onClick={onCloseMobile}
@@ -99,7 +90,6 @@ function Sidebar({ collapsed, onToggleCollapsed, mobileOpen, onCloseMobile }) {
               <NavLink
                 key={item.to}
                 to={item.to}
-                // When collapsed the label is hidden, so `title` gives a hover tooltip
                 title={collapsed ? item.label : undefined}
                 className={({ isActive }) =>
                   clsx(
@@ -133,18 +123,18 @@ function Sidebar({ collapsed, onToggleCollapsed, mobileOpen, onCloseMobile }) {
           </div>
         )}
 
-        {/* User */}
+        {/* Logged-in user */}
         <div className={clsx('px-4 py-4 border-t border-slate-700/50', collapsed && 'lg:px-0 lg:flex lg:justify-center')}>
           <div className="flex items-center gap-3">
             <div
               className="w-9 h-9 rounded-full bg-primary-500 flex items-center justify-center text-sm font-semibold shrink-0"
-              title={collapsed ? 'Megha Sharma' : undefined}
+              title={collapsed ? userName : undefined}
             >
-              MS
+              {initials}
             </div>
             <div className={clsx('min-w-0', collapsed && 'lg:hidden')}>
-              <p className="text-sm font-medium truncate">Megha Sharma</p>
-              <p className="text-xs text-slate-400 truncate">Marketing Manager</p>
+              <p className="text-sm font-medium truncate">{userName}</p>
+              <p className="text-xs text-slate-400 truncate">{user.agencyName || user.email || ''}</p>
             </div>
           </div>
         </div>
@@ -153,5 +143,4 @@ function Sidebar({ collapsed, onToggleCollapsed, mobileOpen, onCloseMobile }) {
   )
 }
 
-// memo → skip re-rendering when the props haven't changed
 export default memo(Sidebar)
