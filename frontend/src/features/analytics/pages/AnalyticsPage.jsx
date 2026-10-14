@@ -1,129 +1,211 @@
+import { useMemo } from 'react'
+import { Link } from 'react-router-dom'
+import { Users, Gauge, Flame, Trophy, Lightbulb, Search } from 'lucide-react'
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Area, AreaChart
+  ResponsiveContainer, PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from 'recharts'
-import { Users, TrendingUp, Target, MessageSquare } from 'lucide-react'
-import StatCard from '@/components/ui/StatCard'
-import { leads, leadTrendData as trendData } from '@/mocks'
-import {
-  countBy, getDashboardStats, getPriorityDistribution, toChartData,
-} from '@/features/leads/utils/leadStats'
+import PageLoader from '@/components/ui/PageLoader'
+import { useLeads } from '@/features/leads/hooks/useLeads'
 
-// Derived from the 50 leads once at module load — charts always match the data.
-const dashboardStats = getDashboardStats(leads)
-const locationData = toChartData(countBy(leads, 'location'))
-const categoryData = toChartData(countBy(leads, 'category'), 6)
-const priorityData = getPriorityDistribution(leads)
-const locations = locationData.filter((d) => d.name !== 'Others').map((d) => d.name)
+const BLUE = '#2F6BFF'
+const VIOLET = '#7B5CFF'
+const HOT = '#F5A524'
+const GREY = '#B3BDD6'
+const PIPELINE = ['New', 'Contacted', 'Follow-up', 'Interested', 'Converted', 'Not Interested']
+const tooltipStyle = { borderRadius: 12, border: '1px solid #E3E7FB', fontSize: 13 }
 
+function countBy(list, getKey) {
+  const map = {}
+  list.forEach((item) => {
+    const keys = [].concat(getKey(item) || [])
+    keys.forEach((k) => { if (k) map[k] = (map[k] || 0) + 1 })
+  })
+  return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value)
+}
+
+function Card({ title, subtitle, children, className = '' }) {
+  return (
+    <div className={`bg-white rounded-2xl border border-slate-200 p-5 ${className}`}>
+      <h3 className="text-base font-semibold text-slate-800">{title}</h3>
+      {subtitle && <p className="text-xs text-slate-500 mb-4">{subtitle}</p>}
+      {children}
+    </div>
+  )
+}
+
+function Kpi({ icon: Icon, label, value, hint, tone }) {
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 p-5">
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${tone}1A`, color: tone }}>
+        <Icon size={20} />
+      </div>
+      <p className="mt-4 text-3xl font-bold text-slate-800">{value}</p>
+      <p className="text-sm font-medium text-slate-700">{label}</p>
+      <p className="text-xs text-slate-500">{hint}</p>
+    </div>
+  )
+}
+
+function HBar({ data, color = BLUE, height = 240 }) {
+  return (
+    <ResponsiveContainer width="100%" height={height}>
+      <BarChart data={data} layout="vertical" margin={{ left: 10, right: 20 }}>
+        <CartesianGrid horizontal={false} stroke="#EEF1FA" />
+        <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12, fill: '#6B7390' }} axisLine={false} tickLine={false} />
+        <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 12, fill: '#3A4360' }} axisLine={false} tickLine={false} />
+        <Tooltip contentStyle={tooltipStyle} cursor={{ fill: '#F4F6FF' }} />
+        <Bar dataKey="value" name="Leads" fill={color} radius={[0, 8, 8, 0]} barSize={18} />
+      </BarChart>
+    </ResponsiveContainer>
+  )
+}
 
 export default function AnalyticsPage() {
+  const { leads, loading, error } = useLeads()
+
+  const stats = useMemo(() => {
+    const total = leads.length
+    const avg = total ? Math.round(leads.reduce((s, l) => s + (l.score || 0), 0) / total) : 0
+    const hot = leads.filter((l) => l.priority === 'High').length
+    const contacted = leads.filter((l) => l.status !== 'New').length
+    const converted = leads.filter((l) => l.status === 'Converted').length
+    const noWebsite = leads.filter((l) => !l.hasWebsite).length
+
+    const priority = ['High', 'Medium', 'Low'].map((p) => ({ name: p, value: leads.filter((l) => l.priority === p).length }))
+    const pipeline = PIPELINE.map((s) => ({ name: s, value: leads.filter((l) => l.status === s).length }))
+    const gaps = countBy(leads, (l) => l.serviceGaps)
+    const categories = countBy(leads, (l) => l.category).slice(0, 8)
+    const cities = countBy(leads, (l) => l.location).slice(0, 8)
+    const buckets = ['0–20', '21–40', '41–60', '61–80', '81–100'].map((name, i) => ({
+      name,
+      value: leads.filter((l) => {
+        const s = l.score || 0
+        return i === 0 ? s <= 20 : s > i * 20 && s <= (i + 1) * 20
+      }).length,
+    }))
+
+    const insights = []
+    if (total) {
+      const pctNoWeb = Math.round((noWebsite / total) * 100)
+      if (pctNoWeb >= 30) insights.push(`${pctNoWeb}% of your leads have no website. Website packages are your biggest opportunity.`)
+      if (gaps[0]) insights.push(`The most common gap is "${gaps[0].name}" (${gaps[0].value} leads). Lead with that in your pitch.`)
+      if (categories[0]) insights.push(`Most of your leads are ${categories[0].name.toLowerCase()} businesses (${categories[0].value}).`)
+      const newCount = pipeline[0].value
+      if (newCount > 0) insights.push(`${newCount} leads are still "New". Start with the High-priority ones.`)
+      if (contacted > 0) insights.push(`Conversion rate: ${Math.round((converted / contacted) * 100)}% of contacted leads became clients.`)
+    }
+
+    return {
+      total, avg, hot, converted, contacted,
+      hotPct: total ? Math.round((hot / total) * 100) : 0,
+      convRate: contacted ? Math.round((converted / contacted) * 100) : 0,
+      priority, pipeline, gaps, categories, cities, buckets, insights,
+    }
+  }, [leads])
+
+  if (loading) return <PageLoader />
+  if (error) return <p className="text-red-600">{error}</p>
+
+  if (stats.total === 0) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-200 p-10 text-center">
+        <h1 className="text-xl font-bold text-slate-800">No data to analyse yet</h1>
+        <p className="text-sm text-slate-500 mt-1">Save a few leads and your charts will appear here.</p>
+        <Link to="/lead-discovery" className="inline-flex items-center gap-2 mt-5 bg-primary-600 hover:bg-primary-700 text-white font-semibold px-5 py-2.5 rounded-xl">
+          <Search size={17} /> Find leads
+        </Link>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-slate-800">Analytics</h1>
-          <p className="text-sm text-slate-500 mt-1">Visualize your lead data and performance</p>
-        </div>
-        <div className="flex gap-2">
-          <select className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
-            <option>Last 30 Days</option>
-            <option>Last 7 Days</option>
-            <option>Last 90 Days</option>
-          </select>
-          <select className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
-            <option>All Locations</option>
-            {locations.map((loc) => <option key={loc}>{loc}</option>)}
-          </select>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold text-slate-800">Insights</h1>
+        <p className="text-slate-500 mt-1">Analysis of your {stats.total} saved leads</p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Total Leads" value={dashboardStats.totalLeads} icon={Users} color="blue" />
-        <StatCard title="Outreach Response Rate" value="68%" change="+12%" icon={MessageSquare} color="green" />
-        <StatCard title="Conversion Rate" value="18%" change="+5%" icon={Target} color="purple" />
-        <StatCard title="High Priority" value={dashboardStats.highPriority} icon={TrendingUp} color="red" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Kpi icon={Users} tone={BLUE} label="Total leads" value={stats.total} hint="Saved in My Leads" />
+        <Kpi icon={Gauge} tone={VIOLET} label="Average score" value={stats.avg} hint="Out of 100" />
+        <Kpi icon={Flame} tone={HOT} label="Hot leads" value={`${stats.hotPct}%`} hint={`${stats.hot} with score 70+`} />
+        <Kpi icon={Trophy} tone="#16A34A" label="Conversion rate" value={`${stats.convRate}%`} hint={`${stats.converted} of ${stats.contacted} contacted`} />
       </div>
 
-      {/* Charts Row 1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Leads by Location */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5">
-          <h3 className="text-base font-semibold text-slate-800 mb-4">Leads by Location</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={locationData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="#94a3b8" />
-              <YAxis tick={{ fontSize: 12 }} stroke="#94a3b8" />
-              <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px' }} />
-              <Bar dataKey="value" fill="#3b82f6" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+      {stats.insights.length > 0 && (
+        <div className="rounded-2xl p-5 text-white" style={{ background: 'linear-gradient(135deg, #0E1550 0%, #2F6BFF 100%)' }}>
+          <p className="flex items-center gap-2 font-semibold"><Lightbulb size={18} /> What your data says</p>
+          <ul className="mt-3 space-y-1.5 text-sm text-blue-50">
+            {stats.insights.map((t) => <li key={t}>• {t}</li>)}
+          </ul>
         </div>
+      )}
 
-        {/* Leads by Category */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5">
-          <h3 className="text-base font-semibold text-slate-800 mb-4">Leads by Category</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={categoryData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} stroke="#94a3b8" />
-              <YAxis tick={{ fontSize: 12 }} stroke="#94a3b8" />
-              <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px' }} />
-              <Bar dataKey="value" fill="#8b5cf6" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Charts Row 2 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Priority Distribution */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5">
-          <h3 className="text-base font-semibold text-slate-800 mb-4">Priority Distribution</h3>
+        <Card title="Priority split" subtitle="How many leads are High, Medium or Low">
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
-              <Pie
-                data={priorityData}
-                cx="50%"
-                cy="50%"
-                innerRadius={55}
-                outerRadius={85}
-                paddingAngle={3}
-                dataKey="value"
-              >
-                {priorityData.map((entry, index) => (
-                  <Cell key={index} fill={entry.color} />
+              <Pie data={stats.priority} dataKey="value" nameKey="name" innerRadius={55} outerRadius={85} paddingAngle={3}>
+                {stats.priority.map((p) => (
+                  <Cell key={p.name} fill={p.name === 'High' ? HOT : p.name === 'Medium' ? BLUE : GREY} />
                 ))}
               </Pie>
-              <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px' }} />
+              <Tooltip contentStyle={tooltipStyle} />
             </PieChart>
           </ResponsiveContainer>
-          <div className="flex justify-center gap-4 mt-2">
-            {priorityData.map(p => (
-              <div key={p.name} className="flex items-center gap-1.5 text-xs">
-                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: p.color }}></div>
-                <span className="text-slate-600">{p.name} {p.value}%</span>
-              </div>
+          <div className="flex justify-center gap-4 text-xs">
+            {stats.priority.map((p) => (
+              <span key={p.name} className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full" style={{ background: p.name === 'High' ? HOT : p.name === 'Medium' ? BLUE : GREY }} />
+                {p.name} ({p.value})
+              </span>
             ))}
           </div>
-        </div>
+        </Card>
 
-        {/* Lead Trends */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-5">
-          <h3 className="text-base font-semibold text-slate-800 mb-4">Lead Trends</h3>
-          <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={trendData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="#94a3b8" />
-              <YAxis tick={{ fontSize: 12 }} stroke="#94a3b8" />
-              <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px' }} />
-              <Area type="monotone" dataKey="leads" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.1} strokeWidth={2} />
-              <Area type="monotone" dataKey="contacted" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.1} strokeWidth={2} />
-            </AreaChart>
+        <Card title="Pipeline" subtitle="Where your leads are in the sales process" className="lg:col-span-2">
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={stats.pipeline}>
+              <CartesianGrid vertical={false} stroke="#EEF1FA" />
+              <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#6B7390' }} axisLine={false} tickLine={false} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: '#6B7390' }} axisLine={false} tickLine={false} width={28} />
+              <Tooltip contentStyle={tooltipStyle} cursor={{ fill: '#F4F6FF' }} />
+              <Bar dataKey="value" name="Leads" radius={[8, 8, 0, 0]}>
+                {stats.pipeline.map((p) => (
+                  <Cell key={p.name} fill={p.name === 'Converted' ? '#16A34A' : p.name === 'Not Interested' ? GREY : BLUE} />
+                ))}
+              </Bar>
+            </BarChart>
           </ResponsiveContainer>
-        </div>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card title="Service gaps" subtitle="What these businesses are missing (what you can sell)">
+          {stats.gaps.length ? <HBar data={stats.gaps} color={HOT} /> : <p className="text-sm text-slate-500">No gaps detected.</p>}
+        </Card>
+        <Card title="Leads by category" subtitle="Types of businesses you saved">
+          <HBar data={stats.categories} color={VIOLET} />
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card title="Score distribution" subtitle="How many leads fall in each score range">
+          <ResponsiveContainer width="100%" height={240}>
+            <BarChart data={stats.buckets}>
+              <CartesianGrid vertical={false} stroke="#EEF1FA" />
+              <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#6B7390' }} axisLine={false} tickLine={false} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: '#6B7390' }} axisLine={false} tickLine={false} width={28} />
+              <Tooltip contentStyle={tooltipStyle} cursor={{ fill: '#F4F6FF' }} />
+              <Bar dataKey="value" name="Leads" radius={[8, 8, 0, 0]}>
+                {stats.buckets.map((b, i) => <Cell key={b.name} fill={i >= 3 ? HOT : i === 2 ? BLUE : GREY} />)}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+        <Card title="Leads by city" subtitle="Where your leads are located">
+          <HBar data={stats.cities} color={BLUE} />
+        </Card>
       </div>
     </div>
   )

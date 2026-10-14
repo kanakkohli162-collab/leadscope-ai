@@ -1,6 +1,6 @@
 /**
  * Ask AI: answers questions about the user's REAL saved leads.
- * Understands: priority, website, phone, city, category, status, counts, summary.
+ * Understands: priority, website, phone, city, category, status, reviews, counts, summary.
  * Filters can be combined, e.g. "high priority gyms in Lucknow without website".
  */
 
@@ -39,7 +39,7 @@ export function getAIResponse(query, leads = []) {
 
   // ---- greetings / help ----
   if (/\b(hi|hello|hey|help|what can you do)\b/.test(q)) {
-    return "Hi! I can answer questions about your saved leads. Try:\n• Show high-priority leads\n• Which businesses have no website?\n• Leads from Noida\n• Show converted leads\n• Give me a summary"
+    return "Hi! I can answer questions about your saved leads. Try:\n• Show high-priority leads\n• Which businesses have no website?\n• Leads from Noida\n• Show businesses with poor reviews\n• Give me a summary"
   }
 
   // ---- general questions (work even with no leads) ----
@@ -70,6 +70,18 @@ export function getAIResponse(query, leads = []) {
   const noWebsite = /(no|without|missing|don'?t have|not have)\s*(a\s*)?website/.test(q) || q.includes('no site')
   const hasWebsite = /(with|has|have)\s*(a\s*)?website/.test(q) && !noWebsite
   const noPhone = /(no|without|missing)\s*(a\s*)?(phone|number|contact)/.test(q)
+
+  // ---- poor reviews / low ratings (Synopsis 8.10 example) ----
+  if (/(poor|bad|low|negative)\s*(review|rating)/.test(q)) {
+    const rated = leads.filter((l) => typeof l.rating === 'number')
+    if (!rated.length) {
+      return "⭐ None of your saved leads have rating data yet. Ratings and reviews come from Google Places; the free OpenStreetMap source doesn't include them."
+    }
+    const poor = rated.filter((l) => l.rating < 3.5).sort((a, b) => a.rating - b.rating)
+    return poor.length
+      ? `Found ${poor.length} leads with poor ratings (below 3.5★):\n${poor.slice(0, MAX_LIST).map((l) => `• ${l.name} – ${l.rating}★ (${l.reviews} reviews)`).join('\n')}\n\nThese may need review-management help.`
+      : 'Good news: none of your rated leads have poor ratings (below 3.5★).'
+  }
 
   // ---- special intents ----
   if (/(summary|overview|report|stats|statistics)/.test(q)) {
