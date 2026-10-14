@@ -16,8 +16,8 @@ export default function LoginPage() {
 
   const [form, setForm] = useState({
     name: '',
-    email: 'megha@example.com',
-    password: 'password123',
+    email: '',
+    password: '',
     company: '',
     designation: '',
   })
@@ -53,7 +53,7 @@ export default function LoginPage() {
         setSuccess('Password reset link sent to your email (demo mode)')
       }
     } catch (err) {
-      setError(err.message || 'Something went wrong. Is backend running on :8080?')
+      setError(err.message || 'Something went wrong. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -209,12 +209,6 @@ export default function LoginPage() {
                 </>
               )}
             </div>
-
-            {mode === 'login' && (
-              <p className="mt-4 text-center text-xs text-slate-400">
-                Demo: megha@example.com / password123
-              </p>
-            )}
           </div>
         </div>
       </div>
