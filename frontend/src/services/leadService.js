@@ -93,3 +93,12 @@ export const generateMessage = (id, service, channel) =>
     method: 'POST',
     body: JSON.stringify({ service, channel }),
   })
+
+// ---------- Review Sentiment (NLP) ----------
+
+/** POST /api/ai/sentiment -> { positive, neutral, negative, total, score, overall, concerns[], summary } */
+export const analyzeSentiment = (reviews) =>
+  request('/ai/sentiment', {
+    method: 'POST',
+    body: JSON.stringify({ reviews }),
+  })

@@ -7,12 +7,12 @@ import {
 import PageLoader from '@/components/ui/PageLoader'
 import { useLeads } from '@/features/leads/hooks/useLeads'
 
-const BLUE = '#2F6BFF'
-const VIOLET = '#7B5CFF'
+const MAGENTA = '#B526E8'
+const PINK = '#FF5CD2'
 const HOT = '#F5A524'
-const GREY = '#B3BDD6'
+const GREY = '#C1A9D6'
 const PIPELINE = ['New', 'Contacted', 'Follow-up', 'Interested', 'Converted', 'Not Interested']
-const tooltipStyle = { borderRadius: 12, border: '1px solid #E3E7FB', fontSize: 13 }
+const tooltipStyle = { borderRadius: 12, border: '1px solid #F0E3FB', fontSize: 13 }
 
 function countBy(list, getKey) {
   const map = {}
@@ -46,14 +46,14 @@ function Kpi({ icon: Icon, label, value, hint, tone }) {
   )
 }
 
-function HBar({ data, color = BLUE, height = 240 }) {
+function HBar({ data, color = MAGENTA, height = 240 }) {
   return (
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={data} layout="vertical" margin={{ left: 10, right: 20 }}>
-        <CartesianGrid horizontal={false} stroke="#EEF1FA" />
-        <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12, fill: '#6B7390' }} axisLine={false} tickLine={false} />
-        <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 12, fill: '#3A4360' }} axisLine={false} tickLine={false} />
-        <Tooltip contentStyle={tooltipStyle} cursor={{ fill: '#F4F6FF' }} />
+        <CartesianGrid horizontal={false} stroke="#F0E3FB" />
+        <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12, fill: '#715A86' }} axisLine={false} tickLine={false} />
+        <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 12, fill: '#200B33' }} axisLine={false} tickLine={false} />
+        <Tooltip contentStyle={tooltipStyle} cursor={{ fill: '#FAF4FF' }} />
         <Bar dataKey="value" name="Leads" fill={color} radius={[0, 8, 8, 0]} barSize={18} />
       </BarChart>
     </ResponsiveContainer>
@@ -126,16 +126,16 @@ export default function AnalyticsPage() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Kpi icon={Users} tone={BLUE} label="Total leads" value={stats.total} hint="Saved in My Leads" />
-        <Kpi icon={Gauge} tone={VIOLET} label="Average score" value={stats.avg} hint="Out of 100" />
+        <Kpi icon={Users} tone={MAGENTA} label="Total leads" value={stats.total} hint="Saved in My Leads" />
+        <Kpi icon={Gauge} tone={PINK} label="Average score" value={stats.avg} hint="Out of 100" />
         <Kpi icon={Flame} tone={HOT} label="Hot leads" value={`${stats.hotPct}%`} hint={`${stats.hot} with score 70+`} />
         <Kpi icon={Trophy} tone="#16A34A" label="Conversion rate" value={`${stats.convRate}%`} hint={`${stats.converted} of ${stats.contacted} contacted`} />
       </div>
 
       {stats.insights.length > 0 && (
-        <div className="rounded-2xl p-5 text-white" style={{ background: 'linear-gradient(135deg, #0E1550 0%, #2F6BFF 100%)' }}>
+        <div className="rounded-2xl p-5 text-white" style={{ background: 'linear-gradient(135deg, #310E50 0%, #B526E8 60%, #FF5CD2 100%)' }}>
           <p className="flex items-center gap-2 font-semibold"><Lightbulb size={18} /> What your data says</p>
-          <ul className="mt-3 space-y-1.5 text-sm text-blue-50">
+          <ul className="mt-3 space-y-1.5 text-sm text-primary-50">
             {stats.insights.map((t) => <li key={t}>• {t}</li>)}
           </ul>
         </div>
@@ -147,7 +147,7 @@ export default function AnalyticsPage() {
             <PieChart>
               <Pie data={stats.priority} dataKey="value" nameKey="name" innerRadius={55} outerRadius={85} paddingAngle={3}>
                 {stats.priority.map((p) => (
-                  <Cell key={p.name} fill={p.name === 'High' ? HOT : p.name === 'Medium' ? BLUE : GREY} />
+                  <Cell key={p.name} fill={p.name === 'High' ? HOT : p.name === 'Medium' ? MAGENTA : GREY} />
                 ))}
               </Pie>
               <Tooltip contentStyle={tooltipStyle} />
@@ -156,7 +156,7 @@ export default function AnalyticsPage() {
           <div className="flex justify-center gap-4 text-xs">
             {stats.priority.map((p) => (
               <span key={p.name} className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full" style={{ background: p.name === 'High' ? HOT : p.name === 'Medium' ? BLUE : GREY }} />
+                <span className="w-2.5 h-2.5 rounded-full" style={{ background: p.name === 'High' ? HOT : p.name === 'Medium' ? MAGENTA : GREY }} />
                 {p.name} ({p.value})
               </span>
             ))}
@@ -166,13 +166,13 @@ export default function AnalyticsPage() {
         <Card title="Pipeline" subtitle="Where your leads are in the sales process" className="lg:col-span-2">
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={stats.pipeline}>
-              <CartesianGrid vertical={false} stroke="#EEF1FA" />
-              <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#6B7390' }} axisLine={false} tickLine={false} />
-              <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: '#6B7390' }} axisLine={false} tickLine={false} width={28} />
-              <Tooltip contentStyle={tooltipStyle} cursor={{ fill: '#F4F6FF' }} />
+              <CartesianGrid vertical={false} stroke="#F0E3FB" />
+              <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#715A86' }} axisLine={false} tickLine={false} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: '#715A86' }} axisLine={false} tickLine={false} width={28} />
+              <Tooltip contentStyle={tooltipStyle} cursor={{ fill: '#FAF4FF' }} />
               <Bar dataKey="value" name="Leads" radius={[8, 8, 0, 0]}>
                 {stats.pipeline.map((p) => (
-                  <Cell key={p.name} fill={p.name === 'Converted' ? '#16A34A' : p.name === 'Not Interested' ? GREY : BLUE} />
+                  <Cell key={p.name} fill={p.name === 'Converted' ? '#16A34A' : p.name === 'Not Interested' ? GREY : MAGENTA} />
                 ))}
               </Bar>
             </BarChart>
@@ -182,10 +182,10 @@ export default function AnalyticsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card title="Service gaps" subtitle="What these businesses are missing (what you can sell)">
-          {stats.gaps.length ? <HBar data={stats.gaps} color={HOT} /> : <p className="text-sm text-slate-500">No gaps detected.</p>}
+          {stats.gaps.length ? <HBar data={stats.gaps} color={PINK} /> : <p className="text-sm text-slate-500">No gaps detected.</p>}
         </Card>
         <Card title="Leads by category" subtitle="Types of businesses you saved">
-          <HBar data={stats.categories} color={VIOLET} />
+          <HBar data={stats.categories} color={PINK} />
         </Card>
       </div>
 
@@ -193,18 +193,18 @@ export default function AnalyticsPage() {
         <Card title="Score distribution" subtitle="How many leads fall in each score range">
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={stats.buckets}>
-              <CartesianGrid vertical={false} stroke="#EEF1FA" />
-              <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#6B7390' }} axisLine={false} tickLine={false} />
-              <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: '#6B7390' }} axisLine={false} tickLine={false} width={28} />
-              <Tooltip contentStyle={tooltipStyle} cursor={{ fill: '#F4F6FF' }} />
+              <CartesianGrid vertical={false} stroke="#F0E3FB" />
+              <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#715A86' }} axisLine={false} tickLine={false} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: '#715A86' }} axisLine={false} tickLine={false} width={28} />
+              <Tooltip contentStyle={tooltipStyle} cursor={{ fill: '#FAF4FF' }} />
               <Bar dataKey="value" name="Leads" radius={[8, 8, 0, 0]}>
-                {stats.buckets.map((b, i) => <Cell key={b.name} fill={i >= 3 ? HOT : i === 2 ? BLUE : GREY} />)}
+                {stats.buckets.map((b, i) => <Cell key={b.name} fill={i >= 3 ? HOT : i === 2 ? MAGENTA : GREY} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
         </Card>
         <Card title="Leads by city" subtitle="Where your leads are located">
-          <HBar data={stats.cities} color={BLUE} />
+          <HBar data={stats.cities} color={MAGENTA} />
         </Card>
       </div>
     </div>

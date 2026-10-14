@@ -24,7 +24,7 @@ const DEFAULT_HELP = {
 }
 
 const CSS = `
-@keyframes cw-pulse { 0% { box-shadow: 0 0 0 0 rgba(47,107,255,.55); } 70% { box-shadow: 0 0 0 16px rgba(47,107,255,0); } 100% { box-shadow: 0 0 0 0 rgba(47,107,255,0); } }
+@keyframes cw-pulse { 0% { box-shadow: 0 0 0 0 rgba(181,38,232,.55); } 70% { box-shadow: 0 0 0 16px rgba(181,38,232,0); } 100% { box-shadow: 0 0 0 0 rgba(181,38,232,0); } }
 @keyframes cw-pop { from { opacity: 0; transform: translateY(8px) scale(.95); } to { opacity: 1; transform: none; } }
 .cw-pulse { animation: cw-pulse 2.4s ease-out infinite; }
 .cw-pop { animation: cw-pop .35s cubic-bezier(.2,.8,.2,1.1) forwards; }

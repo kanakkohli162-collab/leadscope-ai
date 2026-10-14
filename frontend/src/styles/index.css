@@ -9,9 +9,9 @@
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: #f8fafc;
-  color: #0f172a;
+  font-family: Figtree, system-ui, -apple-system, sans-serif;
+  background-color: #FAF4FF;
+  color: #200B33;
 }
 
 /* Custom scrollbar */
@@ -20,14 +20,14 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #FAF4FF;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #E1C9F2;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #BB9AD8;
 }
 
 /* Smooth transitions */
@@ -41,7 +41,7 @@ body {
 }
 .card-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  box-shadow: 0 10px 25px -5px rgb(181 38 232 / 0.12), 0 8px 10px -6px rgb(32 11 51 / 0.08);
 }
 
 /* Priority badges */
@@ -57,7 +57,7 @@ body {
 
 /* Status badges */
 .status-new {
-  @apply bg-blue-100 text-blue-700;
+  @apply bg-primary-100 text-primary-700;
 }
 .status-contacted {
   @apply bg-purple-100 text-purple-700;

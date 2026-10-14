@@ -50,15 +50,15 @@ export default function ChatPanel({ messages, isTyping, suggestions = [], onSend
     <div role="dialog" aria-label="Ask AI"
       className="flex flex-col bg-white shadow-2xl border border-slate-200 overflow-hidden fixed inset-0 z-50 rounded-none
                  sm:inset-auto sm:bottom-24 sm:right-6 sm:w-[390px] sm:h-[580px] sm:max-h-[calc(100vh-8rem)] sm:rounded-2xl animate-chat-in origin-bottom-right">
-      <div className="flex items-center justify-between px-4 py-3 text-white" style={{ background: 'linear-gradient(135deg, #0E1550 0%, #2F6BFF 100%)' }}>
+      <div className="flex items-center justify-between px-4 py-3 text-white" style={{ background: 'linear-gradient(135deg, #310E50 0%, #B526E8 60%, #FF5CD2 100%)' }}>
         <div className="flex items-center gap-2.5">
           <div className="relative w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
             <Bot size={19} />
-            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-400 ring-2 ring-[#1F3FA0]" />
+            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-400 ring-2 ring-[#9A1CC7]" />
           </div>
           <div>
             <p className="text-sm font-semibold leading-tight">Ask AI</p>
-            <p className="text-[11px] text-blue-100">Answers from your saved leads</p>
+            <p className="text-[11px] text-primary-100">Answers from your saved leads</p>
           </div>
         </div>
         <div className="flex items-center gap-1">

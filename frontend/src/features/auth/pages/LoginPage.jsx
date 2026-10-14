@@ -23,9 +23,9 @@ const CSS = `
 .lp-btn   { height: clamp(42px, 6vh, 64px); font-size: clamp(14px, 2.1vh, 22px); }
 .lp-small { font-size: clamp(12px, 1.8vh, 18px); }
 .lp-chip  { font-size: clamp(11px, 1.8vh, 19px); }
-.lp-input { background: #fff; border: 1px solid #D9DEEA; color: #0B1033; }
-.lp-input::placeholder { color: #7A8299; }
-.lp-input:focus { outline: none; border-color: #1F5BF0; box-shadow: 0 0 0 3px rgba(31,91,240,.15); }
+.lp-input { background: #fff; border: 1px solid #F0E3FB; color: #200B33; }
+.lp-input::placeholder { color: #A891BD; }
+.lp-input:focus { outline: none; border-color: #B526E8; box-shadow: 0 0 0 3px rgba(181,38,232,.15); }
 
 @keyframes lp-drift { 0% { transform: scale(1.05) translate(0,0); } 100% { transform: scale(1.12) translate(-1.5%, -1%); } }
 @keyframes lp-bob { 0%, 100% { transform: translate(-50%, -100%); } 50% { transform: translate(-50%, calc(-100% - 1vh)); } }
@@ -55,7 +55,7 @@ function LogoMark({ vh = 5, min = 28, max = 54 }) {
     <div className="flex items-end gap-[3px] shrink-0" style={{ height: h }}>
       {[0.45, 0.7, 1].map((r, i) => (
         <span key={i} className="rounded-[3px]"
-          style={{ width: `calc(${h} * .24)`, height: `calc(${h} * ${r})`, background: i === 2 ? 'linear-gradient(180deg,#3B7BFF,#1F5BF0)' : 'linear-gradient(180deg,#7FC4FF,#3B9BFF)' }} />
+          style={{ width: `calc(${h} * .24)`, height: `calc(${h} * ${r})`, background: i === 2 ? 'linear-gradient(180deg,#FF5CD2,#B526E8)' : 'linear-gradient(180deg,#E78FFF,#D63AF0)' }} />
       ))}
     </div>
   )
@@ -63,18 +63,18 @@ function LogoMark({ vh = 5, min = 28, max = 54 }) {
 
 /* Pins: x, y = tip position in % of the page */
 const PINS = [
-  { label: 'Cafes', icon: UtensilsCrossed, x: 39.7, y: 54, c1: '#FFB547', c2: '#F28C18', glow: 'rgba(255,170,60,.7)', delay: 0.6 },
-  { label: 'Clinics', icon: Plus, x: 52.6, y: 59, c1: '#4FA3FF', c2: '#1F6BF0', glow: 'rgba(60,140,255,.7)', delay: 0.8 },
+  { label: 'Cafes', icon: UtensilsCrossed, x: 39.7, y: 54, c1: '#FF8FE0', c2: '#FF5CD2', glow: 'rgba(255,92,210,.7)', delay: 0.6 },
+  { label: 'Clinics', icon: Plus, x: 52.6, y: 59, c1: '#D63AF0', c2: '#9A1CC7', glow: 'rgba(181,38,232,.7)', delay: 0.8 },
   { label: 'Shops', icon: Store, x: 38.5, y: 76, c1: '#34E0A1', c2: '#12B37A', glow: 'rgba(40,220,150,.7)', delay: 1.0 },
-  { label: 'Gyms', icon: Dumbbell, x: 51, y: 85, c1: '#9B7BFF', c2: '#6A3FF0', glow: 'rgba(140,100,255,.75)', delay: 1.2 },
+  { label: 'Gyms', icon: Dumbbell, x: 51, y: 85, c1: '#B48CFF', c2: '#7A169E', glow: 'rgba(160,80,240,.75)', delay: 1.2 },
 ]
 
 /* Glowing road trails (viewBox 0–100) */
 const TRAILS = [
-  { d: 'M 28 100 Q 36 88 44 86 T 60 74 T 62 56', color: '#4FD1FF', delay: 0 },
-  { d: 'M 34 100 Q 44 92 52 94 T 64 82', color: '#9B7BFF', delay: 1.2 },
-  { d: 'M 30 70 Q 40 66 46 70 T 60 66', color: '#4FD1FF', delay: 2.1 },
-  { d: 'M 40 100 Q 46 84 54 78 T 58 62', color: '#B48CFF', delay: 0.7 },
+  { d: 'M 28 100 Q 36 88 44 86 T 60 74 T 62 56', color: '#FF5CD2', delay: 0 },
+  { d: 'M 34 100 Q 44 92 52 94 T 64 82', color: '#E77FFF', delay: 1.2 },
+  { d: 'M 30 70 Q 40 66 46 70 T 60 66', color: '#FF5CD2', delay: 2.1 },
+  { d: 'M 40 100 Q 46 84 54 78 T 58 62', color: '#F1AFFF', delay: 0.7 },
 ]
 
 const LIGHTS = Array.from({ length: 46 }, (_, i) => ({
@@ -82,7 +82,7 @@ const LIGHTS = Array.from({ length: 46 }, (_, i) => ({
   y: 30 + ((i * 53.3) % 100) * 0.68,
   s: 1.5 + (i % 3),
   d: (i % 9) * 0.4,
-  c: i % 4 === 0 ? '#9CD2FF' : '#FFD58A',
+  c: i % 4 === 0 ? '#F1AFFF' : '#FFC2F2',
 }))
 
 const PARTICLES = Array.from({ length: 14 }, (_, i) => ({
@@ -92,10 +92,10 @@ const PARTICLES = Array.from({ length: 14 }, (_, i) => ({
 }))
 
 const FEATURES = [
-  { icon: Search, title: 'Search Nearby Businesses', text: 'Find shops, cafes, clinics and more in your area.', bg: '#CBEAFF', fg: '#1F6BF0' },
-  { icon: BarChart3, title: 'Get Useful Insights', text: 'Know what businesses need and where to reach them.', bg: '#E2DBFF', fg: '#6A3FF0' },
+  { icon: Search, title: 'Search Nearby Businesses', text: 'Find shops, cafes, clinics and more in your area.', bg: '#F6E6FD', fg: '#B526E8' },
+  { icon: BarChart3, title: 'Get Useful Insights', text: 'Know what businesses need and where to reach them.', bg: '#EBCBFA', fg: '#7A169E' },
   { icon: Send, title: 'Connect Easily', text: 'Contact and manage leads in one place.', bg: '#C8F5E4', fg: '#12A26E' },
-  { icon: Users, title: 'Grow Your Business', text: 'Find new opportunities and reach more customers.', bg: '#FFE3C7', fg: '#F28C18' },
+  { icon: Users, title: 'Grow Your Business', text: 'Find new opportunities and reach more customers.', bg: '#FFE3F6', fg: '#D32AD6' },
 ]
 
 function GoogleIcon() {
@@ -162,7 +162,7 @@ export default function LoginPage() {
 
   return (
     <div className="relative min-h-screen lg:h-screen overflow-hidden text-white"
-      style={{ background: 'linear-gradient(135deg, #0B2A6B 0%, #0E3A8C 40%, #0A2459 100%)' }}>
+      style={{ background: 'linear-gradient(135deg, #160524 0%, #310E50 40%, #1E0B2E 100%)' }}>
       <style>{CSS}</style>
 
       {/* ===== Animated background (desktop) ===== */}
@@ -170,13 +170,14 @@ export default function LoginPage() {
         {/* city image with slow drift */}
         <div className="lp-drift absolute inset-0"
           style={{
-            backgroundImage: 'url(/login-city.png), radial-gradient(60% 70% at 48% 70%, #1E4FB0 0%, transparent 70%)',
+            backgroundImage: 'url(/login-city.png), radial-gradient(60% 70% at 48% 70%, #5A0E86 0%, transparent 70%)',
             backgroundSize: 'cover, cover', backgroundPosition: '60% center, center',
+            filter: 'hue-rotate(65deg) saturate(1.15)',
           }} />
         {/* blend so text and card stay readable */}
         <div className="absolute inset-0"
-          style={{ background: 'linear-gradient(90deg, rgba(10,36,100,.97) 0%, rgba(10,36,100,.85) 26%, rgba(10,36,100,.15) 45%, rgba(10,36,100,.1) 60%, rgba(10,36,100,.55) 100%)' }} />
-        <div className="absolute inset-x-0 top-0 h-[22%]" style={{ background: 'linear-gradient(180deg, rgba(10,36,100,.9), transparent)' }} />
+          style={{ background: 'linear-gradient(90deg, rgba(22,5,36,.97) 0%, rgba(22,5,36,.85) 26%, rgba(22,5,36,.15) 45%, rgba(22,5,36,.1) 60%, rgba(22,5,36,.55) 100%)' }} />
+        <div className="absolute inset-x-0 top-0 h-[22%]" style={{ background: 'linear-gradient(180deg, rgba(22,5,36,.9), transparent)' }} />
 
         {/* twinkling window lights */}
         {LIGHTS.map((l, i) => (
@@ -198,7 +199,7 @@ export default function LoginPage() {
         {/* floating particles */}
         {PARTICLES.map((p, i) => (
           <span key={i} className="lp-up absolute rounded-full"
-            style={{ left: `${p.x}%`, bottom: '-2vh', width: p.s, height: p.s, background: '#BFE3FF', boxShadow: '0 0 8px #8FCBFF', animationDelay: `${p.d}s` }} />
+            style={{ left: `${p.x}%`, bottom: '-2vh', width: p.s, height: p.s, background: '#FFC2F2', boxShadow: '0 0 8px #FF5CD2', animationDelay: `${p.d}s` }} />
         ))}
 
         {/* coloured pins with labels */}
@@ -214,7 +215,7 @@ export default function LoginPage() {
                 style={{ width: `calc(${size} * .9)`, height: `calc(${size} * .32)`, border: `2px solid ${p.c1}`, animationDelay: `${i * 0.5}s` }} />
               <div className="lp-pin absolute left-0 top-0" style={{ animationDelay: `${i * 0.45}s` }}>
                 {/* label chip */}
-                <span className="lp-pop lp-chip absolute left-1/2 whitespace-nowrap rounded-xl bg-white font-semibold text-[#0B1033] shadow-lg"
+                <span className="lp-pop lp-chip absolute left-1/2 whitespace-nowrap rounded-xl bg-white font-semibold text-[#200B33] shadow-lg"
                   style={{ bottom: `calc(${size} * 1.3)`, padding: 'clamp(3px,.6vh,7px) clamp(10px,1.4vh,16px)', animationDelay: `${p.delay}s` }}>
                   {p.label}
                 </span>
@@ -241,12 +242,12 @@ export default function LoginPage() {
         style={{ padding: 'clamp(16px,3.4vh,36px) clamp(20px,4.6vw,72px) 0' }}>
         <Link to="/" className="flex items-center lp-rise" style={{ gap: 'clamp(8px,1.4vh,16px)' }}>
           <LogoMark vh={5.4} min={30} max={58} />
-          <span className="lp-logo font-bold tracking-tight">LeadScope <span className="text-[#4D9BFF]">AI</span></span>
+          <span className="lp-logo font-bold tracking-tight">LeadScope <span className="text-[#FF5CD2]">AI</span></span>
         </Link>
         <nav className="lp-nav hidden sm:flex items-center lp-rise" style={{ gap: 'clamp(18px,3vw,40px)' }}>
-          <Link to="/" className="hover:text-[#9CCBFF] transition-colors">Home</Link>
-          <a href="/#about" className="hover:text-[#9CCBFF] transition-colors">About</a>
-          <a href="/#faq" className="hover:text-[#9CCBFF] transition-colors">Contact</a>
+          <Link to="/" className="hover:text-[#F1AFFF] transition-colors">Home</Link>
+          <a href="/#about" className="hover:text-[#F1AFFF] transition-colors">About</a>
+          <a href="/#faq" className="hover:text-[#F1AFFF] transition-colors">Contact</a>
         </nav>
       </header>
 
@@ -257,9 +258,9 @@ export default function LoginPage() {
         {/* Left text */}
         <section className="hidden lg:flex flex-col justify-center self-stretch" style={{ maxWidth: '44vw' }}>
           <h1 className="lp-h1 lp-rise font-extrabold tracking-tight" style={{ animationDelay: '100ms' }}>
-            Find Local<br />Businesses <span className="text-[#5AB0FF]">Easily</span>
+            Find Local<br />Businesses <span className="text-[#FF5CD2]">Easily</span>
           </h1>
-          <p className="lp-sub lp-rise text-[#DCE8FF]" style={{ marginTop: 'clamp(10px,2.4vh,28px)', maxWidth: '34vw', lineHeight: 1.45, animationDelay: '200ms' }}>
+          <p className="lp-sub lp-rise text-[#F2E4FF]" style={{ marginTop: 'clamp(10px,2.4vh,28px)', maxWidth: '34vw', lineHeight: 1.45, animationDelay: '200ms' }}>
             Search, explore and connect with the right businesses near you using AI.
           </p>
           <div className="flex flex-col" style={{ marginTop: 'clamp(16px,5vh,56px)', gap: 'clamp(12px,3.2vh,36px)', maxWidth: '30vw' }}>
@@ -270,7 +271,7 @@ export default function LoginPage() {
                 </span>
                 <div>
                   <p className="lp-ft font-semibold">{title}</p>
-                  <p className="lp-fd text-[#DCE8FF]" style={{ marginTop: 2, lineHeight: 1.45 }}>{text}</p>
+                  <p className="lp-fd text-[#F2E4FF]" style={{ marginTop: 2, lineHeight: 1.45 }}>{text}</p>
                 </div>
               </div>
             ))}
@@ -278,13 +279,13 @@ export default function LoginPage() {
         </section>
 
         {/* Right: white card */}
-        <section className="lp-rise w-full bg-white text-[#0B1033] rounded-[24px] mx-auto"
+        <section className="lp-rise w-full bg-white text-[#200B33] rounded-[24px] mx-auto"
           style={{ maxWidth: 640, padding: 'clamp(24px,5vh,56px) clamp(22px,3.4vw,64px)', boxShadow: '0 40px 80px -30px rgba(0,0,0,.55)', animationDelay: '250ms' }}>
           <div className="flex items-center justify-center" style={{ gap: 'clamp(10px,1.8vh,20px)' }}>
             <LogoMark vh={7} min={36} max={72} />
             <div>
-              <p className="lp-rlogo font-extrabold leading-none tracking-tight">LeadScope <span className="text-[#1F5BF0]">AI</span></p>
-              <p className="lp-rtag mt-1.5 text-[#3A4360]">Local Businesses. Real Opportunities.</p>
+              <p className="lp-rlogo font-extrabold leading-none tracking-tight">LeadScope <span className="text-[#B526E8]">AI</span></p>
+              <p className="lp-rtag mt-1.5 text-[#715A86]">Local Businesses. Real Opportunities.</p>
             </div>
           </div>
 
@@ -293,41 +294,41 @@ export default function LoginPage() {
             {mode === 'signup' && 'Create Account'}
             {mode === 'forgot' && 'Reset Password'}
           </h2>
-          <p className="lp-rsub text-[#6B7390]" style={{ marginTop: 4 }}>
+          <p className="lp-rsub text-[#715A86]" style={{ marginTop: 4 }}>
             {mode === 'login' && 'Log in to your account to continue.'}
             {mode === 'signup' && 'Start finding better leads today.'}
             {mode === 'forgot' && 'Enter your email to reset your password.'}
           </p>
 
           {error && <div className="lp-small mt-4 p-2.5 rounded-lg bg-red-50 border border-red-200 text-red-700">{error}</div>}
-          {success && <div className="lp-small mt-4 p-2.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-800">{success}</div>}
+          {success && <div className="lp-small mt-4 p-2.5 rounded-lg bg-[#FAF4FF] border border-[#F0E3FB] text-[#9A1CC7]">{success}</div>}
 
           <form onSubmit={handleSubmit} className="flex flex-col" style={{ marginTop: 'clamp(14px,3vh,32px)', gap: 'clamp(10px,1.9vh,20px)' }}>
             {mode === 'signup' && (
               <>
                 <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6380]" style={ic} />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-[#715A86]" style={ic} />
                   <input name="name" value={form.name} onChange={handleChange} required className={inputClass} style={inputPad} placeholder="Full name" />
                 </div>
                 <div className="relative">
-                  <Building className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6380]" style={ic} />
+                  <Building className="absolute left-4 top-1/2 -translate-y-1/2 text-[#715A86]" style={ic} />
                   <input name="company" value={form.company} onChange={handleChange} className={inputClass} style={inputPad} placeholder="Company name" />
                 </div>
               </>
             )}
 
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6380]" style={ic} />
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[#715A86]" style={ic} />
               <input name="email" type="email" value={form.email} onChange={handleChange} required className={inputClass} style={inputPad} placeholder="Email address" />
             </div>
 
             {mode !== 'forgot' && (
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5A6380]" style={ic} />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#715A86]" style={ic} />
                 <input name="password" type={showPassword ? 'text' : 'password'} value={form.password} onChange={handleChange}
                   required minLength={6} className={inputClass} style={{ ...inputPad, paddingRight: 50 }} placeholder="Password" />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#5A6380] hover:text-[#0B1033]">
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#715A86] hover:text-[#200B33]">
                   {showPassword ? <Eye style={ic} /> : <EyeOff style={ic} />}
                 </button>
               </div>
@@ -337,42 +338,42 @@ export default function LoginPage() {
               <div className="lp-small flex items-center justify-between">
                 <label className="flex items-center gap-2.5 cursor-pointer">
                   <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)}
-                    className="accent-[#1F5BF0]" style={{ width: 'clamp(15px,2.2vh,21px)', height: 'clamp(15px,2.2vh,21px)' }} />
+                    className="accent-[#B526E8]" style={{ width: 'clamp(15px,2.2vh,21px)', height: 'clamp(15px,2.2vh,21px)' }} />
                   Remember me
                 </label>
-                <button type="button" onClick={() => switchMode('forgot')} className="font-medium text-[#1F5BF0] hover:underline">Forgot password?</button>
+                <button type="button" onClick={() => switchMode('forgot')} className="font-medium text-[#B526E8] hover:underline">Forgot password?</button>
               </div>
             )}
 
             <button type="submit" disabled={loading}
               className="lp-btn w-full inline-flex items-center justify-center gap-2 text-white font-semibold rounded-xl transition-all hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0"
-              style={{ background: '#1452F0', boxShadow: '0 14px 30px -12px rgba(20,82,240,.85)' }}>
+              style={{ background: 'linear-gradient(135deg, #B526E8 0%, #FF5CD2 100%)', boxShadow: '0 14px 30px -12px rgba(181,38,232,.85)' }}>
               {loading ? 'Please wait...' : (<>{mode === 'login' ? 'Log In' : mode === 'signup' ? 'Create Account' : 'Send Reset Link'} <ArrowRight style={ic} /></>)}
             </button>
           </form>
 
           {mode !== 'forgot' && (
             <>
-              <div className="lp-small flex items-center gap-4 text-[#6B7390]" style={{ margin: 'clamp(14px,3vh,30px) 0' }}>
-                <span className="h-px flex-1 bg-[#D9DEEA]" /> or <span className="h-px flex-1 bg-[#D9DEEA]" />
+              <div className="lp-small flex items-center gap-4 text-[#715A86]" style={{ margin: 'clamp(14px,3vh,30px) 0' }}>
+                <span className="h-px flex-1 bg-[#F0E3FB]" /> or <span className="h-px flex-1 bg-[#F0E3FB]" />
               </div>
               <div className="flex flex-col" style={{ gap: 'clamp(8px,1.4vh,14px)' }}>
                 <button type="button" onClick={() => socialSoon('Google')}
-                  className="lp-field w-full flex items-center justify-center gap-3 rounded-xl border border-[#D9DEEA] font-medium hover:bg-[#F6F8FD] transition-colors">
+                  className="lp-field w-full flex items-center justify-center gap-3 rounded-xl border border-[#F0E3FB] font-medium hover:bg-[#FAF4FF] transition-colors">
                   <GoogleIcon /> Continue with Google
                 </button>
                 <button type="button" onClick={() => socialSoon('Microsoft')}
-                  className="lp-field w-full flex items-center justify-center gap-3 rounded-xl border border-[#D9DEEA] font-medium hover:bg-[#F6F8FD] transition-colors">
+                  className="lp-field w-full flex items-center justify-center gap-3 rounded-xl border border-[#F0E3FB] font-medium hover:bg-[#FAF4FF] transition-colors">
                   <MicrosoftIcon /> Continue with Microsoft
                 </button>
               </div>
             </>
           )}
 
-          <p className="lp-small text-center text-[#6B7390]" style={{ marginTop: 'clamp(16px,4vh,44px)' }}>
-            {mode === 'login' && (<>Don&apos;t have an account?{' '}<button onClick={() => switchMode('signup')} className="font-semibold text-[#1F5BF0] hover:underline ml-1">Sign up</button></>)}
-            {mode === 'signup' && (<>Already have an account?{' '}<button onClick={() => switchMode('login')} className="font-semibold text-[#1F5BF0] hover:underline ml-1">Log in</button></>)}
-            {mode === 'forgot' && (<>Remember password?{' '}<button onClick={() => switchMode('login')} className="font-semibold text-[#1F5BF0] hover:underline ml-1">Log in</button></>)}
+          <p className="lp-small text-center text-[#715A86]" style={{ marginTop: 'clamp(16px,4vh,44px)' }}>
+            {mode === 'login' && (<>Don&apos;t have an account?{' '}<button onClick={() => switchMode('signup')} className="font-semibold text-[#B526E8] hover:underline ml-1">Sign up</button></>)}
+            {mode === 'signup' && (<>Already have an account?{' '}<button onClick={() => switchMode('login')} className="font-semibold text-[#B526E8] hover:underline ml-1">Log in</button></>)}
+            {mode === 'forgot' && (<>Remember password?{' '}<button onClick={() => switchMode('login')} className="font-semibold text-[#B526E8] hover:underline ml-1">Log in</button></>)}
           </p>
         </section>
       </main>
