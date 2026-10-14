@@ -1,16 +1,29 @@
-import { memo, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { Search, Bell, ChevronDown, Menu, LogOut } from 'lucide-react'
+import { memo, useEffect, useRef, useState } from 'react'
+import { useLocation, useNavigate, Link } from 'react-router-dom'
+import { ChevronDown, Menu, LogOut, Settings } from 'lucide-react'
 import { getPageTitle } from '@/config/navigation'
-import { getCurrentUser, getInitials } from '@/utils/currentUser'
+import { getCurrentUser } from '@/utils/currentUser'
 import { clearSession } from '@/services/authService'
 
 function Topbar({ onOpenMobileNav }) {
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const title = getPageTitle(pathname)
-  const user = getCurrentUser()
-  const [menuOpen, setMenuOpen] = useState(false)
+
+  const user = getCurrentUser() || {}
+  const name = user.name || 'User'
+  const initials = name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
+
+  const [open, setOpen] = useState(false)
+  const menuRef = useRef(null)
+
+  // Close the menu when clicking outside it
+  useEffect(() => {
+    if (!open) return
+    const onClick = (e) => { if (menuRef.current && !menuRef.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', onClick)
+    return () => document.removeEventListener('mousedown', onClick)
+  }, [open])
 
   function logout() {
     clearSession()
@@ -20,6 +33,7 @@ function Topbar({ onOpenMobileNav }) {
   return (
     <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between gap-3 px-4 sm:px-6 shrink-0">
       <div className="flex items-center gap-2 min-w-0">
+        {/* Hamburger: only on screens where the sidebar is hidden */}
         <button
           type="button"
           onClick={onOpenMobileNav}
@@ -31,49 +45,46 @@ function Topbar({ onOpenMobileNav }) {
         <h2 className="text-lg font-semibold text-slate-800 truncate">{title}</h2>
       </div>
 
-      <div className="flex items-center gap-2 sm:gap-4">
-        <div className="relative hidden md:block">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search leads..."
-            className="pl-9 pr-4 py-2 w-64 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          />
-        </div>
-
-        <button type="button" className="relative p-2 rounded-lg hover:bg-slate-100 transition-colors" aria-label="Notifications">
-          <Bell className="w-5 h-5 text-slate-600" />
+      {/* User menu */}
+      <div className="relative" ref={menuRef}>
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-haspopup="menu"
+          aria-expanded={open}
+          className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-lg hover:bg-slate-100 transition-colors"
+        >
+          <div className="w-9 h-9 rounded-full bg-primary-600 flex items-center justify-center text-white text-sm font-semibold">
+            {initials}
+          </div>
+          <span className="text-sm font-medium text-slate-700 hidden sm:block max-w-[160px] truncate">{name}</span>
+          <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} />
         </button>
 
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setMenuOpen((o) => !o)}
-            className="flex items-center gap-2 pl-2 pr-1 py-1 rounded-lg hover:bg-slate-100 transition-colors"
-          >
-            <div className="w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center text-white text-xs font-semibold">
-              {getInitials(user.name)}
+        {open && (
+          <div role="menu" className="absolute right-0 mt-2 w-60 rounded-xl bg-white border border-slate-200 shadow-xl py-2 z-50">
+            <div className="px-4 py-2 border-b border-slate-100">
+              <p className="text-sm font-semibold text-slate-800 truncate">{name}</p>
+              <p className="text-xs text-slate-500 truncate">{user.email || ''}</p>
             </div>
-            <span className="text-sm font-medium text-slate-700 hidden sm:block">{user.name || user.email}</span>
-            <ChevronDown className="w-4 h-4 text-slate-400" />
-          </button>
-
-          {menuOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-xl shadow-lg p-2 z-50">
-              <div className="px-3 py-2 border-b border-slate-100 mb-1">
-                <p className="text-sm font-medium text-slate-800 truncate">{user.name}</p>
-                <p className="text-xs text-slate-500 truncate">{user.email}</p>
-              </div>
-              <button
-                type="button"
-                onClick={logout}
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 rounded-lg hover:bg-red-50"
-              >
-                <LogOut size={16} /> Log out
-              </button>
-            </div>
-          )}
-        </div>
+            <Link
+              to="/settings"
+              onClick={() => setOpen(false)}
+              role="menuitem"
+              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
+            >
+              <Settings size={16} /> Settings
+            </Link>
+            <button
+              type="button"
+              onClick={logout}
+              role="menuitem"
+              className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50"
+            >
+              <LogOut size={16} /> Log out
+            </button>
+          </div>
+        )}
       </div>
     </header>
   )

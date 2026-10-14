@@ -1,105 +1,117 @@
 /**
- * The chatbot's "brain" — keyword matching over the mock leads.
- *
- * Kept separate from any React component so that when you connect a real
- * AI backend you only replace `getAIResponse` (e.g. with a fetch call)
- * and the UI stays untouched.
+ * Ask AI: answers questions about the user's REAL saved leads.
+ * Understands: priority, website, phone, city, category, status, counts, summary.
+ * Filters can be combined, e.g. "high priority gyms in Lucknow without website".
  */
-import { leads } from '@/mocks'
 
-const MAX_LIST = 10 // never dump 50 lines into a chat bubble
+export const SUGGESTIONS = [
+  'Show high-priority leads',
+  'Which businesses have no website?',
+  'Who should I contact first?',
+  'Give me a summary',
+]
 
-const CATEGORY_KEYWORDS = {
-  gynecolog: 'Gynecologist',
-  cardiolog: 'Cardiologist',
-  dental: 'Dental Clinic',
-  dentist: 'Dental Clinic',
-  hospital: 'Hospital',
-  pharmac: 'Pharmacy',
-  lab: 'Diagnostic Lab',
-  diagnostic: 'Diagnostic Lab',
+const MAX_LIST = 8
+const STATUS_WORDS = {
+  'not interested': 'Not Interested',
+  'follow-up': 'Follow-up',
+  'follow up': 'Follow-up',
+  followup: 'Follow-up',
+  converted: 'Converted',
+  won: 'Converted',
+  interested: 'Interested',
+  contacted: 'Contacted',
+  new: 'New',
 }
-const LOCATIONS = [...new Set(leads.map((l) => l.location))]
 
-const line = (l) => `• ${l.name} (${l.location}) – Score: ${l.score}`
+const line = (l) => `• ${l.name} (${l.location || '—'}) · Score ${l.score} · ${l.status}`
 
-function formatList(items, render = line) {
-  const shown = items.slice(0, MAX_LIST).map(render).join('\n')
-  const more = items.length > MAX_LIST ? `\n…and ${items.length - MAX_LIST} more` : ''
+function list(items) {
+  const shown = items.slice(0, MAX_LIST).map(line).join('\n')
+  const more = items.length > MAX_LIST ? `\n…and ${items.length - MAX_LIST} more (see My Leads)` : ''
   return shown + more
 }
 
-/** Pull optional location / category filters out of the question. */
-function extractFilters(q) {
-  const location = LOCATIONS.find((loc) => q.includes(loc.toLowerCase()))
-  const categoryKey = Object.keys(CATEGORY_KEYWORDS).find((k) => q.includes(k))
-  return { location, category: categoryKey && CATEGORY_KEYWORDS[categoryKey] }
-}
+const uniq = (arr) => [...new Set(arr.filter(Boolean))]
 
-function applyFilters(list, { location, category }) {
-  return list.filter(
-    (l) => (!location || l.location === location) && (!category || l.category === category),
+export function getAIResponse(query, leads = []) {
+  const q = ` ${query.toLowerCase()} `
+
+  // ---- greetings / help ----
+  if (/\b(hi|hello|hey|help|what can you do)\b/.test(q)) {
+    return "Hi! I can answer questions about your saved leads. Try:\n• Show high-priority leads\n• Which businesses have no website?\n• Leads from Noida\n• Show converted leads\n• Give me a summary"
+  }
+
+  // ---- general questions (work even with no leads) ----
+  if (/(how does|how is).*(scor)/.test(q) || q.includes('scoring')) {
+    return "📈 Every business gets a score from 0 to 100 based on its digital gaps:\n• No website: biggest boost\n• Incomplete profile (no phone / opening hours)\n• Low rating or few reviews (when available)\n\n70+ = High priority, 40–69 = Medium, below 40 = Low."
+  }
+  if (q.includes('what should i search') || q.includes('what to search')) {
+    return "🔎 Try a city + a business type that often lacks a website, e.g.:\n• Gyms in Lucknow\n• Dentists in Noida\n• Salons in Jaipur\n• Cafes in Chandigarh\n\nThen add the High-priority ones to My Leads."
+  }
+
+  if (leads.length === 0) {
+    return 'You have no saved leads yet. Go to Find Leads, search a city and business type, and add some leads. Then ask me again!'
+  }
+
+  // ---- detect filters ----
+  const city = uniq(leads.map((l) => l.location)).find((c) => q.includes(c.toLowerCase()))
+  const category = uniq(leads.map((l) => l.category)).find((c) => {
+    const lc = c.toLowerCase()
+    return q.includes(lc) || q.includes(lc.replace(/s$/, '')) || q.includes(`${lc}s`)
+  })
+  const statusKey = Object.keys(STATUS_WORDS).find(
+    (k) => q.includes(k) && !(k === 'interested' && q.includes('not interested')) && !(k === 'new' && q.includes('news')),
   )
-}
+  const status = statusKey && STATUS_WORDS[statusKey]
+  const wantHigh = /(high|hot|top|best|priority|important)/.test(q) && !/(low|medium)/.test(q)
+  const wantMedium = q.includes('medium')
+  const wantLow = /\blow\b/.test(q) && !q.includes('rating')
+  const noWebsite = /(no|without|missing|don'?t have|not have)\s*(a\s*)?website/.test(q) || q.includes('no site')
+  const hasWebsite = /(with|has|have)\s*(a\s*)?website/.test(q) && !noWebsite
+  const noPhone = /(no|without|missing)\s*(a\s*)?(phone|number|contact)/.test(q)
 
-/** "2 gynecologist leads in Noida", "1 lead", "29 leads" … reads naturally for any filter combo */
-function leadsPhrase(count, { location, category }, adjective = '') {
-  const words = [count]
-  if (adjective) words.push(adjective)
-  if (category) words.push(category.toLowerCase())
-  words.push(count === 1 ? 'lead' : 'leads')
-  if (location) words.push(`in ${location}`)
-  return words.join(' ')
-}
-
-export function getAIResponse(query) {
-  const q = query.toLowerCase()
-  const filters = extractFilters(q)
-  const scoped = applyFilters(leads, filters)
-  const byScore = (a, b) => b.score - a.score
-
-  if (q.includes('high-priority') || q.includes('high priority')) {
-    const high = scoped.filter((l) => l.priority === 'High').sort(byScore)
-    if (!high.length) return `I couldn't find any ${leadsPhrase(0, filters, 'high-priority').slice(2)}.`
-    return `I found ${leadsPhrase(high.length, filters, 'high-priority')}:\n\n${formatList(high)}`
+  // ---- special intents ----
+  if (/(summary|overview|report|stats|statistics)/.test(q)) {
+    const high = leads.filter((l) => l.priority === 'High').length
+    const noWeb = leads.filter((l) => !l.hasWebsite).length
+    const conv = leads.filter((l) => l.status === 'Converted').length
+    const cities = uniq(leads.map((l) => l.location))
+    return `📊 Your lead summary:\n• Total leads: ${leads.length}\n• High priority: ${high}\n• No website: ${noWeb}\n• Converted: ${conv}\n• Cities: ${cities.join(', ') || '—'}`
   }
 
-  if (q.includes('website')) {
-    const noWeb = scoped.filter((l) => !l.hasWebsite).sort(byScore)
-    return `Found ${leadsPhrase(noWeb.length, filters)} without a website:\n\n${formatList(noWeb)}`
+  if (/(contact first|call first|who should|start with|next lead)/.test(q)) {
+    const todo = leads
+      .filter((l) => l.status === 'New' || l.status === 'Follow-up')
+      .sort((a, b) => b.score - a.score)
+    if (!todo.length) return 'No new or follow-up leads right now. Find more leads to keep your pipeline full!'
+    const top = todo[0]
+    const rest = todo.slice(1, 4)
+    return `🔥 Contact ${top.name} first (score ${top.score}).\nWhy: ${(top.serviceGaps || []).join(', ') || 'strong opportunity'}.\nSuggested pitch: ${top.recommendedAction}.${rest.length ? `\n\nNext in line:\n${list(rest)}` : ''}`
   }
 
-  const topMatch = q.match(/top\s*(\d+)/)
-  if (topMatch || q.includes('top leads') || q.includes('best leads')) {
-    const n = Math.min(Number(topMatch?.[1]) || 10, MAX_LIST)
-    const top = [...scoped].sort(byScore).slice(0, n)
-    return `Here are your top ${leadsPhrase(top.length, filters)} by score:\n\n${top
-      .map((l, i) => `${i + 1}. ${l.name} – Score: ${l.score} (${l.priority})`)
-      .join('\n')}`
+  // ---- apply filters ----
+  let result = [...leads]
+  const used = []
+  if (city) { result = result.filter((l) => l.location === city); used.push(`in ${city}`) }
+  if (category) { result = result.filter((l) => l.category === category); used.push(category.toLowerCase()) }
+  if (status) { result = result.filter((l) => l.status === status); used.push(`with status "${status}"`) }
+  if (wantHigh) { result = result.filter((l) => l.priority === 'High'); used.push('high priority') }
+  if (wantMedium) { result = result.filter((l) => l.priority === 'Medium'); used.push('medium priority') }
+  if (wantLow) { result = result.filter((l) => l.priority === 'Low'); used.push('low priority') }
+  if (noWebsite) { result = result.filter((l) => !l.hasWebsite); used.push('without a website') }
+  if (hasWebsite) { result = result.filter((l) => l.hasWebsite); used.push('with a website') }
+  if (noPhone) { result = result.filter((l) => !l.phone || l.phone === '—'); used.push('without a phone number') }
+
+  result.sort((a, b) => b.score - a.score)
+  const isCount = /(how many|count|number of|total)/.test(q)
+
+  if (used.length === 0 && !isCount) {
+    return "I didn't quite get that. You can ask things like:\n• Show high-priority leads\n• Which businesses have no website?\n• Leads from Noida\n• Show contacted leads\n• Give me a summary"
   }
 
-  if (q.includes('contacted')) {
-    const thisWeek = scoped
-      .filter((l) => l.status !== 'New' && l.lastContactedDays <= 7)
-      .sort((a, b) => a.lastContactedDays - b.lastContactedDays)
-    return `This week you contacted ${leadsPhrase(thisWeek.length, filters)}:\n\n${formatList(
-      thisWeek,
-      (l) => `• ${l.name} – ${l.status}, ${l.lastContacted}`,
-    )}`
-  }
-
-  if (q.includes('poor review') || q.includes('bad review') || q.includes('low rating')) {
-    const poor = scoped.filter((l) => l.rating < 4).sort((a, b) => a.rating - b.rating)
-    return `${leadsPhrase(poor.length, filters)} with ratings below 4★:\n\n${formatList(
-      poor,
-      (l) => `• ${l.name} – ${l.rating}★ (${l.reviews} reviews)`,
-    )}\n\nThese may benefit from review management services.`
-  }
-
-  if (filters.location || filters.category) {
-    return `You have ${leadsPhrase(scoped.length, filters)}:\n\n${formatList([...scoped].sort(byScore))}`
-  }
-
-  const highCount = leads.filter((l) => l.priority === 'High').length
-  return `I searched your lead database for "${query}". You have ${leads.length} total leads with ${highCount} high-priority ones. Try asking about a city (e.g. "leads in Lucknow"), a category ("dental clinics"), "top 5 leads" or "poor reviews".`
+  const label = used.length ? `leads ${used.join(', ')}` : 'leads'
+  if (isCount) return `You have ${result.length} ${label}.`
+  if (!result.length) return `No ${label} found. Try another filter, or find more leads.`
+  return `Found ${result.length} ${label}:\n${list(result)}`
 }
