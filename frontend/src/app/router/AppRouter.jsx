@@ -10,18 +10,14 @@ const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage'))
 const DashboardPage = lazy(() => import('@/features/dashboard/pages/DashboardPage'))
 const LeadDiscoveryPage = lazy(() => import('@/features/leads/pages/LeadDiscoveryPage'))
 const LeadDetailsPage = lazy(() => import('@/features/leads/pages/LeadDetailsPage'))
-const AILeadAnalysisPage = lazy(() => import('@/features/leads/pages/AILeadAnalysisPage'))
 const MyLeadsPage = lazy(() => import('@/features/leads/pages/MyLeadsPage'))
 const OutreachGeneratorPage = lazy(() => import('@/features/outreach/pages/OutreachGeneratorPage'))
-const AnalyticsPage = lazy(() => import('@/features/analytics/pages/AnalyticsPage'))
-const ExportReportsPage = lazy(() => import('@/features/reports/pages/ExportReportsPage'))
-const SavedSearchesPage = lazy(() => import('@/features/saved-searches/pages/SavedSearchesPage'))
 const SettingsPage = lazy(() => import('@/features/settings/pages/SettingsPage'))
 
 export default function AppRouter() {
   return (
     <Routes>
-      {/* Public front page */}
+      {/* Public pages */}
       <Route
         path="/"
         element={
@@ -30,7 +26,6 @@ export default function AppRouter() {
           </Suspense>
         }
       />
-
       <Route
         path="/login"
         element={
@@ -40,7 +35,7 @@ export default function AppRouter() {
         }
       />
 
-      {/* Logged-in pages: share the sidebar + topbar */}
+      {/* Logged-in pages: share the sidebar + topbar + Ask AI */}
       <Route
         element={
           <PrivateRoute>
@@ -51,17 +46,19 @@ export default function AppRouter() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/lead-discovery" element={<LeadDiscoveryPage />} />
         <Route path="/lead/:id" element={<LeadDetailsPage />} />
-        <Route path="/ai-analysis/:id" element={<AILeadAnalysisPage />} />
         <Route path="/outreach" element={<OutreachGeneratorPage />} />
         <Route path="/my-leads" element={<MyLeadsPage />} />
-        <Route path="/analytics" element={<AnalyticsPage />} />
-        <Route path="/export" element={<ExportReportsPage />} />
-        <Route path="/saved-searches" element={<SavedSearchesPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+
+        {/* Old pages → merged into other screens */}
+        <Route path="/analytics" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/export" element={<Navigate to="/my-leads" replace />} />
+        <Route path="/saved-searches" element={<Navigate to="/lead-discovery" replace />} />
+        <Route path="/ai-analysis/:id" element={<Navigate to="/my-leads" replace />} />
         <Route path="/chatbot" element={<Navigate to="/dashboard" replace />} />
       </Route>
 
-      {/* Unknown address -> front page */}
+      {/* Unknown address → front page */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
