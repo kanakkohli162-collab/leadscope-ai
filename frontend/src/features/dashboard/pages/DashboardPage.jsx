@@ -11,10 +11,10 @@ import { getCurrentUser } from '@/utils/currentUser'
 
 // Pipeline stages in order, with the colour of each segment
 const PIPELINE = [
-  { status: 'New', color: 'bg-primary-300' },
-  { status: 'Contacted', color: 'bg-sky-400' },
-  { status: 'Follow-up', color: 'bg-orange-400' },
-  { status: 'Interested', color: 'bg-marigold-500' },
+  { status: 'New', color: 'bg-primary-200' },
+  { status: 'Contacted', color: 'bg-primary-400' },
+  { status: 'Follow-up', color: 'bg-primary-600' },
+  { status: 'Interested', color: 'bg-[#FF5CD2]' },
   { status: 'Converted', color: 'bg-emerald-500' },
   { status: 'Not Interested', color: 'bg-slate-300' },
 ]
@@ -151,14 +151,14 @@ export default function DashboardPage() {
               <p className="text-xs text-slate-500 mb-4">Where your saved leads are located</p>
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={cityData} barCategoryGap="30%">
-                  <CartesianGrid vertical={false} stroke="#ECEAF5" />
-                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#6B6A80' }} axisLine={false} tickLine={false} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: '#6B6A80' }} axisLine={false} tickLine={false} width={28} />
+                  <CartesianGrid vertical={false} stroke="#F0E3FB" />
+                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#715A86' }} axisLine={false} tickLine={false} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: '#715A86' }} axisLine={false} tickLine={false} width={28} />
                   <Tooltip
-                    cursor={{ fill: '#F4F2FF' }}
-                    contentStyle={{ borderRadius: 12, border: '1px solid #EAE6FF', fontSize: 13 }}
+                    cursor={{ fill: '#FAF4FF' }}
+                    contentStyle={{ borderRadius: 12, border: '1px solid #F0E3FB', fontSize: 13 }}
                   />
-                  <Bar dataKey="value" name="Leads" fill="#6E56EE" radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="value" name="Leads" fill="#B526E8" radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

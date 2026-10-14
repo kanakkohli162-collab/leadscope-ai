@@ -10,6 +10,7 @@ import PageLoader from '@/components/ui/PageLoader'
 import { updateLeadStatus, updateLeadNotes } from '@/services/leadService'
 import { useLead } from '../hooks/useLeads'
 import LeadNotFound from '../components/LeadNotFound'
+import ReviewSentimentCard from '../components/ReviewSentimentCard'
 
 const statuses = ['New', 'Contacted', 'Follow-up', 'Interested', 'Converted', 'Not Interested']
 
@@ -84,9 +85,11 @@ export default function LeadDetailsPage() {
               <div className="flex items-center gap-2 text-sm text-slate-600">
                 <Clock size={16} className="text-slate-400" /> {lead.hours}
               </div>
-              <div className="flex items-center gap-2 text-sm text-amber-500">
-                <Star size={16} fill="currentColor" /> {lead.rating} ({lead.reviews} reviews)
-              </div>
+              {lead.rating > 0 && (
+                <div className="flex items-center gap-2 text-sm text-amber-500">
+                  <Star size={16} fill="currentColor" /> {lead.rating} ({lead.reviews} reviews)
+                </div>
+              )}
               <div className="flex items-center gap-2 text-sm text-slate-600">
                 <span className="text-slate-500">Status:</span>
                 <select
@@ -140,8 +143,6 @@ export default function LeadDetailsPage() {
             <p className="text-sm text-primary-700">{lead.recommendedAction}</p>
           </div>
         </div>
-
-        {/* Notes */}
         <div className="bg-white rounded-xl border border-slate-200 p-5 flex flex-col">
           <h3 className="font-semibold text-slate-800 mb-3">Notes</h3>
           <textarea
@@ -164,6 +165,9 @@ export default function LeadDetailsPage() {
         </div>
       </div>
 
+      {/* Review Sentiment (AI / NLP) */}
+      <ReviewSentimentCard lead={lead} />
+
       {/* Actions */}
       <div className="flex flex-wrap gap-3">
         <Link
@@ -176,3 +180,5 @@ export default function LeadDetailsPage() {
     </div>
   )
 }
+
+

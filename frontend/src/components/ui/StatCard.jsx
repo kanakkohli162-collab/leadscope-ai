@@ -4,7 +4,7 @@ export default function StatCard({ title, value, change, icon: Icon, color = 'bl
   const isPositive = change?.startsWith('+')
   
   const colorMap = {
-    blue: 'bg-blue-50 text-blue-600',
+    blue: 'bg-primary-50 text-primary-600',
     red: 'bg-red-50 text-red-600',
     amber: 'bg-amber-50 text-amber-600',
     green: 'bg-green-50 text-green-600',

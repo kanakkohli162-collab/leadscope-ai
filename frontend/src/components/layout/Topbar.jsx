@@ -54,7 +54,7 @@ function Topbar({ onOpenMobileNav }) {
           aria-expanded={open}
           className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-lg hover:bg-slate-100 transition-colors"
         >
-          <div className="w-9 h-9 rounded-full bg-primary-600 flex items-center justify-center text-white text-sm font-semibold">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#B526E8] to-[#FF5CD2] flex items-center justify-center text-white text-sm font-semibold">
             {initials}
           </div>
           <span className="text-sm font-medium text-slate-700 hidden sm:block max-w-[160px] truncate">{name}</span>

@@ -4,18 +4,32 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Electric blue (from the reference design)
+        // Purple-magenta (matches the landing page)
         primary: {
-          50: '#F4F6FF',
-          100: '#E4EAFF',
-          200: '#C9D6FF',
-          300: '#9FB7FF',
-          400: '#6F92FF',
-          500: '#4A7BFF',
-          600: '#2F6BFF',
-          700: '#1F55E6',
-          800: '#1A3FB8',
-          900: '#0E1550',
+          50: '#FCF5FF',
+          100: '#F6E6FD',
+          200: '#EBCBFA',
+          300: '#DDA4F5',
+          400: '#CB6FEF',
+          500: '#BE45EC',
+          600: '#B526E8',
+          700: '#9A1CC7',
+          800: '#7A169E',
+          900: '#310E50',
+        },
+        // Purple-tinted greys
+        slate: {
+          50: '#FAF4FF',
+          100: '#F5ECFD',
+          200: '#F0E3FB',
+          300: '#DCC9EB',
+          400: '#A891BD',
+          500: '#715A86',
+          600: '#5A4470',
+          700: '#432E57',
+          800: '#200B33',
+          900: '#160524',
+          950: '#0E0318',
         },
         marigold: {
           50: '#FFF6E5',
@@ -25,9 +39,9 @@ export default {
           600: '#C9860B',
           700: '#9A6508',
         },
-        sidebar: { DEFAULT: '#FFFFFF', light: '#F4F6FF' },
-        ink: '#0B1033',
-        mist: '#F4F6FF',
+        sidebar: { DEFAULT: '#160524', light: '#310E50' },
+        ink: '#200B33',
+        mist: '#FAF4FF',
       },
       fontFamily: {
         sans: ['Figtree', 'system-ui', 'sans-serif'],

@@ -1,6 +1,6 @@
 /**
  * Lead score as a ring gauge (0–100).
- * Hot (70+) = marigold, warm (40–69) = violet, cold = grey.
+ * Hot (70+) = marigold, warm (40–69) = magenta, cold = grey.
  */
 export default function ScoreCircle({ score = 0, size = 'md' }) {
   const dims = { sm: 44, md: 56, lg: 84 }
@@ -9,7 +9,7 @@ export default function ScoreCircle({ score = 0, size = 'md' }) {
   const r = (px - stroke) / 2
   const circumference = 2 * Math.PI * r
   const value = Math.max(0, Math.min(100, Number(score) || 0))
-  const color = value >= 70 ? '#E8A317' : value >= 40 ? '#6E56EE' : '#B4B2C5'
+  const color = value >= 70 ? '#F5A524' : value >= 40 ? '#B526E8' : '#C1A9D6'
   const textSize = size === 'lg' ? 'text-2xl' : size === 'md' ? 'text-base' : 'text-sm'
 
   return (
@@ -21,7 +21,7 @@ export default function ScoreCircle({ score = 0, size = 'md' }) {
       title={`Lead score ${value} / 100`}
     >
       <svg width={px} height={px} className="-rotate-90">
-        <circle cx={px / 2} cy={px / 2} r={r} fill="none" stroke="#ECEAF5" strokeWidth={stroke} />
+        <circle cx={px / 2} cy={px / 2} r={r} fill="none" stroke="#F0E3FB" strokeWidth={stroke} />
         <circle
           cx={px / 2}
           cy={px / 2}
