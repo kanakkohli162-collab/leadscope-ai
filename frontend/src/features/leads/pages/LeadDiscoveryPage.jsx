@@ -60,6 +60,8 @@ export default function LeadDiscoveryPage() {
   ), [results, filters])
 
   const isDemo = results.length > 0 && results[0].source === 'Demo'
+  // Where the data came from: "Google", "Geoapify / OpenStreetMap" or "Demo"
+  const sourceLabel = isDemo ? 'Demo data' : (results[0]?.source || 'Live data')
 
   return (
     <div className="space-y-6">
@@ -143,7 +145,6 @@ export default function LeadDiscoveryPage() {
           >
             <X size={12} /> Clear filters
           </button>
-          <span className="ml-auto text-xs text-slate-400">Limit: 10 searches per day</span>
         </div>
       </form>
 
@@ -151,19 +152,19 @@ export default function LeadDiscoveryPage() {
 
       {isDemo && (
         <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-          Demo mode: showing sample businesses. Real Google results appear once the Google Places API key is added.
+          Demo mode: showing sample businesses. Real results appear once a data source API key is added.
         </p>
       )}
 
       {searched && !loading && (
         <p className="text-sm text-slate-500">
-          {visible.length} businesses found · Source: {isDemo ? 'Demo data' : 'Google'} · sorted by best opportunity
+          {visible.length} businesses found · Source: {sourceLabel} · sorted by best opportunity
         </p>
       )}
 
       {!searched && !loading && (
         <div className="bg-white rounded-xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-500">
-          Try <b>Noida</b> + <b>Dentist</b> to see how it works.
+          Try <b>Indore</b> + <b>Restaurant</b> to see how it works.
         </div>
       )}
 
@@ -184,9 +185,12 @@ export default function LeadDiscoveryPage() {
                 <MapPin size={12} /> <span className="truncate">{r.address}</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="flex items-center gap-1 text-amber-500">
-                  <Star size={12} fill="currentColor" /> {r.rating} ({r.reviews} reviews)
-                </span>
+                {/* Rating only when the data source has it (OpenStreetMap doesn't) */}
+                {r.raw?.rating != null && (
+                  <span className="flex items-center gap-1 text-amber-500">
+                    <Star size={12} fill="currentColor" /> {r.raw.rating} ({r.raw.reviewCount ?? 0} reviews)
+                  </span>
+                )}
                 {r.hasWebsite ? (
                   <span className="flex items-center gap-1 text-green-600"><Globe size={12} /> Website</span>
                 ) : (

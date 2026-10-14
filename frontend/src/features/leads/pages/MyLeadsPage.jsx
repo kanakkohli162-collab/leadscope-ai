@@ -1,6 +1,7 @@
 import { useDeferredValue, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Search, Trash2 } from 'lucide-react'
+import { Plus, Search, Trash2, FileSpreadsheet, FileText } from 'lucide-react'
+import { exportLeadsToExcel, exportLeadsToPdf } from '../utils/exportLeads'
 import PriorityBadge from '@/components/ui/PriorityBadge'
 import ScoreCircle from '@/components/ui/ScoreCircle'
 import { updateLeadStatus, deleteLead } from '@/services/leadService'
@@ -49,13 +50,34 @@ export default function MyLeadsPage() {
           <h1 className="text-xl font-bold text-slate-800">My Leads</h1>
           <p className="text-sm text-slate-500 mt-1">Track and update the leads you've saved</p>
         </div>
-        <Link
-          to="/lead-discovery"
-          className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-medium px-4 py-2.5 rounded-lg transition-colors"
-        >
-          <Plus size={18} />
-          Find Leads
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Export: exports the leads currently shown (respects tab + search) */}
+          {filtered.length > 0 && (
+            <>
+              <button
+                onClick={() => exportLeadsToExcel(filtered)}
+                className="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium px-4 py-2.5 rounded-lg transition-colors"
+              >
+                <FileSpreadsheet size={18} className="text-green-600" />
+                Export Excel
+              </button>
+              <button
+                onClick={() => exportLeadsToPdf(filtered)}
+                className="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium px-4 py-2.5 rounded-lg transition-colors"
+              >
+                <FileText size={18} className="text-red-500" />
+                Export PDF
+              </button>
+            </>
+          )}
+          <Link
+            to="/lead-discovery"
+            className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-medium px-4 py-2.5 rounded-lg transition-colors"
+          >
+            <Plus size={18} />
+            Find Leads
+          </Link>
+        </div>
       </div>
 
       {/* Status Tabs */}
