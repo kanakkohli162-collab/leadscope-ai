@@ -51,6 +51,12 @@ const CSS = `
 .ls-field:focus-within { border-color: #447EFC !important; box-shadow: 0 0 0 3px rgba(68,126,252,.18); }
 .ls-chip { transition: transform .2s ease, background-color .2s ease, color .2s ease; }
 .ls-chip:hover { transform: translateY(-2px); }
+.ls-sec { transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
+.ls-sec:hover { transform: translateY(-4px); border-color: #0497F6 !important; box-shadow: 0 22px 44px -24px rgba(4,151,246,.6); }
+.ls-sec-icon { transition: transform .25s ease; }
+.ls-sec:hover .ls-sec-icon { transform: scale(1.08) rotate(-4deg); }
+.ls-tech { transition: border-color .2s ease, background-color .2s ease; }
+.ls-tech:hover { border-color: #0497F6 !important; background-color: rgba(4,151,246,.16) !important; }
 .ls-flink { position: relative; color: #9DB8CF; transition: color .2s ease; background: none; border: 0; padding: 0; cursor: pointer; font: inherit; }
 .ls-flink::after { content: ''; position: absolute; left: 0; bottom: -3px; height: 2px; width: 100%; background: #0497F6; transform: scaleX(0); transform-origin: left; transition: transform .25s ease; }
 .ls-flink:hover, .ls-flink:focus-visible { color: #fff; }
@@ -62,6 +68,7 @@ html { scroll-behavior: smooth; }
   .ls-lift:hover { transform: none; }
   .ls-flash { animation: none !important; }
   .ls-chip:hover { transform: none; }
+  .ls-sec:hover, .ls-sec:hover .ls-sec-icon { transform: none; }
   html { scroll-behavior: auto; }
 }
 `
@@ -181,10 +188,10 @@ const EXAMPLES = [
 ]
 
 const SECURITY = [
-  { icon: Lock, text: 'Your password is stored in a scrambled form, never as plain text' },
-  { icon: KeyRound, text: 'Secure sign-in that keeps your account safe' },
-  { icon: ShieldCheck, text: 'Account locks for 15 minutes after 5 wrong passwords' },
-  { icon: Users, text: 'Only you can see your leads' },
+  { icon: Lock, title: 'Safe passwords', text: 'Stored in a scrambled form, never as plain text.' },
+  { icon: KeyRound, title: 'Secure sign-in', text: 'You stay signed in safely, and sessions end on their own after some time.' },
+  { icon: ShieldCheck, title: 'Login lock', text: '5 wrong passwords lock the account for 15 minutes.' },
+  { icon: Users, title: 'Private leads', text: 'Only you can see the leads you save.' },
 ]
 
 const BUILT_WITH = [
@@ -533,35 +540,42 @@ export default function LandingPage() {
         </Reveal>
       </section>
 
-      {/* ================= SECURITY + STACK (light) ================= */}
+      {/* ================= SECURITY + STACK ================= */}
       <section className="px-3 sm:px-6 pb-24">
-        <div className="max-w-7xl mx-auto rounded-[28px] px-5 sm:px-12 py-16" style={{ background: C.lavender }}>
-          <div className="grid lg:grid-cols-2 gap-12">
-            <Reveal>
+        <div className="max-w-7xl mx-auto rounded-[28px] px-5 sm:px-12 py-14 relative overflow-hidden" style={{ background: C.lavender }}>
+          <div aria-hidden="true" className="absolute -top-32 -right-24 w-80 h-80 rounded-full" style={{ background: 'radial-gradient(circle, rgba(4,151,246,.18), transparent 70%)' }} />
+
+          <Reveal className="relative flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+            <div>
               <Label>Security</Label>
-              <h2 className={`mt-4 text-3xl sm:text-4xl font-bold leading-tight ${display}`}>Your account and leads stay <span style={{ color: C.blue }}>private</span></h2>
-              <div className="mt-8 grid sm:grid-cols-2 gap-4">
-                {SECURITY.map(({ icon: Icon, text }) => (
-                  <div key={text} className="ls-lift rounded-2xl bg-[#113E62] border border-[#1B4C74] p-5">
-                    <span className="w-10 h-10 rounded-xl flex items-center justify-center text-white" style={{ background: C.blue }}><Icon size={18} /></span>
-                    <p className="mt-3 font-semibold leading-snug">{text}</p>
-                  </div>
-                ))}
-              </div>
-            </Reveal>
-            <Reveal delay={150}>
-              <Label>Made with</Label>
-              <h2 className={`mt-4 text-3xl sm:text-4xl font-bold leading-tight ${display}`}>Trusted <span style={{ color: C.blue }}>tools</span> behind LeadScope</h2>
-              <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {BUILT_WITH.map(({ icon: Icon, name }) => (
-                  <div key={name} className="ls-lift flex flex-col items-center gap-2 rounded-2xl bg-[#113E62] border border-[#1B4C74] py-5">
-                    <span className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(4,151,246,.15)', color: C.blue }}><Icon size={19} /></span>
-                    <span className="text-xs font-semibold">{name}</span>
-                  </div>
-                ))}
-              </div>
-            </Reveal>
+              <h2 className={`mt-3 text-3xl sm:text-4xl font-bold leading-tight ${display}`}>Your account and leads stay <span style={{ color: C.blue }}>private</span></h2>
+            </div>
+            <p className="max-w-md text-[15px] leading-relaxed" style={{ color: C.muted }}>
+              LeadScope keeps your login safe and shows your leads only to you.
+            </p>
+          </Reveal>
+
+          <div className="relative mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {SECURITY.map(({ icon: Icon, title, text }, i) => (
+              <Reveal key={title} delay={i * 80} className="ls-sec group rounded-2xl p-5" style={{ background: C.card, border: `1px solid ${C.line}` }}>
+                <span className="ls-sec-icon w-11 h-11 rounded-xl flex items-center justify-center text-white" style={{ background: C.blue }}><Icon size={19} /></span>
+                <p className={`mt-4 text-lg font-semibold ${display}`}>{title}</p>
+                <p className="mt-1.5 text-sm leading-relaxed" style={{ color: C.muted }}>{text}</p>
+              </Reveal>
+            ))}
           </div>
+
+          <Reveal className="relative mt-10 pt-8 flex flex-col md:flex-row md:items-center gap-4" style={{ borderTop: `1px solid ${C.line}` }}>
+            <p className="shrink-0 text-sm font-semibold" style={{ color: C.ink }}>Built with</p>
+            <div className="flex flex-wrap gap-2">
+              {BUILT_WITH.map(({ icon: Icon, name }) => (
+                <span key={name} className="ls-tech inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium"
+                  style={{ background: 'rgba(4,151,246,.08)', border: `1px solid ${C.line}`, color: '#CFDEEA' }}>
+                  <Icon size={13} style={{ color: C.glow }} /> {name}
+                </span>
+              ))}
+            </div>
+          </Reveal>
         </div>
       </section>
 
