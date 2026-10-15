@@ -80,7 +80,16 @@ export default function LeadDetailsPage() {
                 <Phone size={16} className="text-slate-400" /> {lead.phone}
               </div>
               <div className="flex items-center gap-2 text-sm text-slate-600">
-                <Globe size={16} className="text-slate-400" /> {lead.website || 'No website'}
+                <Globe size={16} className="text-slate-400 shrink-0" />
+                <span className="truncate">{lead.website || 'No website'}</span>
+                {lead.website && (
+                  <Link
+                    to={`/website-checker?url=${encodeURIComponent(lead.website)}`}
+                    className="shrink-0 text-xs font-medium text-primary-600 hover:text-aqua border border-line rounded-full px-2.5 py-0.5"
+                  >
+                    Check website
+                  </Link>
+                )}
               </div>
               <div className="flex items-center gap-2 text-sm text-slate-600">
                 <Clock size={16} className="text-slate-400" /> {lead.hours}
