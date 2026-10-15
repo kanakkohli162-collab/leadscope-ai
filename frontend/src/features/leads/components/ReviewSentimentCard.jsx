@@ -4,9 +4,9 @@ import { analyzeSentiment } from '@/services/leadService'
 
 // Colour + icon for each result
 const STYLE = {
-  Positive: { icon: Smile, text: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200' },
-  Neutral: { icon: Meh, text: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-200' },
-  Negative: { icon: Frown, text: 'text-red-700', bg: 'bg-red-50', border: 'border-red-200' },
+  Positive: { icon: Smile, text: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30' },
+  Neutral: { icon: Meh, text: 'text-amber-300', bg: 'bg-amber-500/10', border: 'border-amber-500/30' },
+  Negative: { icon: Frown, text: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/30' },
 }
 
 export default function ReviewSentimentCard({ lead }) {
@@ -41,12 +41,12 @@ export default function ReviewSentimentCard({ lead }) {
   const pct = (n) => (result?.total ? Math.round((n * 100) / result.total) : 0)
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
+    <div className="bg-card rounded-xl border border-slate-200 p-5 space-y-4">
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
-            <MessageSquareText size={18} className="text-primary-600" />
+            <MessageSquareText size={18} className="text-aqua" />
             Review Sentiment (AI / NLP)
           </h3>
           <p className="text-xs text-slate-500 mt-1">
@@ -58,7 +58,7 @@ export default function ReviewSentimentCard({ lead }) {
             href={mapsUrl}
             target="_blank"
             rel="noreferrer"
-            className="text-xs font-medium text-primary-600 hover:text-primary-700 flex items-center gap-1"
+            className="text-xs font-medium text-primary-600 hover:text-aqua flex items-center gap-1"
           >
             Open on Google Maps <ExternalLink size={12} />
           </a>
@@ -71,14 +71,14 @@ export default function ReviewSentimentCard({ lead }) {
         value={reviews}
         onChange={(e) => setReviews(e.target.value)}
         placeholder="Paste reviews here, one per line…"
-        className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+        className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-600"
       />
 
       <div className="flex items-center gap-3">
         <button
           onClick={handleAnalyze}
           disabled={loading}
-          className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white font-medium px-4 py-2.5 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white font-medium px-4 py-2.5 rounded-md transition-colors"
         >
           {loading && <Loader2 size={16} className="animate-spin" />}
           {loading ? 'Analysing…' : 'Analyse Sentiment'}
@@ -93,7 +93,7 @@ export default function ReviewSentimentCard({ lead }) {
         )}
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-400">{error}</p>}
 
       {/* Result */}
       {result && s && (
@@ -113,7 +113,7 @@ export default function ReviewSentimentCard({ lead }) {
 
           {/* Positive / Neutral / Negative bar */}
           <div>
-            <div className="flex h-3 rounded-full overflow-hidden bg-white">
+            <div className="flex h-3 rounded-full overflow-hidden bg-inset">
               <div className="bg-emerald-500" style={{ width: `${pct(result.positive)}%` }} />
               <div className="bg-amber-400" style={{ width: `${pct(result.neutral)}%` }} />
               <div className="bg-red-500" style={{ width: `${pct(result.negative)}%` }} />
@@ -133,7 +133,7 @@ export default function ReviewSentimentCard({ lead }) {
               <p className="text-xs font-semibold text-slate-600 mb-1.5">Main customer concerns</p>
               <div className="flex flex-wrap gap-2">
                 {result.concerns.map((c) => (
-                  <span key={c} className="text-xs bg-white border border-slate-200 text-slate-700 px-2.5 py-1 rounded-full">
+                  <span key={c} className="text-xs bg-inset border border-line text-slate-700 px-2.5 py-1 rounded-full">
                     {c}
                   </span>
                 ))}

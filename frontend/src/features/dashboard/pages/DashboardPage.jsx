@@ -11,23 +11,23 @@ import { getCurrentUser } from '@/utils/currentUser'
 
 // Pipeline stages in order, with the colour of each segment
 const PIPELINE = [
-  { status: 'New', color: 'bg-primary-200' },
-  { status: 'Contacted', color: 'bg-primary-400' },
-  { status: 'Follow-up', color: 'bg-primary-600' },
-  { status: 'Interested', color: 'bg-[#FF5CD2]' },
+  { status: 'New', color: 'bg-aqua-light' },
+  { status: 'Contacted', color: 'bg-aqua' },
+  { status: 'Follow-up', color: 'bg-primary-400' },
+  { status: 'Interested', color: 'bg-primary-600' },
   { status: 'Converted', color: 'bg-emerald-500' },
   { status: 'Not Interested', color: 'bg-slate-300' },
 ]
 
 function StatTile({ icon: Icon, label, value, hint, tone }) {
   const tones = {
-    violet: 'bg-primary-50 text-primary-600',
-    marigold: 'bg-marigold-50 text-marigold-600',
-    rose: 'bg-rose-50 text-rose-500',
-    emerald: 'bg-emerald-50 text-emerald-600',
+    violet: 'bg-primary-600/15 text-aqua',
+    marigold: 'bg-marigold-500/15 text-marigold-400',
+    rose: 'bg-rose-500/15 text-rose-400',
+    emerald: 'bg-emerald-500/15 text-emerald-400',
   }
   return (
-    <div className="bg-white rounded-2xl border border-primary-100/70 p-5">
+    <div className="bg-card rounded-2xl border border-line p-5">
       <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${tones[tone]}`}>
         <Icon size={20} />
       </div>
@@ -68,7 +68,7 @@ export default function DashboardPage() {
     [leads],
   )
 
-  if (error) return <p className="text-rose-600">{error}</p>
+  if (error) return <p className="text-rose-400">{error}</p>
   if (!summary) return <PageLoader />
 
   return (
@@ -82,7 +82,7 @@ export default function DashboardPage() {
         </div>
         <Link
           to="/lead-discovery"
-          className="inline-flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold px-5 py-2.5 rounded-xl shadow-sm shadow-primary-600/30 transition-colors"
+          className="inline-flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold px-5 py-2.5 rounded-md shadow-lg shadow-primary-600/30 transition-colors"
         >
           <Search size={17} /> Find new leads
         </Link>
@@ -90,8 +90,8 @@ export default function DashboardPage() {
 
       {summary.totalLeads === 0 ? (
         /* Empty state */
-        <div className="bg-white rounded-2xl border border-primary-100/70 p-10 text-center">
-          <div className="mx-auto w-14 h-14 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center">
+        <div className="bg-card rounded-2xl border border-line p-10 text-center">
+          <div className="mx-auto w-14 h-14 rounded-2xl bg-primary-600/15 text-aqua flex items-center justify-center">
             <MapPin size={26} />
           </div>
           <h2 className="font-display text-xl font-bold text-ink mt-4">Your pipeline is empty</h2>
@@ -100,7 +100,7 @@ export default function DashboardPage() {
           </p>
           <Link
             to="/lead-discovery"
-            className="inline-flex items-center gap-2 mt-5 bg-primary-600 hover:bg-primary-700 text-white font-semibold px-5 py-2.5 rounded-xl"
+            className="inline-flex items-center gap-2 mt-5 bg-primary-600 hover:bg-primary-700 text-white font-semibold px-5 py-2.5 rounded-md"
           >
             <Search size={17} /> Find your first leads
           </Link>
@@ -116,10 +116,10 @@ export default function DashboardPage() {
           </div>
 
           {/* Pipeline bar */}
-          <div className="bg-white rounded-2xl border border-primary-100/70 p-5">
+          <div className="bg-card rounded-2xl border border-line p-5">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-display text-lg font-bold text-ink">Pipeline</h3>
-              <Link to="/my-leads" className="text-sm text-primary-600 hover:text-primary-700 font-semibold inline-flex items-center gap-1">
+              <Link to="/my-leads" className="text-sm text-primary-600 hover:text-aqua font-semibold inline-flex items-center gap-1">
                 Manage leads <ArrowRight size={15} />
               </Link>
             </div>
@@ -146,25 +146,27 @@ export default function DashboardPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
             {/* Chart */}
-            <div className="lg:col-span-3 bg-white rounded-2xl border border-primary-100/70 p-5">
+            <div className="lg:col-span-3 bg-card rounded-2xl border border-line p-5">
               <h3 className="font-display text-lg font-bold text-ink">Leads by city</h3>
               <p className="text-xs text-slate-500 mb-4">Where your saved leads are located</p>
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={cityData} barCategoryGap="30%">
-                  <CartesianGrid vertical={false} stroke="#F0E3FB" />
-                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#715A86' }} axisLine={false} tickLine={false} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: '#715A86' }} axisLine={false} tickLine={false} width={28} />
+                  <CartesianGrid vertical={false} stroke="#1B4C74" />
+                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#9DB8CF' }} axisLine={false} tickLine={false} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: '#9DB8CF' }} axisLine={false} tickLine={false} width={28} />
                   <Tooltip
-                    cursor={{ fill: '#FAF4FF' }}
-                    contentStyle={{ borderRadius: 12, border: '1px solid #F0E3FB', fontSize: 13 }}
+                    cursor={{ fill: '#0B3354' }}
+                    contentStyle={{ borderRadius: 12, background: '#113E62', border: '1px solid #1B4C74', color: '#E6F1F7', fontSize: 13 }}
+                    labelStyle={{ color: '#E6F1F7' }}
+                    itemStyle={{ color: '#E6F1F7' }}
                   />
-                  <Bar dataKey="value" name="Leads" fill="#B526E8" radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="value" name="Leads" fill="#0497F6" radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
 
             {/* Hottest leads */}
-            <div className="lg:col-span-2 bg-white rounded-2xl border border-primary-100/70 p-5">
+            <div className="lg:col-span-2 bg-card rounded-2xl border border-line p-5">
               <h3 className="font-display text-lg font-bold text-ink">Hottest leads</h3>
               <p className="text-xs text-slate-500 mb-3">Contact these first</p>
               <div className="space-y-1">

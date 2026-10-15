@@ -35,7 +35,7 @@ export default function AppLayout() {
   const closeMobile = useCallback(() => setMobileOpen(false), [])
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
+    <div className="ls-app flex h-screen bg-abyss text-ink overflow-hidden">
       <Sidebar
         collapsed={collapsed}
         onToggleCollapsed={toggleCollapsed}
@@ -45,7 +45,7 @@ export default function AppLayout() {
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Topbar onOpenMobileNav={openMobile} />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+        <main className="flex-1 overflow-y-auto bg-abyss p-4 sm:p-6">
           {/* Suspense here (not around the whole app) keeps the sidebar visible
               while only the page area shows a loader. */}
           <Suspense fallback={<PageLoader />}>

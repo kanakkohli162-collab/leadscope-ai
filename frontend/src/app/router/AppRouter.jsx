@@ -12,6 +12,7 @@ const LeadDiscoveryPage = lazy(() => import('@/features/leads/pages/LeadDiscover
 const LeadDetailsPage = lazy(() => import('@/features/leads/pages/LeadDetailsPage'))
 const MyLeadsPage = lazy(() => import('@/features/leads/pages/MyLeadsPage'))
 const OutreachGeneratorPage = lazy(() => import('@/features/outreach/pages/OutreachGeneratorPage'))
+const AnalyticsPage = lazy(() => import('@/features/analytics/pages/AnalyticsPage'))
 const SettingsPage = lazy(() => import('@/features/settings/pages/SettingsPage'))
 
 export default function AppRouter() {
@@ -48,10 +49,10 @@ export default function AppRouter() {
         <Route path="/lead/:id" element={<LeadDetailsPage />} />
         <Route path="/outreach" element={<OutreachGeneratorPage />} />
         <Route path="/my-leads" element={<MyLeadsPage />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
 
         {/* Old pages → merged into other screens */}
-        <Route path="/analytics" element={<Navigate to="/dashboard" replace />} />
         <Route path="/export" element={<Navigate to="/my-leads" replace />} />
         <Route path="/saved-searches" element={<Navigate to="/lead-discovery" replace />} />
         <Route path="/ai-analysis/:id" element={<Navigate to="/my-leads" replace />} />

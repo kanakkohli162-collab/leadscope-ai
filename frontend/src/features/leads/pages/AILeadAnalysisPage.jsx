@@ -44,9 +44,9 @@ export default function AILeadAnalysisPage() {
   ]
 
   const statusStyles = {
-    ok: 'bg-green-50 border-green-200 text-green-700',
-    warning: 'bg-amber-50 border-amber-200 text-amber-700',
-    error: 'bg-red-50 border-red-200 text-red-700',
+    ok: 'bg-green-500/10 border-green-500/30 text-green-400',
+    warning: 'bg-amber-500/10 border-amber-500/30 text-amber-300',
+    error: 'bg-red-500/10 border-red-500/30 text-red-400',
   }
 
   return (
@@ -56,10 +56,10 @@ export default function AILeadAnalysisPage() {
       </Link>
 
       {/* Header */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6">
+      <div className="bg-card rounded-xl border border-slate-200 p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-primary-50 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-primary-600/15 flex items-center justify-center">
               <Brain className="w-6 h-6 text-primary-600" />
             </div>
             <div>
@@ -73,7 +73,7 @@ export default function AILeadAnalysisPage() {
           </div>
         </div>
 
-        <div className="mt-4 flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+        <div className="mt-4 flex items-center gap-3 p-3 bg-inset rounded-lg">
           <img src={lead.image} alt="" className="w-12 h-12 rounded-lg object-cover" />
           <div>
             <p className="font-semibold text-slate-800">{lead.name}</p>
@@ -99,7 +99,7 @@ export default function AILeadAnalysisPage() {
       </div>
 
       {/* AI Generated Reason */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6">
+      <div className="bg-card rounded-xl border border-slate-200 p-6">
         <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
           <Brain size={18} className="text-primary-600" />
           AI Generated Reason
@@ -108,16 +108,16 @@ export default function AILeadAnalysisPage() {
       </div>
 
       {/* Recommended Action */}
-      <div className="bg-primary-50 rounded-xl border border-primary-100 p-6">
-        <h3 className="font-semibold text-primary-800 mb-2 flex items-center gap-2">
+      <div className="bg-primary-600/15 rounded-xl border border-primary-600/30 p-6">
+        <h3 className="font-semibold text-aqua-light mb-2 flex items-center gap-2">
           <CheckCircle size={18} />
           Recommended Action
         </h3>
-        <p className="text-primary-700">{lead.recommendedAction}</p>
+        <p className="text-aqua-light">{lead.recommendedAction}</p>
         <div className="mt-4">
           <Link
             to="/outreach"
-            className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-medium px-5 py-2.5 rounded-lg transition-colors"
+            className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-medium px-5 py-2.5 rounded-md transition-colors"
           >
             Generate Outreach Message
           </Link>

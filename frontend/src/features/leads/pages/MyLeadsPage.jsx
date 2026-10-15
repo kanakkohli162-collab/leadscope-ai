@@ -56,23 +56,23 @@ export default function MyLeadsPage() {
             <>
               <button
                 onClick={() => exportLeadsToExcel(filtered)}
-                className="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium px-4 py-2.5 rounded-lg transition-colors"
+                className="flex items-center gap-2 bg-card border border-slate-200 hover:bg-inset text-slate-700 font-medium px-4 py-2.5 rounded-lg transition-colors"
               >
-                <FileSpreadsheet size={18} className="text-green-600" />
+                <FileSpreadsheet size={18} className="text-green-400" />
                 Export Excel
               </button>
               <button
                 onClick={() => exportLeadsToPdf(filtered)}
-                className="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium px-4 py-2.5 rounded-lg transition-colors"
+                className="flex items-center gap-2 bg-card border border-slate-200 hover:bg-inset text-slate-700 font-medium px-4 py-2.5 rounded-lg transition-colors"
               >
-                <FileText size={18} className="text-red-500" />
+                <FileText size={18} className="text-red-400" />
                 Export PDF
               </button>
             </>
           )}
           <Link
             to="/lead-discovery"
-            className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-medium px-4 py-2.5 rounded-lg transition-colors"
+            className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-medium px-4 py-2.5 rounded-md transition-colors"
           >
             <Plus size={18} />
             Find Leads
@@ -89,7 +89,7 @@ export default function MyLeadsPage() {
             className={`px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors ${
               activeStatus === status
                 ? 'bg-primary-600 text-white'
-                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                : 'bg-card border border-slate-200 text-slate-600 hover:bg-inset'
             }`}
           >
             {status} ({statusCounts[status] || 0})
@@ -105,16 +105,16 @@ export default function MyLeadsPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search leads..."
-          className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-600"
         />
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+      <div className="bg-card rounded-xl border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200">
+              <tr className="bg-inset border-b border-slate-200">
                 <th className="text-left px-5 py-3 font-semibold text-slate-600">Business Name</th>
                 <th className="text-left px-5 py-3 font-semibold text-slate-600">Location</th>
                 <th className="text-left px-5 py-3 font-semibold text-slate-600">Score</th>
@@ -128,7 +128,7 @@ export default function MyLeadsPage() {
                 <tr><td colSpan={6} className="px-5 py-8 text-center text-slate-500">Loading your leads…</td></tr>
               )}
               {!loading && error && (
-                <tr><td colSpan={6} className="px-5 py-8 text-center text-red-600">{error}</td></tr>
+                <tr><td colSpan={6} className="px-5 py-8 text-center text-red-400">{error}</td></tr>
               )}
               {!loading && !error && filtered.length === 0 && (
                 <tr>
@@ -138,7 +138,7 @@ export default function MyLeadsPage() {
                 </tr>
               )}
               {!loading && !error && filtered.map((lead) => (
-                <tr key={lead.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                <tr key={lead.id} className="border-b border-line hover:bg-inset transition-colors">
                   <td className="px-5 py-3.5">
                     <Link to={`/lead/${lead.id}`} className="font-medium text-slate-800 hover:text-primary-600">
                       {lead.name}
@@ -155,7 +155,7 @@ export default function MyLeadsPage() {
                     <select
                       value={lead.status}
                       onChange={(e) => changeStatus(lead.id, e.target.value)}
-                      className="border border-slate-200 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      className="border border-slate-200 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary-600"
                     >
                       {statuses.slice(1).map((s) => <option key={s} value={s}>{s}</option>)}
                     </select>
@@ -165,7 +165,7 @@ export default function MyLeadsPage() {
                     <button
                       onClick={() => removeLead(lead.id)}
                       title="Delete lead"
-                      className="p-1.5 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-600"
+                      className="p-1.5 rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-400"
                     >
                       <Trash2 size={16} />
                     </button>

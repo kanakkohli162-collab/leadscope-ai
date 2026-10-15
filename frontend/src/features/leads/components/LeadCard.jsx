@@ -10,10 +10,10 @@ import ScoreCircle from '@/components/ui/ScoreCircle'
  */
 function LeadCard({ lead }) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5 card-hover">
+    <div className="bg-card rounded-xl border border-slate-200 p-5 card-hover">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center text-primary-600 font-bold text-sm">
+          <div className="w-10 h-10 rounded-lg bg-primary-600/15 flex items-center justify-center text-primary-600 font-bold text-sm">
             {lead.name.charAt(0)}
           </div>
           <div>
@@ -35,11 +35,11 @@ function LeadCard({ lead }) {
             {lead.rating} ({lead.reviews} reviews)
           </span>
           {lead.hasWebsite ? (
-            <span className="flex items-center gap-1 text-green-600">
+            <span className="flex items-center gap-1 text-green-400">
               <Globe size={12} /> Website
             </span>
           ) : (
-            <span className="flex items-center gap-1 text-red-500">
+            <span className="flex items-center gap-1 text-red-400">
               <Globe size={12} /> No website
             </span>
           )}
@@ -50,7 +50,7 @@ function LeadCard({ lead }) {
         <PriorityBadge priority={lead.priority} />
         <Link
           to={`/lead/${lead.id}`}
-          className="text-sm font-medium text-primary-600 hover:text-primary-700"
+          className="text-sm font-medium text-primary-600 hover:text-aqua"
         >
           View Details →
         </Link>

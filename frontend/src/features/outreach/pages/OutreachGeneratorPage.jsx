@@ -78,10 +78,10 @@ export default function OutreachGeneratorPage() {
 
   if (!leads.length) {
     return (
-      <div className="bg-white rounded-xl border border-slate-200 p-10 text-center">
+      <div className="bg-card rounded-xl border border-slate-200 p-10 text-center">
         <h2 className="text-lg font-semibold text-slate-800">No leads yet</h2>
         <p className="text-sm text-slate-500 mt-1">Add a lead first, then come back to write a message.</p>
-        <Link to="/lead-discovery" className="inline-block mt-4 bg-primary-600 text-white font-medium px-5 py-2.5 rounded-lg">
+        <Link to="/lead-discovery" className="inline-block mt-4 bg-primary-600 text-white font-medium px-5 py-2.5 rounded-md">
           Find Leads →
         </Link>
       </div>
@@ -98,17 +98,17 @@ export default function OutreachGeneratorPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: choices */}
         <div className="space-y-4">
-          <div className="bg-white rounded-xl border border-slate-200 p-5">
+          <div className="bg-card rounded-xl border border-slate-200 p-5">
             <label className="block text-sm font-medium text-slate-700 mb-2">Lead</label>
             <select
               value={leadId}
               onChange={(e) => { setLeadId(e.target.value); setMessage('') }}
-              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-600"
             >
               {leads.map((l) => <option key={l.id} value={l.id}>{l.name} – {l.location}</option>)}
             </select>
             {lead && (
-              <div className="mt-4 flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+              <div className="mt-4 flex items-center gap-3 p-3 bg-inset rounded-lg">
                 <ScoreCircle score={lead.score} size="sm" />
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-slate-800 truncate">{lead.name}</p>
@@ -118,12 +118,12 @@ export default function OutreachGeneratorPage() {
             )}
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200 p-5">
+          <div className="bg-card rounded-xl border border-slate-200 p-5">
             <label className="block text-sm font-medium text-slate-700 mb-2">Service to offer</label>
             <select
               value={service}
               onChange={(e) => setService(e.target.value)}
-              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-600"
             >
               {SERVICES.map((s) => <option key={s}>{s}</option>)}
             </select>
@@ -132,21 +132,21 @@ export default function OutreachGeneratorPage() {
           <button
             onClick={write}
             disabled={writing || !lead}
-            className="w-full inline-flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white font-semibold py-3 rounded-lg"
+            className="w-full inline-flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white font-semibold py-3 rounded-md"
           >
             <Sparkles size={18} /> {writing ? 'Writing…' : message ? 'Write again' : 'Write message'}
           </button>
         </div>
 
         {/* Right: message */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-5 flex flex-col">
+        <div className="lg:col-span-2 bg-card rounded-xl border border-slate-200 p-5 flex flex-col">
           <div className="flex gap-2 mb-4">
             {tabs.map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
                 onClick={() => { setChannel(id); setMessage('') }}
                 className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium ${
-                  channel === id ? 'bg-primary-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  channel === id ? 'bg-primary-600 text-white' : 'bg-inset border border-line text-slate-600 hover:bg-line'
                 }`}
               >
                 <Icon size={14} /> {label}
@@ -160,19 +160,19 @@ export default function OutreachGeneratorPage() {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 rows={12}
-                className="flex-1 w-full border border-slate-200 rounded-lg p-4 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="flex-1 w-full border border-slate-200 rounded-lg p-4 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary-600"
               />
-              <p className="text-xs text-amber-700 mt-2">
+              <p className="text-xs text-amber-300 mt-2">
                 {source === 'AI' ? 'Written by AI' : 'Written from a template (AI key not set)'} — check before sending. You can edit it above.
               </p>
               <div className="flex flex-wrap gap-2 mt-4">
-                <button onClick={copy} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-50">
+                <button onClick={copy} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-line text-sm text-slate-700 hover:bg-inset">
                   <Copy size={14} /> {copied ? 'Copied!' : 'Copy'}
                 </button>
-                <button onClick={download} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-50">
+                <button onClick={download} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-line text-sm text-slate-700 hover:bg-inset">
                   <Download size={14} /> Download
                 </button>
-                <button onClick={write} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-50">
+                <button onClick={write} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-line text-sm text-slate-700 hover:bg-inset">
                   <RefreshCw size={14} /> Regenerate
                 </button>
                 {channel === 'whatsapp' && lead?.phone && lead.phone !== '—' && (
@@ -183,7 +183,7 @@ export default function OutreachGeneratorPage() {
               </div>
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-sm text-slate-400 border border-dashed border-slate-200 rounded-lg p-10 text-center">
+            <div className="flex-1 flex items-center justify-center text-sm text-slate-400 border border-dashed border-line rounded-lg p-10 text-center">
               Choose a lead and service, then click <b className="mx-1">Write message</b>.
             </div>
           )}

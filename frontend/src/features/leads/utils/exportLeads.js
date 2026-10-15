@@ -42,13 +42,13 @@ export function exportLeadsToPdf(leads) {
   const head = COLUMNS.filter(([h]) => h !== 'Notes' && h !== 'Address')
   const html = `<!doctype html><html><head><meta charset="utf-8"><title>LeadScope AI – Leads Report</title>
   <style>
-    body { font-family: Arial, sans-serif; color: #200B33; padding: 24px; }
-    h1 { margin: 0; font-size: 22px; } h1 span { color: #B526E8; }
-    p { color: #715A86; margin: 4px 0 16px; font-size: 13px; }
+    body { font-family: Arial, sans-serif; color: #01081A; padding: 24px; }
+    h1 { margin: 0; font-size: 22px; } h1 span { color: #0497F6; }
+    p { color: #4A6A85; margin: 4px 0 16px; font-size: 13px; }
     table { width: 100%; border-collapse: collapse; font-size: 11px; }
-    th { background: #310E50; color: #fff; text-align: left; padding: 7px; }
-    td { border-bottom: 1px solid #F0E3FB; padding: 6px 7px; vertical-align: top; }
-    tr:nth-child(even) td { background: #FAF4FF; }
+    th { background: #0497F6; color: #fff; text-align: left; padding: 7px; }
+    td { border-bottom: 1px solid #CDEBFD; padding: 6px 7px; vertical-align: top; }
+    tr:nth-child(even) td { background: #E6F5FE; }
   </style></head><body>
   <h1>LeadScope<span>.</span> Leads Report</h1>
   <p>${leads.length} leads · exported on ${new Date().toLocaleDateString('en-IN')}</p>

@@ -66,7 +66,7 @@ export default function LeadDiscoveryPage() {
   return (
     <div className="space-y-6">
       {/* Search Form */}
-      <form onSubmit={handleSearch} className="bg-white rounded-xl border border-slate-200 p-5">
+      <form onSubmit={handleSearch} className="bg-card rounded-xl border border-slate-200 p-5">
         <h2 className="text-lg font-semibold text-slate-800">Find Leads</h2>
         <p className="text-sm text-slate-500 mb-4">
           Enter a city and business type to find businesses that need digital services.
@@ -82,7 +82,7 @@ export default function LeadDiscoveryPage() {
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 maxLength={60}
-                className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-600"
                 placeholder="e.g. Noida, Lucknow..."
               />
             </div>
@@ -95,7 +95,7 @@ export default function LeadDiscoveryPage() {
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               maxLength={60}
-              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-600"
               placeholder="e.g. Dentist, Restaurant..."
             />
             <datalist id="category-suggestions">
@@ -106,7 +106,7 @@ export default function LeadDiscoveryPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors"
+              className="w-full bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-md flex items-center justify-center gap-2 transition-colors"
             >
               <Search size={18} />
               {loading ? 'Searching…' : 'Search'}
@@ -115,14 +115,14 @@ export default function LeadDiscoveryPage() {
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-100">
+        <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-line">
           <div className="flex items-center gap-1.5 text-sm text-slate-500">
             <Filter size={14} /> Filters:
           </div>
           <select
             value={filters.priority}
             onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
-            className="px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-primary-500"
+            className="px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-primary-600"
           >
             <option value="">Priority</option>
             <option value="High">High</option>
@@ -132,7 +132,7 @@ export default function LeadDiscoveryPage() {
           <select
             value={filters.hasWebsite}
             onChange={(e) => setFilters({ ...filters, hasWebsite: e.target.value })}
-            className="px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-primary-500"
+            className="px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-primary-600"
           >
             <option value="">Website</option>
             <option value="yes">Has website</option>
@@ -148,10 +148,10 @@ export default function LeadDiscoveryPage() {
         </div>
       </form>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-400">{error}</p>}
 
       {isDemo && (
-        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+        <p className="text-xs text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2">
           Demo mode: showing sample businesses. Real results appear once a data source API key is added.
         </p>
       )}
@@ -163,7 +163,7 @@ export default function LeadDiscoveryPage() {
       )}
 
       {!searched && !loading && (
-        <div className="bg-white rounded-xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-500">
+        <div className="bg-card rounded-xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-500">
           Try <b>Indore</b> + <b>Restaurant</b> to see how it works.
         </div>
       )}
@@ -171,7 +171,7 @@ export default function LeadDiscoveryPage() {
       {/* Results */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {visible.map((r) => (
-          <div key={r.id} className="bg-white rounded-xl border border-slate-200 p-5 flex flex-col">
+          <div key={r.id} className="bg-card rounded-xl border border-slate-200 p-5 flex flex-col">
             <div className="flex items-start justify-between mb-3 gap-2">
               <div className="min-w-0">
                 <h3 className="font-semibold text-slate-800 text-sm truncate">{r.name}</h3>
@@ -192,9 +192,9 @@ export default function LeadDiscoveryPage() {
                   </span>
                 )}
                 {r.hasWebsite ? (
-                  <span className="flex items-center gap-1 text-green-600"><Globe size={12} /> Website</span>
+                  <span className="flex items-center gap-1 text-green-400"><Globe size={12} /> Website</span>
                 ) : (
-                  <span className="flex items-center gap-1 text-red-500"><Globe size={12} /> No website</span>
+                  <span className="flex items-center gap-1 text-red-400"><Globe size={12} /> No website</span>
                 )}
               </div>
             </div>
@@ -202,7 +202,7 @@ export default function LeadDiscoveryPage() {
             {r.serviceGaps.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mb-4">
                 {r.serviceGaps.map((gap) => (
-                  <span key={gap} className="inline-flex items-center gap-1 text-[11px] text-red-600 bg-red-50 rounded px-2 py-0.5">
+                  <span key={gap} className="inline-flex items-center gap-1 text-[11px] text-red-400 bg-red-500/10 rounded px-2 py-0.5">
                     <AlertTriangle size={10} /> {gap}
                   </span>
                 ))}
@@ -212,14 +212,14 @@ export default function LeadDiscoveryPage() {
             <div className="mt-auto flex items-center justify-between">
               <PriorityBadge priority={r.priority} />
               {added[r.id] ? (
-                <Link to={`/lead/${added[r.id]}`} className="inline-flex items-center gap-1 text-sm font-medium text-green-600">
+                <Link to={`/lead/${added[r.id]}`} className="inline-flex items-center gap-1 text-sm font-medium text-green-400">
                   <Check size={16} /> Added · View
                 </Link>
               ) : (
                 <button
                   onClick={() => addToMyLeads(r)}
                   disabled={adding === r.id}
-                  className="inline-flex items-center gap-1 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:opacity-60 px-3 py-1.5 rounded-lg"
+                  className="inline-flex items-center gap-1 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:opacity-60 px-3 py-1.5 rounded-md"
                 >
                   <Plus size={14} /> {adding === r.id ? 'Adding…' : 'Add to My Leads'}
                 </button>
