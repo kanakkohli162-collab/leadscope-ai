@@ -6,6 +6,7 @@ import {
   Globe, Database, Server, Cpu, Map, Layers, Code2, Target, BarChart3,
 } from 'lucide-react'
 import { getCurrentUser } from '@/utils/currentUser'
+import InsideMapSheet from '@/features/leads/components/InsideMapSheet'
 
 /* ---------- colours: deep ocean theme (taken from the reference image) ---------- */
 const C = {
@@ -385,9 +386,9 @@ export default function LandingPage() {
       {/* ================= LIGHT PANEL ================= */}
       <section id="about" className="relative z-10 px-3 sm:px-6 -mt-10 scroll-mt-10">
         <div className="max-w-7xl mx-auto rounded-[28px] px-5 sm:px-12 py-16" style={{ background: C.lavender }}>
-          <div className="grid lg:grid-cols-5 gap-12">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* left */}
-            <Reveal className="lg:col-span-2">
+            <Reveal>
               <Label>What LeadScope does</Label>
               <h2 className={`mt-4 text-3xl sm:text-4xl font-bold leading-tight ${display}`}>
                 A lead tool focused on <span style={{ color: C.blue }}>local businesses</span> &amp; <span style={{ color: C.blue }}>AI outreach</span>
@@ -396,54 +397,27 @@ export default function LandingPage() {
                 We combine open map data, a clear scoring system and Gemini AI so agencies spend time talking to the right businesses.
               </p>
               <BlueButton to={startTo} state={startState} className="mt-7 px-5 py-2.5 text-sm">Create free account <ArrowRight size={15} /></BlueButton>
-              <div className="mt-10 grid grid-cols-3 gap-4">
-                {MINI_FEATURES.map(({ icon: Icon, title, text }) => (
-                  <div key={title}>
-                    <span className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'rgba(4,151,246,.15)', color: C.blue }}><Icon size={17} /></span>
-                    <p className="mt-3 text-sm font-semibold">{title}</p>
-                    <p className="mt-1 text-xs leading-relaxed" style={{ color: C.muted }}>{text}</p>
-                  </div>
-                ))}
-              </div>
             </Reveal>
 
-            {/* right: inside the app */}
-            <div className="lg:col-span-3">
-              <Reveal className="flex items-center justify-between">
-                <Label>Inside LeadScope</Label>
-                <a href="#features" className="text-sm font-semibold inline-flex items-center gap-1" style={{ color: C.blue }}>See all features <ArrowRight size={15} /></a>
-              </Reveal>
-              <div className="mt-5 grid sm:grid-cols-2 gap-4">
-                <Reveal className="ls-lift sm:row-span-2 rounded-3xl p-6 flex flex-col justify-between min-h-[340px]"
-                  style={{ background: `linear-gradient(160deg, #0B3354 0%, ${C.indigo} 60%, ${C.night} 100%)` }}>
-                  <MiniLeadList dark delayBase={0} />
-                  <div className="mt-6 flex items-end justify-between">
-                    <div>
-                      <p className={`text-xl font-bold text-white ${display}`}>Find Leads</p>
-                      <p className="text-sm" style={{ color: '#7FA0BC' }}>Search · Score · Sort</p>
-                    </div>
-                    <Link to={startTo} state={startState} className="w-10 h-10 rounded-full flex items-center justify-center text-white" style={{ background: C.blue }} aria-label="Open Find Leads"><ArrowRight size={17} /></Link>
-                  </div>
-                </Reveal>
-                <Reveal delay={120} className="ls-lift rounded-3xl p-6 bg-[#113E62] border border-[#1B4C74] flex items-center justify-between gap-4">
-                  <div>
-                    <p className={`text-lg font-bold ${display}`}>Lead Scoring</p>
-                    <p className="text-sm" style={{ color: C.muted }}>0–100 from digital gaps</p>
-                  </div>
-                  <Ring value={86} size={64} delay={300} />
-                </Reveal>
-                <Reveal delay={220} className="ls-lift rounded-3xl p-6 bg-[#113E62] border border-[#1B4C74]">
-                  <div className="flex items-center justify-between">
-                    <p className={`text-lg font-bold ${display}`}>AI Messages</p>
-                    <span className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: 'rgba(4,151,246,.15)', color: C.blue }}><Wand2 size={16} /></span>
-                  </div>
-                  <p className="mt-2 text-sm" style={{ color: C.muted }}>Email · WhatsApp · LinkedIn</p>
-                  <div className="mt-3 rounded-xl p-3 text-xs leading-relaxed" style={{ background: C.lavender, color: '#CFDEEA' }}>
-                    “Hi Neelkamal team, I noticed you don&apos;t have a website yet…”
-                  </div>
-                </Reveal>
-              </div>
-            </div>
+            {/* right: mini features */}
+            <Reveal delay={120} className="grid sm:grid-cols-3 gap-6">
+              {MINI_FEATURES.map(({ icon: Icon, title, text }) => (
+                <div key={title}>
+                  <span className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'rgba(4,151,246,.15)', color: C.blue }}><Icon size={17} /></span>
+                  <p className="mt-3 text-sm font-semibold">{title}</p>
+                  <p className="mt-1 text-xs leading-relaxed" style={{ color: C.muted }}>{text}</p>
+                </div>
+              ))}
+            </Reveal>
+          </div>
+
+          {/* full width: inside the app */}
+          <div className="mt-14">
+            <Reveal className="flex items-center justify-between">
+              <Label>Inside LeadScope</Label>
+              <a href="#features" className="text-sm font-semibold inline-flex items-center gap-1" style={{ color: C.blue }}>See all features <ArrowRight size={15} /></a>
+            </Reveal>
+            <div className="mt-5 min-w-0"><InsideMapSheet /></div>
           </div>
 
           {/* stats strip */}
