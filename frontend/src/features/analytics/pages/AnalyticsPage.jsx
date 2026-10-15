@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
+import WhitePanel from '@/components/ui/WhitePanel'
 import { Link } from 'react-router-dom'
 import {
   Search, Lightbulb, Sparkles, Loader2, FileDown, Flame, MapPin, Target, Trophy, AlertTriangle, ArrowRight,
@@ -111,13 +112,13 @@ export default function AnalyticsPage() {
 
   if (leads.length === 0) {
     return (
-      <div className="bg-card rounded-2xl border border-slate-200 p-10 text-center">
+      <WhitePanel as="div" bodyClassName="text-center !p-8 sm:!p-10">
         <h1 className="text-xl font-bold text-slate-800">No data to analyse yet</h1>
         <p className="text-sm text-slate-500 mt-1">Save a few leads and your charts will appear here.</p>
         <Link to="/lead-discovery" className="inline-flex items-center gap-2 mt-5 bg-primary-600 hover:bg-primary-700 text-white font-semibold px-5 py-2.5 rounded-md">
           <Search size={17} /> Find leads
         </Link>
-      </div>
+      </WhitePanel>
     )
   }
 
@@ -183,9 +184,9 @@ export default function AnalyticsPage() {
       </div>
 
       {stats.total === 0 ? (
-        <div className="bg-card rounded-2xl border border-slate-200 p-8 text-center text-sm text-slate-500">
+        <WhitePanel as="div" bodyClassName="text-center text-sm text-slate-500 !p-8">
           No leads match these filters. Try “All time” or another city / category.
-        </div>
+        </WhitePanel>
       ) : (
         <>
           {/* AI summary */}

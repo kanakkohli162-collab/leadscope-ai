@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import WhitePanel from '@/components/ui/WhitePanel'
 import { MessageSquareText, Loader2, ExternalLink, Smile, Meh, Frown } from 'lucide-react'
 import { analyzeSentiment } from '@/services/leadService'
 
@@ -41,7 +42,7 @@ export default function ReviewSentimentCard({ lead }) {
   const pct = (n) => (result?.total ? Math.round((n * 100) / result.total) : 0)
 
   return (
-    <div className="bg-card rounded-xl border border-slate-200 p-5 space-y-4">
+    <WhitePanel bodyClassName="space-y-4">
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
@@ -146,6 +147,6 @@ export default function ReviewSentimentCard({ lead }) {
           </p>
         </div>
       )}
-    </div>
+    </WhitePanel>
   )
 }

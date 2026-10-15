@@ -4,6 +4,7 @@ import { Plus, Search, Trash2, FileSpreadsheet, FileText, X } from 'lucide-react
 import { exportLeadsToExcel, exportLeadsToPdf } from '../utils/exportLeads'
 import PriorityBadge from '@/components/ui/PriorityBadge'
 import ScoreCircle from '@/components/ui/ScoreCircle'
+import WhitePanel from '@/components/ui/WhitePanel'
 import { updateLeadStatus, deleteLead } from '@/services/leadService'
 import { countBy, matchesSearch } from '../utils/leadStats'
 import { useLeads } from '../hooks/useLeads'
@@ -100,6 +101,7 @@ export default function MyLeadsPage() {
         </div>
       )}
 
+      <WhitePanel bodyClassName="space-y-5">
       {/* Status Tabs */}
       <div className="flex flex-wrap gap-2">
         {statuses.map((status) => (
@@ -109,7 +111,7 @@ export default function MyLeadsPage() {
             className={`px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors ${
               activeStatus === status
                 ? 'bg-primary-600 text-white'
-                : 'bg-card border border-slate-200 text-slate-600 hover:bg-inset'
+                : 'bg-inset border border-line text-slate-600 hover:bg-line'
             }`}
           >
             {status} ({statusCounts[status] || 0})
@@ -130,11 +132,11 @@ export default function MyLeadsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-card rounded-xl border border-slate-200 overflow-hidden">
+      <div className="rounded-xl border border-line overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-inset border-b border-slate-200">
+              <tr className="bg-inset border-b border-line">
                 <th className="text-left px-5 py-3 font-semibold text-slate-600">Business Name</th>
                 <th className="text-left px-5 py-3 font-semibold text-slate-600">Location</th>
                 <th className="text-left px-5 py-3 font-semibold text-slate-600">Score</th>
@@ -196,6 +198,7 @@ export default function MyLeadsPage() {
           </table>
         </div>
       </div>
+      </WhitePanel>
     </div>
   )
 }

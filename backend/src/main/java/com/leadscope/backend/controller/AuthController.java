@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RestController
@@ -79,6 +80,9 @@ public class AuthController {
         // 3) Success -> clear the counter and give a token
         loginAttempts.reset(email);
         User user = found.get();
+        user.setPreviousLoginAt(user.getLastLoginAt());   // shown in Settings as "last login"
+        user.setLastLoginAt(LocalDateTime.now());
+        userRepository.save(user);
         String token = jwtService.generateToken(user.getEmail());
         return new AuthResponse(token, toResponse(user));
     }
@@ -92,6 +96,6 @@ public class AuthController {
     }
 
     private UserResponse toResponse(User user) {
-        return new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getAgencyName());
+        return UserResponse.of(user);
     }
 }

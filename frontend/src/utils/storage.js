@@ -36,4 +36,5 @@ export const STORAGE_KEYS = {
   recentSearches: 'leads.recentSearches',
   messageTemplates: 'outreach.templates',
   messageHistory: 'outreach.history',
+  recentWebsiteChecks: 'websiteChecker.recent',
 }

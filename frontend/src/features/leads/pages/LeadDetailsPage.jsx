@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import PriorityBadge from '@/components/ui/PriorityBadge'
 import ScoreCircle from '@/components/ui/ScoreCircle'
+import WhitePanel from '@/components/ui/WhitePanel'
 import PageLoader from '@/components/ui/PageLoader'
 import { updateLeadStatus, updateLeadNotes } from '@/services/leadService'
 import { useLead } from '../hooks/useLeads'
@@ -58,7 +59,7 @@ export default function LeadDetailsPage() {
       </Link>
 
       {/* Header Card */}
-      <div className="bg-card rounded-xl border border-slate-200 p-6">
+      <WhitePanel>
         <div className="flex flex-col md:flex-row md:items-start gap-6">
           <img src={lead.image} alt={lead.name} className="w-full md:w-48 h-36 object-cover rounded-xl bg-inset" />
           <div className="flex-1">
@@ -114,12 +115,12 @@ export default function LeadDetailsPage() {
             </div>
           </div>
         </div>
-      </div>
+      </WhitePanel>
 
       {/* Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Opportunities */}
-        <div className="bg-card rounded-xl border border-slate-200 p-5">
+        <WhitePanel>
           <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
             <AlertTriangle size={18} className="text-amber-500" />
             Opportunities
@@ -135,26 +136,26 @@ export default function LeadDetailsPage() {
               ))}
             </div>
           )}
-        </div>
+        </WhitePanel>
 
         {/* Why this lead + action */}
         <div className="space-y-4">
-          <div className="bg-card rounded-xl border border-slate-200 p-5">
+          <WhitePanel>
             <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
               <Lightbulb size={18} className="text-amber-500" />
               Why this lead?
             </h3>
             <p className="text-sm text-slate-600 leading-relaxed">{lead.aiReason}</p>
-          </div>
-          <div className="bg-primary-600/10 rounded-xl border border-primary-600/30 p-5">
-            <h3 className="font-semibold text-aqua-light mb-2 flex items-center gap-2">
-              <CheckCircle size={18} />
-              Suggested Pitch
-            </h3>
-            <p className="text-sm text-slate-700">{lead.recommendedAction}</p>
-          </div>
+            <div className="mt-4 rounded-xl border border-primary-600/30 bg-primary-600/10 p-4">
+              <h3 className="font-semibold text-aqua-light mb-2 flex items-center gap-2">
+                <CheckCircle size={18} />
+                Suggested Pitch
+              </h3>
+              <p className="text-sm text-slate-700">{lead.recommendedAction}</p>
+            </div>
+          </WhitePanel>
         </div>
-        <div className="bg-card rounded-xl border border-slate-200 p-5 flex flex-col">
+        <WhitePanel bodyClassName="flex flex-col">
           <h3 className="font-semibold text-slate-800 mb-3">Notes</h3>
           <textarea
             value={notes}
@@ -173,7 +174,7 @@ export default function LeadDetailsPage() {
             </button>
             {savedMsg && <span className="text-sm text-green-400">{savedMsg}</span>}
           </div>
-        </div>
+        </WhitePanel>
       </div>
 
       {/* Contact & social (from the business's own website) */}
@@ -186,14 +187,14 @@ export default function LeadDetailsPage() {
       <NearbyCompetitorsCard lead={lead} />
 
       {/* Actions */}
-      <div className="flex flex-wrap gap-3">
+      <WhitePanel as="div" bodyClassName="flex flex-wrap items-center gap-3 !py-4">
         <Link
           to={`/outreach?leadId=${lead.id}`}
           className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-medium px-5 py-2.5 rounded-md transition-colors"
         >
           <Send size={18} /> Write Message
         </Link>
-      </div>
+      </WhitePanel>
     </div>
   )
 }

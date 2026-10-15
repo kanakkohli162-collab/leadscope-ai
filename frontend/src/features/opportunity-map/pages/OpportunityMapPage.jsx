@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
+import WhitePanel from '@/components/ui/WhitePanel'
 import { Link } from 'react-router-dom'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
@@ -168,23 +169,23 @@ export default function OpportunityMapPage() {
 
   if (error) {
     return (
-      <div className="bg-card rounded-xl border border-slate-200 p-10 text-center">
+      <WhitePanel as="div" bodyClassName="text-center !p-8 sm:!p-10">
         <h2 className="text-lg font-semibold text-slate-800">Couldn&apos;t load your leads</h2>
         <p className="text-sm text-slate-500 mt-1">Please refresh the page and try again.</p>
-      </div>
+      </WhitePanel>
     )
   }
 
   if (!leads.length) {
     return (
-      <div className="bg-card rounded-xl border border-slate-200 p-10 text-center">
+      <WhitePanel as="div" bodyClassName="text-center !p-8 sm:!p-10">
         <MapPinned size={32} className="mx-auto text-aqua" />
         <h2 className="mt-3 text-lg font-semibold text-slate-800">No leads to show yet</h2>
         <p className="text-sm text-slate-500 mt-1">Save some leads first, then come back to see them on the map.</p>
         <Link to="/lead-discovery" className="inline-block mt-4 bg-primary-600 text-white font-medium px-5 py-2.5 rounded-md">
           Find Leads →
         </Link>
-      </div>
+      </WhitePanel>
     )
   }
 
@@ -222,7 +223,7 @@ export default function OpportunityMapPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-6">
         {/* Map */}
-        <div className="min-w-0 bg-card rounded-xl border border-slate-200 p-2">
+        <WhitePanel as="div" bodyClassName="!p-2 sm:!p-3">
           {/* Map toolbar */}
           <div className="flex flex-wrap items-center gap-2 px-1 pb-2">
             <Toggle label="Map view" value={view} onChange={setView} options={[['pins', 'Pins'], ['heat', 'Heatmap']]} />
@@ -246,7 +247,7 @@ export default function OpportunityMapPage() {
                   onChange={(e) => setFindType(e.target.value)}
                   maxLength={60}
                   placeholder="e.g. Cafes"
-                  className="mt-1 w-full px-3 py-2 border border-slate-300 bg-card rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-600"
+                  className="mt-1 w-full px-3 py-2 border border-slate-300 bg-white rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-600"
                 />
               </label>
               <label className="text-xs font-medium text-slate-500">
@@ -254,7 +255,7 @@ export default function OpportunityMapPage() {
                 <select
                   value={radius}
                   onChange={(e) => setRadius(Number(e.target.value))}
-                  className="mt-1 w-full sm:w-28 px-3 py-2 border border-slate-300 bg-card rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-600"
+                  className="mt-1 w-full sm:w-28 px-3 py-2 border border-slate-300 bg-white rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-600"
                 >
                   <option value={1000}>1 km</option>
                   <option value={1500}>1.5 km</option>
@@ -362,11 +363,11 @@ export default function OpportunityMapPage() {
             {nearby.length > 0 && <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full border border-dashed border-slate-400" /> Not saved yet</span>}
             <span className="sm:ml-auto">{onMap.length} of {visible.length} leads on the map</span>
           </div>
-        </div>
+        </WhitePanel>
 
         <div className="space-y-6 min-w-0">
           {/* Top areas */}
-          <div className="bg-card rounded-xl border border-slate-200 p-5 h-fit">
+          <WhitePanel as="div" className="h-fit">
             <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
               <Flame size={18} style={{ color: SCORE_COLORS.High.color }} /> Top areas
             </h3>
@@ -402,10 +403,10 @@ export default function OpportunityMapPage() {
                 No High-priority leads here yet.
               </p>
             )}
-          </div>
+          </WhitePanel>
 
           {/* Route plan */}
-          <div className="bg-card rounded-xl border border-slate-200 p-5 h-fit">
+          <WhitePanel as="div" className="h-fit">
             <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
               <Route size={18} className="text-aqua" aria-hidden="true" /> Route plan
               <span className="ml-auto text-xs font-medium text-slate-500">{routeStops.length} / {MAX_ROUTE_STOPS}</span>
@@ -438,13 +439,13 @@ export default function OpportunityMapPage() {
             ) : (
               <p className="mt-2 text-sm text-slate-500">Open a pin and tick <b className="text-slate-700">Add to route</b> to plan visits (up to {MAX_ROUTE_STOPS} stops, in the order you add them).</p>
             )}
-          </div>
+          </WhitePanel>
         </div>
       </div>
 
       {/* Leads without coordinates */}
       {offMap.length > 0 && (
-        <div className="bg-card rounded-xl border border-slate-200 p-5">
+        <WhitePanel as="div">
           <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
             <MapPinOff size={18} className="text-slate-400" /> Not on map (no location)
           </h3>
@@ -464,7 +465,7 @@ export default function OpportunityMapPage() {
               </li>
             ))}
           </ul>
-        </div>
+        </WhitePanel>
       )}
     </div>
   )

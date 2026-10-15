@@ -20,7 +20,7 @@ export default function SearchProgress({ city, done }) {
 
   return (
     <div className="space-y-4" aria-live="polite" aria-busy={!done}>
-      <div className="bg-card rounded-xl border border-slate-200 p-5">
+      <div>
         <p className="text-sm font-semibold text-slate-800">
           Finding businesses in {city}… <span className="font-normal text-slate-500">usually takes 5–10 seconds</span>
         </p>
@@ -49,7 +49,7 @@ export default function SearchProgress({ city, done }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" aria-hidden="true">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="bg-card rounded-xl border border-slate-200 p-5 motion-safe:animate-pulse">
+          <div key={i} className="bg-card rounded-xl border border-line p-5 motion-safe:animate-pulse">
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 space-y-2">
                 <div className="h-3.5 w-3/4 rounded bg-line" />

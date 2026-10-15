@@ -21,7 +21,7 @@ export default function ScoreCircle({ score = 0, size = 'md' }) {
       title={`Lead score ${value} / 100`}
     >
       <svg width={px} height={px} className="-rotate-90">
-        <circle cx={px / 2} cy={px / 2} r={r} fill="none" stroke="#1B4C74" strokeWidth={stroke} />
+        <circle cx={px / 2} cy={px / 2} r={r} fill="none" className="ls-ring-track" strokeWidth={stroke} />
         <circle
           cx={px / 2}
           cy={px / 2}

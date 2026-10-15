@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Scale, Trophy, Loader2, X, AlertCircle } from 'lucide-react'
 import { searchBusinesses } from '@/services/leadService'
+import WhitePanel from '@/components/ui/WhitePanel'
 import CityInput from './CityInput'
 import { FOCUS } from './styles'
 import { friendlySearchError } from '../../utils/searchErrors'
@@ -56,7 +57,7 @@ export default function CompareCities({ category, initialCity, onClose }) {
   const better = columns ? betterOf(columns[0].stats, columns[1].stats) : null
 
   return (
-    <section className="bg-card rounded-xl border border-primary-600/50 p-4 sm:p-5" aria-labelledby="compare-title">
+    <WhitePanel aria-labelledby="compare-title">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 id="compare-title" className="text-base font-semibold text-slate-800 flex items-center gap-2">
@@ -137,6 +138,6 @@ export default function CompareCities({ category, initialCity, onClose }) {
           )}
         </div>
       )}
-    </section>
+    </WhitePanel>
   )
 }

@@ -5,25 +5,27 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import PriorityBadge from '@/components/ui/PriorityBadge'
 import ScoreCircle from '@/components/ui/ScoreCircle'
 import PageLoader from '@/components/ui/PageLoader'
+import WhitePanel from '@/components/ui/WhitePanel'
+import { lightChart } from '@/components/ui/lightStyles'
 import { getDashboardSummary } from '@/services/leadService'
 import { useLeads } from '@/features/leads/hooks/useLeads'
 import { getCurrentUser } from '@/utils/currentUser'
 
-// Pipeline stages in order, with the colour of each segment
+// Pipeline stages in order, with the colour of each segment (fixed colours, readable on the white panel)
 const PIPELINE = [
-  { status: 'New', color: 'bg-aqua-light' },
-  { status: 'Contacted', color: 'bg-aqua' },
-  { status: 'Follow-up', color: 'bg-primary-400' },
-  { status: 'Interested', color: 'bg-primary-600' },
-  { status: 'Converted', color: 'bg-emerald-500' },
-  { status: 'Not Interested', color: 'bg-slate-300' },
+  { status: 'New', color: 'bg-[#4EB9E5]' },
+  { status: 'Contacted', color: 'bg-[#447EFC]' },
+  { status: 'Follow-up', color: 'bg-[#A78BFA]' },
+  { status: 'Interested', color: 'bg-[#F5A524]' },
+  { status: 'Converted', color: 'bg-[#34A853]' },
+  { status: 'Not Interested', color: 'bg-[#B0BEC5]' },
 ]
 
 function StatTile({ icon: Icon, label, value, hint, tone }) {
   const tones = {
     violet: 'bg-primary-600/15 text-aqua',
     marigold: 'bg-marigold-500/15 text-marigold-400',
-    rose: 'bg-rose-500/15 text-rose-400',
+    rose: 'bg-[#F06A8A]/15 text-[#F06A8A]',
     emerald: 'bg-emerald-500/15 text-emerald-400',
   }
   return (
@@ -90,7 +92,7 @@ export default function DashboardPage() {
 
       {summary.totalLeads === 0 ? (
         /* Empty state */
-        <div className="bg-card rounded-2xl border border-line p-10 text-center">
+        <WhitePanel bodyClassName="text-center !p-8 sm:!p-10">
           <div className="mx-auto w-14 h-14 rounded-2xl bg-primary-600/15 text-aqua flex items-center justify-center">
             <MapPin size={26} />
           </div>
@@ -104,7 +106,7 @@ export default function DashboardPage() {
           >
             <Search size={17} /> Find your first leads
           </Link>
-        </div>
+        </WhitePanel>
       ) : (
         <>
           {/* Stat tiles */}
@@ -116,7 +118,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Pipeline bar */}
-          <div className="bg-card rounded-2xl border border-line p-5">
+          <WhitePanel>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-display text-lg font-bold text-ink">Pipeline</h3>
               <Link to="/my-leads" className="text-sm text-primary-600 hover:text-aqua font-semibold inline-flex items-center gap-1">
@@ -142,31 +144,26 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
-          </div>
+          </WhitePanel>
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
             {/* Chart */}
-            <div className="lg:col-span-3 bg-card rounded-2xl border border-line p-5">
+            <WhitePanel className="lg:col-span-3">
               <h3 className="font-display text-lg font-bold text-ink">Leads by city</h3>
               <p className="text-xs text-slate-500 mb-4">Where your saved leads are located</p>
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={cityData} barCategoryGap="30%">
-                  <CartesianGrid vertical={false} stroke="#1B4C74" />
-                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#9DB8CF' }} axisLine={false} tickLine={false} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: '#9DB8CF' }} axisLine={false} tickLine={false} width={28} />
-                  <Tooltip
-                    cursor={{ fill: '#0B3354' }}
-                    contentStyle={{ borderRadius: 12, background: '#113E62', border: '1px solid #1B4C74', color: '#E6F1F7', fontSize: 13 }}
-                    labelStyle={{ color: '#E6F1F7' }}
-                    itemStyle={{ color: '#E6F1F7' }}
-                  />
-                  <Bar dataKey="value" name="Leads" fill="#0497F6" radius={[8, 8, 0, 0]} />
+                  <CartesianGrid vertical={false} stroke={lightChart.grid} />
+                  <XAxis dataKey="name" {...lightChart.axis} />
+                  <YAxis allowDecimals={false} {...lightChart.axis} width={28} />
+                  <Tooltip {...lightChart.tooltip} />
+                  <Bar dataKey="value" name="Leads" fill="#447EFC" radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
-            </div>
+            </WhitePanel>
 
             {/* Hottest leads */}
-            <div className="lg:col-span-2 bg-card rounded-2xl border border-line p-5">
+            <WhitePanel className="lg:col-span-2">
               <h3 className="font-display text-lg font-bold text-ink">Hottest leads</h3>
               <p className="text-xs text-slate-500 mb-3">Contact these first</p>
               <div className="space-y-1">
@@ -185,7 +182,7 @@ export default function DashboardPage() {
                   </Link>
                 ))}
               </div>
-            </div>
+            </WhitePanel>
           </div>
         </>
       )}

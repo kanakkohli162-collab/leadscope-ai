@@ -11,10 +11,10 @@ export default function ChartCard({ title, caption, index = 0, reportId, classNa
       data-report-chart={reportId}
       data-report-title={title}
       data-report-caption={caption}
-      className={`rounded-[24px] p-[10px] motion-safe:animate-fade-up motion-safe:transition-transform motion-safe:duration-300 motion-safe:hover:-translate-y-1 ${className}`}
-      style={{ background: LIGHT.frame, animationDelay: `${index * 70}ms` }}
+      className={`min-w-0 rounded-[24px] p-2 sm:p-[10px] motion-safe:animate-fade-up motion-safe:transition-transform motion-safe:duration-300 motion-safe:hover:-translate-y-1 ${className}`}
+      style={{ background: LIGHT.frame, animationDelay: `${index * 70}ms`, boxShadow: '0 30px 70px -30px rgba(0,0,0,.6)' }}
     >
-      <div className="h-full rounded-2xl p-4 sm:p-5" style={{ background: LIGHT.card, color: LIGHT.ink }}>
+      <div className="ls-light h-full min-w-0 rounded-2xl p-4 sm:p-5" style={{ background: LIGHT.card, color: LIGHT.ink }}>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h3 className="text-base font-semibold" style={{ color: LIGHT.ink }}>{title}</h3>
