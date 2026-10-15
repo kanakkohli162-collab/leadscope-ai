@@ -39,6 +39,8 @@ export function toUiLead(l) {
     phone: l.phone || '—',
     website: l.website || null,
     hasWebsite: Boolean(l.website),
+    latitude: l.latitude ?? null,
+    longitude: l.longitude ?? null,
     rating: l.rating ?? 0,
     reviews: l.reviewCount ?? 0,
     score: l.score ?? 0,
@@ -56,6 +58,10 @@ export function toUiLead(l) {
     recommendedAction: gaps.length ? 'Offer services that fix the gaps above.' : 'Monitor this lead.',
     notes: l.notes || '',
     source: l.source || 'Google',
+    sentimentLabel: l.sentimentLabel || null,      // Positive / Neutral / Negative, null = not analysed
+    sentimentScore: l.sentimentScore ?? null,
+    websiteHealthScore: l.websiteHealthScore ?? null, // null = website not checked
+    websiteOutdated: l.websiteOutdated ?? null,
   }
 }
 
@@ -96,21 +102,33 @@ export const generateMessage = (id, service, channel) =>
 
 // ---------- Review Sentiment (NLP) ----------
 
-/** POST /api/ai/sentiment -> { positive, neutral, negative, total, score, overall, concerns[], summary } */
-export const analyzeSentiment = (reviews) =>
+/**
+ * POST /api/ai/sentiment -> { positive, neutral, negative, total, score, overall, concerns[], summary }
+ * With a leadId, the backend also saves the result on that lead (used by Insights).
+ */
+export const analyzeSentiment = (reviews, leadId) =>
   request('/ai/sentiment', {
     method: 'POST',
-    body: JSON.stringify({ reviews }),
+    body: JSON.stringify({ reviews, leadId }),
   })
+
+// ---------- Nearby Competitor Check ----------
+
+/**
+ * GET /api/leads/:id/competitors -> { totalNearby, withWebsite, withoutWebsite, withPhone, percentWithWebsite,
+ * leadHasWebsite, radiusMeters, nearby[{ name, distanceMeters, hasWebsite }], insight }
+ */
+export const getCompetitors = (leadId) => request(`/leads/${leadId}/competitors`)
 
 // ---------- Website Checker ----------
 
 /**
  * POST /api/tools/website-check -> { reachable, statusCode, finalUrl, https, loadTimeMs, mobileFriendly,
  * title, hasMetaDescription, copyrightYear, outdated, score, issues[], suggestion }
+ * With a leadId, the backend also saves the health score + "outdated" on that lead (used by Insights).
  */
-export const checkWebsite = (url) =>
+export const checkWebsite = (url, leadId) =>
   request('/tools/website-check', {
     method: 'POST',
-    body: JSON.stringify({ url }),
+    body: JSON.stringify({ url, leadId }),
   })

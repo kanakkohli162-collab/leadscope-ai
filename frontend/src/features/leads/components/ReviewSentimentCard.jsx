@@ -29,7 +29,7 @@ export default function ReviewSentimentCard({ lead }) {
     setError('')
     setResult(null)
     try {
-      setResult(await analyzeSentiment(reviews))
+      setResult(await analyzeSentiment(reviews, lead?.id))
     } catch (e) {
       setError(e.message || 'Something went wrong. Please try again.')
     } finally {

@@ -110,6 +110,8 @@ public class GeoapifyService {
             lead.setAddress(first(str(p.get("formatted")), str(p.get("address_line2"))));
             lead.setPhone(phone);
             lead.setWebsite(website);
+            lead.setLatitude(number(p.get("lat")));                // used later by Nearby Competitor Check
+            lead.setLongitude(number(p.get("lon")));
             lead.setSource("Geoapify / OpenStreetMap");          // attribution required by the free plan
             // OpenStreetMap has no ratings/reviews -> left empty; scoring skips those rules
             scoringService.score(lead, hours != null);
@@ -142,6 +144,70 @@ public class GeoapifyService {
         return res == null ? List.of() : (List<Map<String, Object>>) res.getOrDefault("features", List.of());
     }
 
+    // ---- Nearby Competitor Check ----
+
+    /** Address text -> { lat, lon }, or null if Geoapify can't find it. */
+    @SuppressWarnings("unchecked")
+    public double[] geocode(String text) {
+        Map<String, Object> res = restClient.get()
+                .uri(GEOCODE_URL + "?text={t}&format=json&limit=1&bias=countrycode:in&apiKey={k}", text, apiKey)
+                .retrieve()
+                .body(Map.class);
+        List<Map<String, Object>> list = res == null ? List.of()
+                : (List<Map<String, Object>>) res.getOrDefault("results", List.of());
+        if (list.isEmpty()) return null;
+        Double lat = number(list.get(0).get("lat"));
+        Double lon = number(list.get(0).get("lon"));
+        return lat == null || lon == null ? null : new double[] { lat, lon };
+    }
+
+    /**
+     * Businesses of the same category within `radiusMeters` of a point (max `limit`).
+     * Each item: name, lat, lon, hasWebsite, hasPhone.
+     */
+    public List<Map<String, Object>> nearby(String category, double lat, double lon, int radiusMeters, int limit) {
+        List<Map<String, Object>> features;
+        try {
+            features = findPlacesAround(toGeoapifyCategory(category), lat, lon, radiusMeters, limit);
+        } catch (HttpClientErrorException.BadRequest e) {
+            features = findPlacesAround(DEFAULT_CATEGORY, lat, lon, radiusMeters, limit);   // unknown category -> broad search
+        }
+
+        List<Map<String, Object>> places = new ArrayList<>();
+        for (Map<String, Object> feature : features) {
+            Map<String, Object> p = asMap(feature.get("properties"));
+            String name = str(p.get("name"));
+            Double pLat = number(p.get("lat"));
+            Double pLon = number(p.get("lon"));
+            if (name == null || pLat == null || pLon == null) continue;
+
+            Map<String, Object> contact = asMap(p.get("contact"));
+            Map<String, Object> raw = asMap(asMap(p.get("datasource")).get("raw"));
+            String phone = first(str(contact.get("phone")), str(raw.get("phone")), str(raw.get("contact:phone")));
+            String website = first(str(p.get("website")), str(raw.get("website")), str(raw.get("contact:website")));
+
+            Map<String, Object> place = new LinkedHashMap<>();
+            place.put("name", name);
+            place.put("lat", pLat);
+            place.put("lon", pLon);
+            place.put("hasWebsite", website != null);
+            place.put("hasPhone", phone != null);
+            places.add(place);
+        }
+        return places;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> findPlacesAround(String geoCategory, double lat, double lon, int radius, int limit) {
+        // Geoapify wants lon,lat (in that order) for circle filters
+        Map<String, Object> res = restClient.get()
+                .uri(PLACES_URL + "?categories={c}&filter=circle:{lon},{lat},{r}&bias=proximity:{lon2},{lat2}&limit={l}&apiKey={k}",
+                        geoCategory, lon, lat, radius, lon, lat, limit, apiKey)
+                .retrieve()
+                .body(Map.class);
+        return res == null ? List.of() : (List<Map<String, Object>>) res.getOrDefault("features", List.of());
+    }
+
     private String toGeoapifyCategory(String category) {
         String c = category == null ? "" : category.toLowerCase();
         for (Map.Entry<String, String> e : CATEGORY_MAP.entrySet()) {
@@ -160,6 +226,15 @@ public class GeoapifyService {
         if (o == null) return null;
         String s = o.toString().trim();
         return s.isEmpty() ? null : s;
+    }
+
+    private static Double number(Object o) {
+        if (o instanceof Number n) return n.doubleValue();
+        try {
+            return o == null ? null : Double.valueOf(o.toString());
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     private static String first(String... values) {

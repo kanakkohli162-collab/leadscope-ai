@@ -11,6 +11,7 @@ import { updateLeadStatus, updateLeadNotes } from '@/services/leadService'
 import { useLead } from '../hooks/useLeads'
 import LeadNotFound from '../components/LeadNotFound'
 import ReviewSentimentCard from '../components/ReviewSentimentCard'
+import NearbyCompetitorsCard from '../components/NearbyCompetitorsCard'
 
 const statuses = ['New', 'Contacted', 'Follow-up', 'Interested', 'Converted', 'Not Interested']
 
@@ -84,7 +85,7 @@ export default function LeadDetailsPage() {
                 <span className="truncate">{lead.website || 'No website'}</span>
                 {lead.website && (
                   <Link
-                    to={`/website-checker?url=${encodeURIComponent(lead.website)}`}
+                    to={`/website-checker?url=${encodeURIComponent(lead.website)}&leadId=${lead.id}`}
                     className="shrink-0 text-xs font-medium text-primary-600 hover:text-aqua border border-line rounded-full px-2.5 py-0.5"
                   >
                     Check website
@@ -176,6 +177,9 @@ export default function LeadDetailsPage() {
 
       {/* Review Sentiment (AI / NLP) */}
       <ReviewSentimentCard lead={lead} />
+
+      {/* Nearby competitors (Geoapify, within 1 km) */}
+      <NearbyCompetitorsCard lead={lead} />
 
       {/* Actions */}
       <div className="flex flex-wrap gap-3">
