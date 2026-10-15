@@ -25,6 +25,7 @@ public class GeoapifyService {
     static {
         CATEGORY_MAP.put("gym", "sport.fitness");
         CATEGORY_MAP.put("fitness", "sport.fitness");
+        CATEGORY_MAP.put("yoga", "sport.fitness");
         CATEGORY_MAP.put("dent", "healthcare.dentist");
         CATEGORY_MAP.put("clinic", "healthcare.clinic_or_praxis");
         CATEGORY_MAP.put("doctor", "healthcare.clinic_or_praxis");
@@ -34,26 +35,36 @@ public class GeoapifyService {
         CATEGORY_MAP.put("medical", "healthcare.pharmacy");
         CATEGORY_MAP.put("cafe", "catering.cafe");
         CATEGORY_MAP.put("coffee", "catering.cafe");
+        CATEGORY_MAP.put("sweet", "commercial.food_and_drink.confectionery");
+        CATEGORY_MAP.put("mithai", "commercial.food_and_drink.confectionery");
         CATEGORY_MAP.put("restaurant", "catering.restaurant");
         CATEGORY_MAP.put("food", "catering.restaurant");
-        CATEGORY_MAP.put("bakery", "commercial.food_and_drink.bakery");
+        CATEGORY_MAP.put("baker", "commercial.food_and_drink.bakery");
         CATEGORY_MAP.put("cake", "commercial.food_and_drink.bakery");
+        CATEGORY_MAP.put("spa", "service.beauty.spa");
         CATEGORY_MAP.put("salon", "service.beauty");
         CATEGORY_MAP.put("parlour", "service.beauty");
         CATEGORY_MAP.put("parlor", "service.beauty");
         CATEGORY_MAP.put("beauty", "service.beauty");
-        CATEGORY_MAP.put("spa", "service.beauty");
         CATEGORY_MAP.put("barber", "service.beauty");
         CATEGORY_MAP.put("hotel", "accommodation.hotel");
         CATEGORY_MAP.put("school", "education.school");
         CATEGORY_MAP.put("college", "education.college");
+        CATEGORY_MAP.put("coach", "education");
+        CATEGORY_MAP.put("tuition", "education");
         CATEGORY_MAP.put("real estate", "office.estate_agent");
         CATEGORY_MAP.put("property", "office.estate_agent");
+        CATEGORY_MAP.put("travel", "service.travel_agency");
         CATEGORY_MAP.put("lawyer", "office.lawyer");
         CATEGORY_MAP.put("advocate", "office.lawyer");
         CATEGORY_MAP.put("cloth", "commercial.clothing");
         CATEGORY_MAP.put("boutique", "commercial.clothing");
         CATEGORY_MAP.put("fashion", "commercial.clothing");
+        CATEGORY_MAP.put("electronic", "commercial.elektronics");
+        CATEGORY_MAP.put("furniture", "commercial.furniture_and_interior");
+        CATEGORY_MAP.put("car repair", "service.vehicle.repair");
+        CATEGORY_MAP.put("garage", "service.vehicle.repair");
+        CATEGORY_MAP.put("mechanic", "service.vehicle.repair");
         CATEGORY_MAP.put("supermarket", "commercial.supermarket");
         CATEGORY_MAP.put("grocery", "commercial.supermarket");
         CATEGORY_MAP.put("jewel", "commercial.jewelry");
@@ -61,6 +72,8 @@ public class GeoapifyService {
         CATEGORY_MAP.put("vet", "pet");
     }
     private static final String DEFAULT_CATEGORY = "commercial";
+    public static final int MAX_RESULTS = 500;
+    private static final int AREA_RADIUS_METERS = 3000;
 
     private final String apiKey;
     private final LeadScoringService scoringService;
@@ -75,19 +88,30 @@ public class GeoapifyService {
         return apiKey != null && !apiKey.isBlank();
     }
 
-    public List<Lead> search(String category, String city) {
+    /**
+     * @param area  optional part of the city (e.g. "Vijay Nagar"): searches within AREA_RADIUS_METERS of it.
+     *              If Geoapify can't find the area, the whole city is searched.
+     * @param limit max businesses to return (1 … MAX_RESULTS)
+     */
+    public List<Lead> search(String category, String city, String area, int limit) {
         String cityId = findCityId(city);
         if (cityId == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "City not found: " + city + ". Please check the spelling.");
         }
 
+        int max = Math.max(1, Math.min(limit, MAX_RESULTS));
+        double[] areaPoint = area == null || area.isBlank() ? null : geocode(area + ", " + city);
         String geoCategory = toGeoapifyCategory(category);
         List<Map<String, Object>> features;
         try {
-            features = findPlaces(geoCategory, cityId);
+            features = areaPoint != null
+                    ? findPlacesAround(geoCategory, areaPoint[0], areaPoint[1], AREA_RADIUS_METERS, max)
+                    : findPlaces(geoCategory, cityId, max);
         } catch (HttpClientErrorException e) {
-            features = findPlaces(DEFAULT_CATEGORY, cityId);   // unknown category -> broad search
+            features = areaPoint != null                         // unknown category -> broad search
+                    ? findPlacesAround(DEFAULT_CATEGORY, areaPoint[0], areaPoint[1], AREA_RADIUS_METERS, max)
+                    : findPlaces(DEFAULT_CATEGORY, cityId, max);
         }
 
         List<Lead> results = new ArrayList<>();
@@ -136,9 +160,9 @@ public class GeoapifyService {
 
     // Step 2: businesses of that category inside the city
     @SuppressWarnings("unchecked")
-    private List<Map<String, Object>> findPlaces(String geoCategory, String cityId) {
+    private List<Map<String, Object>> findPlaces(String geoCategory, String cityId, int limit) {
         Map<String, Object> res = restClient.get()
-                .uri(PLACES_URL + "?categories={c}&filter=place:{p}&limit=500&apiKey={k}", geoCategory, cityId, apiKey)
+                .uri(PLACES_URL + "?categories={c}&filter=place:{p}&limit={l}&apiKey={k}", geoCategory, cityId, limit, apiKey)
                 .retrieve()
                 .body(Map.class);
         return res == null ? List.of() : (List<Map<String, Object>>) res.getOrDefault("features", List.of());

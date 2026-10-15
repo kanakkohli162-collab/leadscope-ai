@@ -160,7 +160,7 @@ const MINI_FEATURES = [
 ]
 
 const STATS = [
-  { icon: Search, big: '500', small: 'Businesses per search (max)' },
+  { icon: Search, big: '500', small: 'Businesses in one search' },
   { icon: Gauge, big: '0–100', small: 'Score for every business' },
   { icon: MessageCircle, big: '3', small: 'Ways to contact: Email, WhatsApp, LinkedIn' },
   { icon: Sparkles, big: 'Free', small: 'No card needed' },
@@ -171,7 +171,7 @@ const TABS = [
     text: 'Type a city and a business type. You get a list of real businesses with address, phone and website.',
     points: ['Works for any city in India', 'Up to 500 businesses in one search', 'Filter by priority or website'] },
   { id: 'score', icon: Gauge, label: 'Score', title: 'See who needs you most',
-    text: 'Each business gets a score from 0 to 100. A higher score means more is missing online, so they are shown first.',
+    text: 'Each business gets a score from 0 to 100. A higher score means they need your help more, so they are shown first.',
     points: ['Checks if they have a website', 'Checks if their details are complete', 'High, Medium and Low priority'] },
   { id: 'why', icon: Lightbulb, label: 'Why', title: 'Know what to offer',
     text: 'Each lead tells you, in plain words, what is missing and which service to offer first.',
@@ -213,6 +213,7 @@ const FAQS = [
     a: 'No. Your leads are linked to your account, and only you can see them.' },
   { q: 'Who is LeadScope for?',
     a: 'Digital marketing agencies, freelancers, web designers and small IT teams who sell online services to local businesses.' },
+  { q: 'What else can LeadScope do?', a: 'Check if a business website is old or not secure, compare a business with nearby competitors, see hot leads on a map, and track every lead on a pipeline board.' },
 ]
 
 /* ---------- mini app screens (white, like the "See it in action" box) ---------- */
@@ -351,7 +352,7 @@ export default function LandingPage() {
               Find local businesses that need your services
             </h1>
             <p className="ls-rise mt-6 text-lg leading-relaxed max-w-xl" style={{ animationDelay: '260ms', color: '#B5CBDD' }}>
-              Search any city, see which businesses are missing a website or details, and send your first message with AI.
+              Search any city. See which businesses have no website or missing details, get a score for each one, and send your first message with AI.
             </p>
             <div className="ls-rise mt-9 flex flex-wrap items-center gap-5" style={{ animationDelay: '400ms' }}>
               <BlueButton to={startTo} state={startState} className="px-7 py-3.5 text-base">
@@ -404,7 +405,7 @@ export default function LandingPage() {
           <div className="mt-14">
             <Reveal className="flex items-center justify-between">
               <Label>See it in action</Label>
-              <a href="#features" className="text-sm font-semibold inline-flex items-center gap-1" style={{ color: C.blue }}>How it works <ArrowRight size={15} /></a>
+              <a href="#features" className="text-sm font-semibold inline-flex items-center gap-1" style={{ color: C.blue }}>See the steps <ArrowRight size={15} /></a>
             </Reveal>
             <div className="mt-5 min-w-0"><InsideMapSheet /></div>
           </div>

@@ -15,7 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * POST /api/search  { "city": "...", "category": "..." }  -> scored businesses (not saved)
+ * POST /api/search  { "city": "...", "category": "...", "area": "..." (optional), "limit": 50 (optional, 1-500) }
+ *                                                         -> scored businesses (not saved), each with a scoreBreakdown
  * GET  /api/search/status                                 -> data source + searches left today
  *
  * Data source (pluggable):  Google key -> Google Places,  else Geoapify key -> Geoapify (free),  else Demo.
@@ -50,9 +51,11 @@ public class SearchController {
     }
 
     @PostMapping
-    public List<Lead> search(@RequestBody Map<String, String> body) {
-        String city = body.getOrDefault("city", "").trim();
-        String category = body.getOrDefault("category", "").trim();
+    public List<Lead> search(@RequestBody Map<String, Object> body) {
+        String city = text(body.get("city"));
+        String category = text(body.get("category"));
+        String area = text(body.get("area"));
+        int limit = number(body.get("limit"), GeoapifyService.MAX_RESULTS);
         if (city.isEmpty() || category.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please enter a city and a business type");
         }
@@ -62,8 +65,8 @@ public class SearchController {
 
         try {
             return switch (provider) {
-                case "Geoapify" -> geoapifyService.search(category, city);
-                default -> placesService.search(category, city);   // Google, or demo if no key
+                case "Geoapify" -> geoapifyService.search(category, city, area, limit);
+                default -> placesService.search(category, city, area, limit);   // Google, or demo if no key
             };
         } catch (RestClientException e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
@@ -97,6 +100,19 @@ public class SearchController {
         if (!today.equals(day)) {
             day = today;
             usedToday = 0;
+        }
+    }
+
+    private static String text(Object o) {
+        return o == null ? "" : o.toString().trim();
+    }
+
+    private static int number(Object o, int fallback) {
+        if (o instanceof Number n) return n.intValue();
+        try {
+            return o == null ? fallback : Integer.parseInt(o.toString().trim());
+        } catch (NumberFormatException e) {
+            return fallback;
         }
     }
 }
