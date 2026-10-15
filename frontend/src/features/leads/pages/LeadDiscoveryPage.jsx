@@ -2,10 +2,11 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react
 import { useNavigate } from 'react-router-dom'
 import {
   Search, MapPinned, History, X, SlidersHorizontal, List, Map as MapIcon, Bookmark, Download, Lightbulb, AlertCircle,
+  Scale, Info, TrendingUp,
 } from 'lucide-react'
 import PageLoader from '@/components/ui/PageLoader'
 import { useToast } from '@/hooks/useToast'
-import { searchBusinesses, createLead, getLeads } from '@/services/leadService'
+import { searchBusinesses, createLead, getLeads, enrichLead } from '@/services/leadService'
 import { storage, STORAGE_KEYS } from '@/utils/storage'
 import { exportLeadsToExcel } from '../utils/exportLeads'
 import CityInput from '../components/discovery/CityInput'
@@ -16,7 +17,11 @@ import ResultFilters from '../components/discovery/ResultFilters'
 import { applyFilters, DEFAULT_FILTERS } from '../utils/discoveryFilters'
 import ResultCard from '../components/discovery/ResultCard'
 import ScoreBreakdownModal from '../components/discovery/ScoreBreakdownModal'
+import SellPicker from '../components/discovery/SellPicker'
+import CompareCities from '../components/discovery/CompareCities'
 import { FOCUS, INPUT, chip } from '../components/discovery/styles'
+import { friendlySearchError } from '../utils/searchErrors'
+import { sellServiceById, hasReviewData } from '../data/sellServices'
 
 // The map (Leaflet) is only downloaded when the user opens the Map view
 const ResultsMap = lazy(() => import('../components/discovery/ResultsMap'))
@@ -24,21 +29,13 @@ const ResultsMap = lazy(() => import('../components/discovery/ResultsMap'))
 const RESULT_LIMITS = [20, 50, 100]
 const MAX_RECENT = 5
 
-/** Same business in search results and in My Leads -> same key (name + address). */
-const keyOf = (name, address) => `${name}|${address && address !== '—' ? address : ''}`.trim().toLowerCase()
-const resultKey = (r) => keyOf(r.name, r.raw?.address)
+/** Same business in search results and in My Leads -> same key (name + address, like the backend's duplicate check). */
+const normalise = (text) => (text && text !== '—' ? text.toLowerCase().replace(/[^\p{L}\p{N}]/gu, '') : '')
+const keyOf = (name, address) => `${normalise(name)}|${normalise(address)}`
 
-/** Turns any error into plain words (no technical text). */
-function friendlyError(err) {
-  const msg = err?.message || ''
-  if (err instanceof TypeError || /failed to fetch|networkerror|load failed/i.test(msg)) {
-    return 'We could not reach the server. It may be waking up — please try again in a minute.'
-  }
-  if (/limit/i.test(msg)) return "Today's search limit is reached. Please try again in a minute, or tomorrow."
-  if (/city not found|not responding|please enter/i.test(msg)) return msg   // already friendly (from our backend)
-  if (/\(5\d\d\)/.test(msg)) return 'The server is starting up or busy. Please try again in a minute.'
-  return 'Something went wrong with the search. Please try again.'
-}
+/** "good" ≥ 50% without website, "average" 25–49%, "low" below 25% */
+const opportunityLevel = (pct) => (pct >= 50 ? 'good' : pct >= 25 ? 'average' : 'low')
+const resultKey = (r) => keyOf(r.name, r.raw?.address)
 
 export default function LeadDiscoveryPage() {
   const toast = useToast()
@@ -48,6 +45,8 @@ export default function LeadDiscoveryPage() {
   const [city, setCity] = useState('')
   const [category, setCategory] = useState('')
   const [area, setArea] = useState('')
+  const [service, setService] = useState('')        // "What do you sell?" (optional)
+  const [compareOpen, setCompareOpen] = useState(false)
   const [limit, setLimit] = useState(50)
   const [recent, setRecent] = useState(() => {
     const list = storage.get(STORAGE_KEYS.recentSearches, [])
@@ -60,6 +59,7 @@ export default function LeadDiscoveryPage() {
   const [done, setDone] = useState(false)            // all progress steps ticked
   const [searchedFor, setSearchedFor] = useState(null)
   const [error, setError] = useState('')
+  const [duplicatesRemoved, setDuplicatesRemoved] = useState(0)
 
   // ---- results view ----
   const [filters, setFilters] = useState(DEFAULT_FILTERS)
@@ -69,9 +69,10 @@ export default function LeadDiscoveryPage() {
   const [selected, setSelected] = useState(() => new Set())
   const [scoreFor, setScoreFor] = useState(null)
 
-  // ---- saved leads: business key -> lead id (for the "Saved" chip) ----
-  const [savedIds, setSavedIds] = useState({})
+  // ---- saved leads: business key -> lead (for the "Saved" chip, Find contacts and social icons) ----
+  const [savedLeads, setSavedLeads] = useState({})
   const [savingId, setSavingId] = useState(null)
+  const [enrichingId, setEnrichingId] = useState(null)
   const [bulkSaving, setBulkSaving] = useState(false)
 
   useEffect(() => {
@@ -80,14 +81,22 @@ export default function LeadDiscoveryPage() {
       .then((leads) => {
         if (!active) return
         const map = {}
-        leads.forEach((l) => { map[keyOf(l.name, l.address)] = l.id })
-        setSavedIds((prev) => ({ ...map, ...prev }))
+        leads.forEach((l) => { map[keyOf(l.name, l.address)] = l })
+        setSavedLeads((prev) => ({ ...map, ...prev }))
       })
       .catch(() => { /* "Saved" chips are a bonus; search still works */ })
     return () => { active = false }
   }, [])
 
-  const savedIdOf = useCallback((r) => savedIds[resultKey(r)], [savedIds])
+  const savedLeadOf = useCallback((r) => savedLeads[resultKey(r)], [savedLeads])
+  const savedIdOf = useCallback((r) => savedLeads[resultKey(r)]?.id, [savedLeads])
+  const sellService = sellServiceById(service)
+  const defaultSort = sellService ? 'fit' : 'score'
+
+  function chooseService(id) {
+    setService(id)
+    setSort(id ? 'fit' : 'score')
+  }
 
   const canSearch = city.trim() && category.trim()
 
@@ -103,7 +112,9 @@ export default function LeadDiscoveryPage() {
     setSearchedFor(query)
     setSelected(new Set())
     setFilters(DEFAULT_FILTERS)
+    setSort(defaultSort)
     setSheetOpen(false)
+    setDuplicatesRemoved(0)
 
     // Remember it (newest first, no duplicates, max 5)
     const same = (s) => ['city', 'category', 'area'].every((k) => (s[k] || '').toLowerCase() === query[k].toLowerCase())
@@ -115,9 +126,10 @@ export default function LeadDiscoveryPage() {
       const found = await searchBusinesses(query.city, query.category, { area: query.area, limit })
       setDone(true)
       await new Promise((r) => setTimeout(r, 400))   // let the user see all steps ticked
-      setResults(found)
+      setResults(found.results)
+      setDuplicatesRemoved(found.duplicatesRemoved)
     } catch (err) {
-      setError(friendlyError(err))
+      setError(friendlySearchError(err))
       setResults([])
     } finally {
       setLoading(false)
@@ -131,13 +143,16 @@ export default function LeadDiscoveryPage() {
 
   // ---- saving ----
   const saveResult = useCallback(async (r, { quiet = false } = {}) => {
-    const existing = savedIds[resultKey(r)]
-    if (existing) return existing
+    const existing = savedLeads[resultKey(r)]
+    if (existing) return existing.id
     setSavingId(r.id)
     try {
       const saved = await createLead(r.raw)
-      setSavedIds((prev) => ({ ...prev, [resultKey(r)]: saved.id }))
-      if (!quiet) toast.success(`${r.name} saved to My Leads`)
+      setSavedLeads((prev) => ({ ...prev, [resultKey(r)]: saved }))
+      if (!quiet) {
+        if (saved.alreadySaved) toast.success(`${r.name} is already in My Leads`)
+        else toast.success(`${r.name} saved to My Leads`)
+      }
       return saved.id
     } catch {
       if (!quiet) toast.error(`Could not save ${r.name}. Please try again.`)
@@ -145,7 +160,23 @@ export default function LeadDiscoveryPage() {
     } finally {
       setSavingId(null)
     }
-  }, [savedIds, toast])
+  }, [savedLeads, toast])
+
+  const findContacts = useCallback(async (lead) => {
+    setEnrichingId(lead.id)
+    try {
+      const res = await enrichLead(lead.id)
+      setSavedLeads((prev) => ({ ...prev, [keyOf(res.lead.name, res.lead.address)]: res.lead }))
+      const found = res.emails.length + res.socialCount + (res.whatsappUrl ? 1 : 0)
+      toast.success(found
+        ? `Found ${found} contact ${found === 1 ? 'detail' : 'details'} for ${lead.name}. Best way: ${res.bestChannel}.`
+        : `No email or social links on ${lead.name}'s website. Best way: ${res.bestChannel}.`)
+    } catch (err) {
+      toast.error(err instanceof TypeError ? 'We could not reach the server. Please try again in a minute.' : (err.message || 'Could not find contacts. Please try again.'))
+    } finally {
+      setEnrichingId(null)
+    }
+  }, [toast])
 
   const writeMessage = useCallback(async (r) => {
     const id = await saveResult(r, { quiet: true })   // a message needs a saved lead
@@ -166,7 +197,13 @@ export default function LeadDiscoveryPage() {
   const closeScore = useCallback(() => setScoreFor(null), [])
 
   // ---- filtered view ----
-  const visible = useMemo(() => applyFilters(results, filters, sort), [results, filters, sort])
+  const fitRank = sellService && !(sellService.needsReviewData && !hasReviewData(results)) ? sellService.fitRank : null
+  const visible = useMemo(() => applyFilters(results, filters, sort, fitRank), [results, filters, sort, fitRank])
+  const reviewDataMissing = sellService?.needsReviewData && results.length > 0 && !hasReviewData(results)
+
+  // City opportunity line
+  const noWebsitePct = results.length ? Math.round((results.filter((r) => !r.hasWebsite).length / results.length) * 100) : 0
+  const hotCount = results.filter((r) => r.score >= 70).length
   const selectedResults = useMemo(() => results.filter((r) => selected.has(r.id)), [results, selected])
   const allVisibleSelected = visible.length > 0 && visible.every((r) => selected.has(r.id))
 
@@ -214,7 +251,7 @@ export default function LeadDiscoveryPage() {
   const isDemo = results.length > 0 && results[0].source === 'Demo'
   const sourceLabel = isDemo ? 'Demo data' : (results[0]?.source || 'Live data')
   const showResults = searchedFor && !loading && !error && results.length > 0
-  const filterProps = { filters, setFilters, sort, setSort }
+  const filterProps = { filters, setFilters, sort, setSort, defaultSort, hasService: Boolean(sellService) }
 
   return (
     <div className="space-y-6 min-w-0">
@@ -223,8 +260,20 @@ export default function LeadDiscoveryPage() {
         onSubmit={(e) => { e.preventDefault(); runSearch({ city, category, area }) }}
         className="bg-card rounded-xl border border-slate-200 p-4 sm:p-5"
       >
-        <h2 className="text-lg font-semibold text-slate-800">Find Leads</h2>
-        <p className="text-sm text-slate-500">Pick a city and a business type. We find the businesses and score who needs your help most.</p>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold text-slate-800">Find Leads</h2>
+            <p className="text-sm text-slate-500">Pick a city and a business type. We find the businesses and score who needs your help most.</p>
+          </div>
+          <button
+            type="button"
+            aria-expanded={compareOpen}
+            onClick={() => setCompareOpen((o) => !o)}
+            className={chip(compareOpen)}
+          >
+            <Scale size={14} aria-hidden="true" /> Compare cities
+          </button>
+        </div>
 
         {recent.length > 0 && (
           <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -251,6 +300,10 @@ export default function LeadDiscoveryPage() {
         <div className="mt-5 grid grid-cols-1 lg:grid-cols-2 gap-5">
           <CityInput value={city} onChange={setCity} />
           <CategoryPicker value={category} onChange={setCategory} />
+        </div>
+
+        <div className="mt-5">
+          <SellPicker service={service} onServiceChange={chooseService} category={category} onCategoryChange={setCategory} />
         </div>
 
         <div className="mt-5 pt-4 border-t border-line grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto_auto] gap-4 sm:items-end">
@@ -299,6 +352,9 @@ export default function LeadDiscoveryPage() {
         )}
       </form>
 
+      {/* ---------- Compare cities ---------- */}
+      {compareOpen && <CompareCities category={category} initialCity={city} onClose={() => setCompareOpen(false)} />}
+
       {/* ---------- While searching ---------- */}
       {loading && <SearchProgress key={`${searchedFor?.city}-${searchedFor?.category}`} city={searchedFor?.city} done={done} />}
 
@@ -341,6 +397,31 @@ export default function LeadDiscoveryPage() {
           {isDemo && (
             <p className="text-xs text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2">
               Demo mode: showing sample businesses. Real results appear once a data source API key is added.
+            </p>
+          )}
+
+          {/* City opportunity line */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-line bg-inset px-4 py-3 text-sm">
+            <TrendingUp size={16} className="text-aqua shrink-0" aria-hidden="true" />
+            <p className="text-slate-600 min-w-0">
+              <b className="text-slate-800">{searchedFor.city} {searchedFor.category.toLowerCase()}</b>: {noWebsitePct}% have no website · {hotCount} hot {hotCount === 1 ? 'lead' : 'leads'}
+              {' → '}
+              <b className={{ good: 'text-green-400', average: 'text-marigold-400', low: 'text-slate-400' }[opportunityLevel(noWebsitePct)]}>
+                {opportunityLevel(noWebsitePct)} opportunity
+              </b>
+              {' '}for {sellService ? sellService.short : 'digital services'}
+            </p>
+            {duplicatesRemoved > 0 && (
+              <p className="sm:ml-auto text-xs text-slate-400">
+                {duplicatesRemoved} {duplicatesRemoved === 1 ? 'duplicate' : 'duplicates'} removed
+              </p>
+            )}
+          </div>
+
+          {reviewDataMissing && (
+            <p className="flex items-start gap-2 text-xs text-slate-400">
+              <Info size={14} className="shrink-0 mt-0.5" aria-hidden="true" />
+              Review data not available for this source (OpenStreetMap has no ratings), so results can’t be ranked for review management.
             </p>
           )}
 
@@ -399,7 +480,7 @@ export default function LeadDiscoveryPage() {
               {visible.length === 0 ? (
                 <div className="bg-card rounded-xl border border-slate-200 p-8 text-center text-sm text-slate-500">
                   No businesses match these filters.{' '}
-                  <button type="button" onClick={() => { setFilters(DEFAULT_FILTERS); setSort('score') }} className={`font-semibold text-aqua underline underline-offset-2 rounded ${FOCUS}`}>
+                  <button type="button" onClick={() => { setFilters(DEFAULT_FILTERS); setSort(defaultSort) }} className={`font-semibold text-aqua underline underline-offset-2 rounded ${FOCUS}`}>
                     Reset filters
                   </button>
                 </div>
@@ -413,13 +494,16 @@ export default function LeadDiscoveryPage() {
                     <ResultCard
                       key={r.id}
                       result={r}
-                      savedId={savedIdOf(r)}
+                      savedLead={savedLeadOf(r)}
+                      goodFit={Boolean(fitRank && fitRank(r) > 0)}
                       saving={savingId === r.id}
+                      enriching={enrichingId != null && enrichingId === savedIdOf(r)}
                       selected={selected.has(r.id)}
                       onToggleSelect={toggleSelect}
                       onSave={saveResult}
                       onWriteMessage={writeMessage}
                       onShowScore={showScore}
+                      onFindContacts={findContacts}
                     />
                   ))}
                 </div>

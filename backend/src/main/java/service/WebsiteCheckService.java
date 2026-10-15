@@ -56,6 +56,19 @@ public class WebsiteCheckService {
     });
 
     public Map<String, Object> check(String input) {
+        return report(fetchSafely(input));
+    }
+
+    /** A fetched homepage, for other features (e.g. Contacts & social). `html` is empty when it did not open. */
+    public record Page(boolean reachable, String finalUrl, String html, String problem) { }
+
+    /** Opens a public website with the same safety rules as the checker (no private IPs, 8 s timeout, max 1 MB). */
+    public Page fetchPage(String input) {
+        Fetch f = fetchSafely(input);
+        return new Page(f.reachable, f.finalUrl.toString(), f.reachable ? f.html : "", f.problem);
+    }
+
+    private Fetch fetchSafely(String input) {
         if (input == null || input.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please enter a website address.");
         }
@@ -69,7 +82,7 @@ public class WebsiteCheckService {
             Fetch plain = fetch(toUri("http://" + text));
             if (plain.reachable || plain.statusCode != null) fetch = plain;
         }
-        return report(fetch);
+        return fetch;
     }
 
     // ---------- fetching ----------

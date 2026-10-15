@@ -29,6 +29,7 @@ public class Lead {
     // Map position (from search results, or geocoded once from the address). Null for old leads.
     private Double latitude;
     private Double longitude;
+    private Boolean locationApproximate;   // true = position is only the city / area (geocoded), not the exact place
 
     // Google data
     private Double rating;
@@ -53,7 +54,31 @@ public class Lead {
     private Integer websiteHealthScore; // 0 … 100
     private Boolean websiteOutdated;
 
+    // Contacts & social (from the business's own public website, see LeadEnrichmentService). Null = not checked.
+    @Column(length = 500)
+    private String email;             // up to 3, comma-separated
+    @Column(length = 500)
+    private String instagramUrl;
+    @Column(length = 500)
+    private String facebookUrl;
+    @Column(length = 500)
+    private String linkedinUrl;
+    @Column(length = 500)
+    private String twitterUrl;        // X / Twitter
+    @Column(length = 500)
+    private String youtubeUrl;
+    @Column(length = 500)
+    private String whatsappUrl;
+    private String socialPresence;    // Strong, Weak, None
+    private LocalDateTime enrichedAt;
+
+    // Set only on the POST /api/leads answer: true = this business was already in My Leads (nothing new saved)
+    @Transient
+    private Boolean alreadySaved;
+
     // CRM
+    private Long dealValue;           // expected deal size in rupees (null = not set)
+
     private String status = "NEW";    // NEW, CONTACTED, FOLLOW_UP, INTERESTED, WON, NOT_INTERESTED
 
     @Column(length = 2000)

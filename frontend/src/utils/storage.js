@@ -34,4 +34,6 @@ export const STORAGE_KEYS = {
   user: 'user',
   sidebarCollapsed: 'ui.sidebarCollapsed',
   recentSearches: 'leads.recentSearches',
+  messageTemplates: 'outreach.templates',
+  messageHistory: 'outreach.history',
 }

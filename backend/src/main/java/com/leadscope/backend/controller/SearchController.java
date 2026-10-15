@@ -1,8 +1,9 @@
 package com.leadscope.backend.controller;
 
-import com.leadscope.backend.entity.Lead;
+import com.leadscope.backend.dto.SearchResult;
 import com.leadscope.backend.service.GeoapifyService;
 import com.leadscope.backend.service.PlacesService;
+import com.leadscope.backend.service.SearchDeduplicator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -11,12 +12,13 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * POST /api/search  { "city": "...", "category": "...", "area": "..." (optional), "limit": 50 (optional, 1-500) }
- *                                                         -> scored businesses (not saved), each with a scoreBreakdown
+ *     -> { results: scored businesses (not saved, each with a scoreBreakdown), duplicatesRemoved }
+ * Map search ("Find businesses here"): { "category": "...", "lat": 22.7, "lon": 75.8, "radius": 1500 } (city not needed,
+ * radius 500-5000 m, Geoapify only)
  * GET  /api/search/status                                 -> data source + searches left today
  *
  * Data source (pluggable):  Google key -> Google Places,  else Geoapify key -> Geoapify (free),  else Demo.
@@ -51,22 +53,43 @@ public class SearchController {
     }
 
     @PostMapping
-    public List<Lead> search(@RequestBody Map<String, Object> body) {
+    public SearchResult search(@RequestBody Map<String, Object> body) {
         String city = text(body.get("city"));
         String category = text(body.get("category"));
         String area = text(body.get("area"));
         int limit = number(body.get("limit"), GeoapifyService.MAX_RESULTS);
-        if (city.isEmpty() || category.isEmpty()) {
+        Double lat = decimal(body.get("lat"));
+        Double lon = decimal(body.get("lon"));
+        boolean around = lat != null && lon != null;
+        if (category.isEmpty() || (!around && city.isEmpty())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please enter a city and a business type");
+        }
+        if (around && (Math.abs(lat) > 90 || Math.abs(lon) > 180)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "That map position is not valid. Please move the map and try again.");
         }
 
         String provider = provider();
+        if (around && !provider.equals("Geoapify")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Searching around the map needs the free Geoapify data source. Please use Find Leads instead.");
+        }
+        if (around) {
+            int radius = Math.max(500, Math.min(number(body.get("radius"), 1500), 5000));
+            useOneSearch();
+            try {
+                return geoapifyService.searchAround(category, lat, lon, radius, limit);
+            } catch (RestClientException e) {
+                throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
+                        "The business search service is not responding. Please try again in a minute.");
+            }
+        }
+
         if (!provider.equals("Demo")) useOneSearch();      // demo searches are free -> not counted
 
         try {
             return switch (provider) {
                 case "Geoapify" -> geoapifyService.search(category, city, area, limit);
-                default -> placesService.search(category, city, area, limit);   // Google, or demo if no key
+                default -> SearchDeduplicator.dedupe(placesService.search(category, city, area, limit), null);   // Google, or demo
             };
         } catch (RestClientException e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
@@ -105,6 +128,15 @@ public class SearchController {
 
     private static String text(Object o) {
         return o == null ? "" : o.toString().trim();
+    }
+
+    private static Double decimal(Object o) {
+        if (o instanceof Number n) return n.doubleValue();
+        try {
+            return o == null || o.toString().isBlank() ? null : Double.valueOf(o.toString().trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     private static int number(Object o, int fallback) {

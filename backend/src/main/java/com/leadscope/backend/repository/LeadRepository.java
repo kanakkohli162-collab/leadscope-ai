@@ -17,6 +17,9 @@ public interface LeadRepository extends JpaRepository<Lead, Long> {
     List<Lead> findByOwnerEmailAndCityIgnoreCaseAndStatus(String ownerEmail, String city, String status);
     List<Lead> findByOwnerEmailAndBusinessNameContainingIgnoreCase(String ownerEmail, String keyword);
 
+    // Same business name (for "Already in My Leads")
+    List<Lead> findByOwnerEmailAndBusinessNameIgnoreCase(String ownerEmail, String businessName);
+
     // One lead, only if it belongs to this owner
     Optional<Lead> findByIdAndOwnerEmail(Long id, String ownerEmail);
 

@@ -41,12 +41,16 @@ export function toUiLead(l) {
     hasWebsite: Boolean(l.website),
     latitude: l.latitude ?? null,
     longitude: l.longitude ?? null,
+    locationApproximate: Boolean(l.locationApproximate), // only the city / area was found, not the exact place
     rating: l.rating ?? 0,
     reviews: l.reviewCount ?? 0,
     score: l.score ?? 0,
     priority: PRIORITY_TO_UI[l.priority] || 'Low',
     status: STATUS_TO_UI[l.status] || 'New',
     lastContacted: timeAgo(l.updatedAt),
+    updatedAt: l.updatedAt || null,
+    createdAt: l.createdAt || null,
+    dealValue: l.dealValue ?? null,                     // rupees, null = not set
     image: `https://placehold.co/400x300?text=${encodeURIComponent(name)}`,
     hours: 'Not available',
     serviceGaps: gaps,
@@ -62,6 +66,16 @@ export function toUiLead(l) {
     sentimentScore: l.sentimentScore ?? null,
     websiteHealthScore: l.websiteHealthScore ?? null, // null = website not checked
     websiteOutdated: l.websiteOutdated ?? null,
+    // Contacts & social (null = not checked yet, see enrichLead)
+    emails: (l.email || '').split(',').map((s) => s.trim()).filter(Boolean),
+    instagramUrl: l.instagramUrl || null,
+    facebookUrl: l.facebookUrl || null,
+    linkedinUrl: l.linkedinUrl || null,
+    twitterUrl: l.twitterUrl || null,
+    youtubeUrl: l.youtubeUrl || null,
+    whatsappUrl: l.whatsappUrl || null,
+    socialPresence: l.socialPresence || null,   // Strong / Weak / None
+    enrichedAt: l.enrichedAt || null,
   }
 }
 
@@ -69,8 +83,11 @@ export const getLeads = async () => (await request('/leads')).map(toUiLead)
 
 export const getLead = async (id) => toUiLead(await request(`/leads/${id}`))
 
-export const createLead = async (data) =>
-  toUiLead(await request('/leads', { method: 'POST', body: JSON.stringify(data) }))
+/** Saves a lead. `alreadySaved: true` = this business was already in My Leads (the existing lead is returned). */
+export const createLead = async (data) => {
+  const saved = await request('/leads', { method: 'POST', body: JSON.stringify(data) })
+  return { ...toUiLead(saved), alreadySaved: Boolean(saved.alreadySaved) }
+}
 
 export const updateLeadStatus = async (id, uiStatus) =>
   toUiLead(await request(`/leads/${id}/status?status=${STATUS_TO_API[uiStatus] || uiStatus}`, { method: 'PUT' }))
@@ -78,28 +95,71 @@ export const updateLeadStatus = async (id, uiStatus) =>
 export const updateLeadNotes = async (id, notes) =>
   toUiLead(await request(`/leads/${id}/notes`, { method: 'PUT', body: JSON.stringify({ notes }) }))
 
+/** PUT /api/leads/:id/deal-value — rupees (whole number), or null to clear it */
+export const updateDealValue = async (id, dealValue) =>
+  toUiLead(await request(`/leads/${id}/deal-value`, { method: 'PUT', body: JSON.stringify({ dealValue }) }))
+
 export const deleteLead = (id) => request(`/leads/${id}`, { method: 'DELETE' })
 
 export const getDashboardSummary = () => request('/dashboard/summary')
 
 /**
- * POST /api/search -> scored businesses (not saved yet).
+ * POST /api/search -> { results, duplicatesRemoved }: scored businesses (not saved yet).
  * `area` (optional) narrows the search to part of the city; `limit` = max results.
  * Each result keeps the original backend object in `raw`, so "Add to My Leads"
  * can send it straight to POST /api/leads, plus `scoreBreakdown` for "Why this score?".
  */
-export const searchBusinesses = async (city, category, { area = '', limit } = {}) =>
-  (await request('/search', { method: 'POST', body: JSON.stringify({ city, category, area, limit }) }))
-    .map((l, i) => ({ ...toUiLead(l), id: `result-${i}`, raw: l, scoreBreakdown: l.scoreBreakdown || [] }))
+export const searchBusinesses = async (city, category, { area = '', limit } = {}) => {
+  const res = await request('/search', { method: 'POST', body: JSON.stringify({ city, category, area, limit }) })
+  return {
+    results: (res.results || []).map((l, i) => ({ ...toUiLead(l), id: `result-${i}`, raw: l, scoreBreakdown: l.scoreBreakdown || [] })),
+    duplicatesRemoved: res.duplicatesRemoved || 0,
+  }
+}
+
+/**
+ * "Find businesses here" (Opportunity Map): businesses of a type within `radius` metres of a map point.
+ * Same answer shape as searchBusinesses.
+ */
+export const searchNearby = async (lat, lon, category, { radius = 1500, limit = 50 } = {}) => {
+  const res = await request('/search', { method: 'POST', body: JSON.stringify({ category, lat, lon, radius, limit }) })
+  return {
+    results: (res.results || []).map((l, i) => ({ ...toUiLead(l), id: `nearby-${i}`, raw: l })),
+    duplicatesRemoved: res.duplicatesRemoved || 0,
+  }
+}
+
+// ---------- Contacts & social (lead enrichment) ----------
+
+/**
+ * POST /api/leads/:id/enrich -> reads the lead's own website for emails, social links and WhatsApp.
+ * { emails[], instagramUrl, facebookUrl, linkedinUrl, twitterUrl, youtubeUrl, whatsappUrl,
+ *   socialCount, socialPresence, bestChannel, bestChannelReason, lead }
+ */
+export const enrichLead = async (id) => {
+  const res = await request(`/leads/${id}/enrich`, { method: 'POST' })
+  return { ...res, lead: toUiLead(res.lead) }
+}
 
 // ---------- Write Message (AI / template) ----------
 
-/** POST /api/leads/:id/message -> { message, source: "AI" | "Template" } */
-export const generateMessage = (id, service, channel) =>
-  request(`/leads/${id}/message`, {
-    method: 'POST',
-    body: JSON.stringify({ service, channel }),
-  })
+/**
+ * POST /api/leads/:id/message
+ * options: { service, channel: email|whatsapp|linkedin, tone: Friendly|Professional|Short, language: English|Hindi|Hinglish, versions: 1|2 }
+ * -> { source: "AI" | "Template", note, messages: [{ subject, body }], message, used: { businessName, category, city, gaps[] } }
+ */
+export const generateMessage = (id, options) =>
+  request(`/leads/${id}/message`, { method: 'POST', body: JSON.stringify(options) })
+
+/** POST /api/leads/:id/message/sequence -> { source, note, steps: [{ day, label, subject, body }], used } */
+export const generateSequence = (id, options) =>
+  request(`/leads/${id}/message/sequence`, { method: 'POST', body: JSON.stringify(options) })
+
+// ---------- Insights AI summary ----------
+
+/** POST /api/insights/summary with aggregated counts only (no personal data) -> { summary, recommendations[] } */
+export const getInsightSummary = (counts) =>
+  request('/insights/summary', { method: 'POST', body: JSON.stringify(counts) })
 
 // ---------- Review Sentiment (NLP) ----------
 

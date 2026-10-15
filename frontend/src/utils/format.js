@@ -11,3 +11,17 @@ export function getInitials(name) {
 export function getFirstName(name) {
   return (name || '').trim().split(/\s+/)[0] || 'there'
 }
+
+const INR = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })
+
+/** 120000 → "₹1,20,000" (Indian grouping). null / empty → "". */
+export function formatINR(value) {
+  if (value == null || value === '' || Number.isNaN(Number(value))) return ''
+  return INR.format(Number(value))
+}
+
+/** Whole days since an ISO date (0 = today). null when there is no date. */
+export function daysSince(isoDate) {
+  if (!isoDate) return null
+  return Math.floor((Date.now() - new Date(isoDate).getTime()) / 86400000)
+}

@@ -1,15 +1,23 @@
 import { memo } from 'react'
 import { Link } from 'react-router-dom'
-import { MapPin, Globe, Phone, Star, AlertTriangle, Bookmark, BookmarkCheck, ScanSearch, PenLine, MessageCircle, Loader2 } from 'lucide-react'
+import { MapPin, Globe, Phone, Star, AlertTriangle, Bookmark, BookmarkCheck, ScanSearch, PenLine, MessageCircle, Loader2, Target, Contact } from 'lucide-react'
 import PriorityBadge from '@/components/ui/PriorityBadge'
 import ScoreCircle from '@/components/ui/ScoreCircle'
 import { FOCUS } from './styles'
-import { toWhatsAppNumber } from '../../utils/discoveryFilters'
+import { toWhatsAppNumber } from '../../utils/contactChannel'
+import SocialIcons from '../SocialIcons'
 
 const ACTION = `inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium border border-line bg-inset text-slate-700 hover:bg-line hover:text-slate-800 disabled:opacity-60 ${FOCUS}`
 
-/** One search result: details, gaps, score (opens "Why this score?") and quick actions. */
-function ResultCard({ result: r, savedId, saving, selected, onToggleSelect, onSave, onWriteMessage, onShowScore }) {
+/**
+ * One search result: details, gaps, score (opens "Why this score?") and quick actions.
+ * `savedLead` = the same business in My Leads (or undefined), used for "Saved", "Find contacts" and social icons.
+ */
+function ResultCard({
+  result: r, savedLead, goodFit, saving, enriching, selected,
+  onToggleSelect, onSave, onWriteMessage, onShowScore, onFindContacts,
+}) {
+  const savedId = savedLead?.id
   const phone = r.raw?.phone || null
   const whatsapp = toWhatsAppNumber(phone)
   const checkerUrl = `/website-checker?url=${encodeURIComponent(r.website || '')}${savedId ? `&leadId=${savedId}` : ''}`
@@ -31,6 +39,11 @@ function ResultCard({ result: r, savedId, saving, selected, onToggleSelect, onSa
             {savedId && (
               <span className="inline-flex items-center gap-1 rounded-full bg-green-500/15 border border-green-500/40 px-2 py-0.5 text-[11px] font-semibold text-green-300">
                 <BookmarkCheck size={11} aria-hidden="true" /> Saved
+              </span>
+            )}
+            {goodFit && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-marigold-500/15 border border-marigold-500/40 px-2 py-0.5 text-[11px] font-semibold text-marigold-400">
+                <Target size={11} aria-hidden="true" /> Good fit for your service
               </span>
             )}
           </div>
@@ -77,6 +90,17 @@ function ResultCard({ result: r, savedId, saving, selected, onToggleSelect, onSa
         </div>
       )}
 
+      {savedLead?.enrichedAt && (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <SocialIcons lead={savedLead} size={13} />
+          {savedLead.emails.length > 0 && (
+            <a href={`mailto:${savedLead.emails[0]}`} className={`text-[11px] text-aqua hover:text-aqua-light truncate max-w-full rounded ${FOCUS}`}>
+              {savedLead.emails[0]}
+            </a>
+          )}
+        </div>
+      )}
+
       <div className="mt-4 pt-3 border-t border-line flex items-center justify-between gap-2">
         <PriorityBadge priority={r.priority} />
         {savedId ? (
@@ -99,6 +123,12 @@ function ResultCard({ result: r, savedId, saving, selected, onToggleSelect, onSa
       <div className="mt-2.5 flex flex-wrap gap-1.5">
         {r.hasWebsite && (
           <Link to={checkerUrl} className={ACTION}><ScanSearch size={13} aria-hidden="true" /> Check website</Link>
+        )}
+        {savedId && r.hasWebsite && (
+          <button type="button" onClick={() => onFindContacts(savedLead)} disabled={enriching} className={ACTION}>
+            {enriching ? <Loader2 size={13} className="motion-safe:animate-spin" aria-hidden="true" /> : <Contact size={13} aria-hidden="true" />}
+            {enriching ? 'Finding…' : savedLead.enrichedAt ? 'Find contacts again' : 'Find contacts'}
+          </button>
         )}
         <button type="button" onClick={() => onWriteMessage(r)} disabled={saving} className={ACTION}>
           <PenLine size={13} aria-hidden="true" /> Write message
