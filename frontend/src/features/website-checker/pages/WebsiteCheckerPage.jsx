@@ -111,8 +111,10 @@ export default function WebsiteCheckerPage() {
     setLoading(true)
     setError('')
     setResult(null)
+    // Save the result on the lead only when checking that lead's own website (not a newly typed one)
+    const leadId = params.get('leadId') && value === (params.get('url') || '').trim() ? params.get('leadId') : undefined
     try {
-      setResult(await checkWebsite(value))
+      setResult(await checkWebsite(value, leadId))
     } catch (e) {
       setError(friendly(e.message))
     } finally {

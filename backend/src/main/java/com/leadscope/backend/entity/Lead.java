@@ -24,6 +24,10 @@ public class Lead {
     private String phone;
     private String website;
 
+    // Map position (from search results, or geocoded once from the address). Null for old leads.
+    private Double latitude;
+    private Double longitude;
+
     // Google data
     private Double rating;
     private Integer reviewCount;
@@ -34,6 +38,14 @@ public class Lead {
 
     @Column(length = 1000)
     private String opportunities;     // e.g. "No website, Incomplete Google profile"
+
+    // Last Review Sentiment result (null = never analysed)
+    private String sentimentLabel;    // Positive, Neutral, Negative
+    private Integer sentimentScore;   // -100 … +100
+
+    // Last Website Checker result (null = never checked)
+    private Integer websiteHealthScore; // 0 … 100
+    private Boolean websiteOutdated;
 
     // CRM
     private String status = "NEW";    // NEW, CONTACTED, FOLLOW_UP, INTERESTED, WON, NOT_INTERESTED

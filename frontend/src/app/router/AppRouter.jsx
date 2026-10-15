@@ -13,6 +13,8 @@ const LeadDetailsPage = lazy(() => import('@/features/leads/pages/LeadDetailsPag
 const MyLeadsPage = lazy(() => import('@/features/leads/pages/MyLeadsPage'))
 const OutreachGeneratorPage = lazy(() => import('@/features/outreach/pages/OutreachGeneratorPage'))
 const AnalyticsPage = lazy(() => import('@/features/analytics/pages/AnalyticsPage'))
+const PipelinePage = lazy(() => import('@/features/pipeline/pages/PipelinePage'))
+const OpportunityMapPage = lazy(() => import('@/features/opportunity-map/pages/OpportunityMapPage'))
 const WebsiteCheckerPage = lazy(() => import('@/features/website-checker/pages/WebsiteCheckerPage'))
 const SettingsPage = lazy(() => import('@/features/settings/pages/SettingsPage'))
 
@@ -50,6 +52,8 @@ export default function AppRouter() {
         <Route path="/lead/:id" element={<LeadDetailsPage />} />
         <Route path="/outreach" element={<OutreachGeneratorPage />} />
         <Route path="/my-leads" element={<MyLeadsPage />} />
+        <Route path="/pipeline" element={<PipelinePage />} />
+        <Route path="/opportunity-map" element={<OpportunityMapPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/website-checker" element={<WebsiteCheckerPage />} />
         <Route path="/settings" element={<SettingsPage />} />
