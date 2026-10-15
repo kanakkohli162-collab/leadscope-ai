@@ -4,9 +4,10 @@ import {
   Sparkles, Search, Gauge, Lightbulb, Wand2, Check, MapPin, ArrowRight, ChevronDown, Play,
   Mail, MessageCircle, Linkedin, ShieldCheck, Lock, KeyRound, Users,
   Globe, Database, Server, Cpu, Map, Layers, Code2, Target, BarChart3,
-  Phone, Stethoscope, Dumbbell, UtensilsCrossed, Scissors, Coffee,
+  Phone, Stethoscope, Dumbbell, UtensilsCrossed, Scissors, Coffee, LogOut, ArrowUp,
 } from 'lucide-react'
 import { getCurrentUser } from '@/utils/currentUser'
+import { useLogout } from '@/hooks/useLogout'
 import InsideMapSheet from '@/features/leads/components/InsideMapSheet'
 import HeroMapSlider from '@/features/leads/components/HeroMapSlider'
 
@@ -50,6 +51,10 @@ const CSS = `
 .ls-field:focus-within { border-color: #447EFC !important; box-shadow: 0 0 0 3px rgba(68,126,252,.18); }
 .ls-chip { transition: transform .2s ease, background-color .2s ease, color .2s ease; }
 .ls-chip:hover { transform: translateY(-2px); }
+.ls-flink { position: relative; color: #9DB8CF; transition: color .2s ease; background: none; border: 0; padding: 0; cursor: pointer; font: inherit; }
+.ls-flink::after { content: ''; position: absolute; left: 0; bottom: -3px; height: 2px; width: 100%; background: #0497F6; transform: scaleX(0); transform-origin: left; transition: transform .25s ease; }
+.ls-flink:hover, .ls-flink:focus-visible { color: #fff; }
+.ls-flink:hover::after, .ls-flink:focus-visible::after { transform: scaleX(1); }
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) {
   .ls-rise, .ls-slide, .ls-reveal { opacity:1 !important; transform:none !important; animation:none !important; transition:none !important; }
@@ -283,6 +288,7 @@ function TabPreview({ id }) {
 export default function LandingPage() {
   const navigate = useNavigate()
   const loggedIn = Boolean(getCurrentUser()?.email)
+  const logout = useLogout()
   const startTo = loggedIn ? '/lead-discovery' : '/login'
   const startState = loggedIn ? undefined : { mode: 'signup' }
 
@@ -317,7 +323,13 @@ export default function LandingPage() {
             <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
           </nav>
           <div className="flex items-center gap-3">
-            {!loggedIn && <Link to="/login" className="hidden sm:inline text-[15px] font-medium text-white/80 hover:text-white">Log in</Link>}
+            {loggedIn ? (
+              <button type="button" onClick={logout} className="inline-flex items-center gap-1.5 text-[15px] font-medium text-white/80 hover:text-white transition-colors">
+                <LogOut size={16} /> <span className="hidden sm:inline">Log out</span>
+              </button>
+            ) : (
+              <Link to="/login" className="text-[15px] font-medium text-white/80 hover:text-white transition-colors">Log in</Link>
+            )}
             <BlueButton to={loggedIn ? '/dashboard' : '/login'} state={loggedIn ? undefined : { mode: 'signup' }} className="px-5 py-2.5 text-sm">
               {loggedIn ? 'Open dashboard' : 'Start free'} <ArrowRight size={16} />
             </BlueButton>
@@ -600,39 +612,70 @@ export default function LandingPage() {
       </section>
 
       {/* ================= FOOTER ================= */}
-      <footer style={{ borderTop: '1px solid rgba(255,255,255,.08)', color: '#7FA0BC' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 grid grid-cols-2 md:grid-cols-4 gap-10">
-          <div className="col-span-2 md:col-span-1">
-            <p className={`text-2xl font-bold text-white ${display}`}>LeadScope<span style={{ color: C.blue }}>.</span></p>
-            <p className="mt-4 text-sm leading-relaxed max-w-xs">Find and contact local businesses that need online services.</p>
-          </div>
+      <footer className="relative" style={{ background: '#010D20', borderTop: `1px solid ${C.line}`, color: '#9DB8CF' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-10 grid gap-10 sm:grid-cols-2 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+          {/* brand */}
           <div>
-            <p className="font-semibold text-white">Product</p>
-            <ul className="mt-4 space-y-3 text-sm">
-              <li><a href="#features" className="hover:text-white">Find businesses</a></li>
-              <li><a href="#features" className="hover:text-white">Score leads</a></li>
-              <li><a href="#features" className="hover:text-white">Write messages</a></li>
-              <li><a href="#try" className="hover:text-white">Try it</a></li>
-            </ul>
+            <Link to="/" className={`text-2xl font-bold text-white ${display}`}>LeadScope<span style={{ color: C.blue }}>.</span></Link>
+            <p className="mt-3 text-sm leading-relaxed max-w-xs">Find and contact local businesses that need online services.</p>
+            <BlueButton to={loggedIn ? '/dashboard' : '/login'} state={loggedIn ? undefined : { mode: 'signup' }} className="mt-5 px-5 py-2.5 text-sm">
+              {loggedIn ? 'Open dashboard' : 'Start free'} <ArrowRight size={15} />
+            </BlueButton>
           </div>
+
+          {/* link columns */}
+          {[
+            { title: 'Product', links: [['Find businesses', '#features'], ['Score leads', '#features'], ['Write messages', '#features'], ['Try a search', '#try']] },
+            { title: 'Help', links: [['What it does', '#about'], ['How it works', '#features'], ['FAQ', '#faq']] },
+          ].map((col) => (
+            <div key={col.title}>
+              <p className="text-sm font-semibold text-white">{col.title}</p>
+              <ul className="mt-4 space-y-2.5 text-sm">
+                {col.links.map(([t, href]) => (
+                  <li key={t}><a href={href} className="ls-flink">{t}</a></li>
+                ))}
+              </ul>
+            </div>
+          ))}
+
+          {/* account */}
           <div>
-            <p className="font-semibold text-white">About</p>
-            <ul className="mt-4 space-y-3 text-sm">
-              <li><a href="#about" className="hover:text-white">What it does</a></li>
-              <li><a href="#faq" className="hover:text-white">FAQ</a></li>
-              <li>Data © OpenStreetMap contributors</li>
-            </ul>
-          </div>
-          <div>
-            <p className="font-semibold text-white">Get started</p>
-            <ul className="mt-4 space-y-3 text-sm">
-              <li><Link to="/login" state={{ mode: 'signup' }} className="hover:text-white">Create account</Link></li>
-              <li><Link to="/login" className="hover:text-white">Log in</Link></li>
+            <p className="text-sm font-semibold text-white">Account</p>
+            <ul className="mt-4 space-y-2.5 text-sm">
+              {loggedIn ? (
+                <>
+                  <li><Link to="/dashboard" className="ls-flink">Open dashboard</Link></li>
+                  <li><Link to="/lead-discovery" className="ls-flink">Find leads</Link></li>
+                  <li><button type="button" onClick={logout} className="ls-flink">Log out</button></li>
+                </>
+              ) : (
+                <>
+                  <li><Link to="/login" state={{ mode: 'signup' }} className="ls-flink">Create account</Link></li>
+                  <li><Link to="/login" className="ls-flink">Log in</Link></li>
+                </>
+              )}
             </ul>
           </div>
         </div>
-        <div style={{ borderTop: '1px solid rgba(255,255,255,.08)' }}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex flex-col sm:flex-row gap-2 items-center justify-between text-sm">
+
+        {/* project credit */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-8">
+          <div className="rounded-2xl px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-sm" style={{ background: 'rgba(255,255,255,.03)', border: `1px solid ${C.line}` }}>
+            <span className="font-semibold text-white">MCA major project, Chandigarh University</span>
+            <span>Shivani Verma · Kanak Kohli · Megha Sharma</span>
+            <span className="sm:ml-auto">Guide: Akshay Awasthi</span>
+          </div>
+        </div>
+
+        {/* bottom bar */}
+        <div style={{ borderTop: '1px solid rgba(255,255,255,.06)' }}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row gap-3 items-center justify-between text-xs">
+            <p>© {new Date().getFullYear()} LeadScope · Map data © OpenStreetMap contributors</p>
+            <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: reducedMotion() ? 'auto' : 'smooth' })}
+              className="group inline-flex items-center gap-2 rounded-full px-4 py-2 font-medium text-white transition-colors hover:bg-white/10"
+              style={{ border: `1px solid ${C.line}` }}>
+              Back to top <ArrowUp size={14} className="transition-transform group-hover:-translate-y-0.5" />
+            </button>
           </div>
         </div>
       </footer>
