@@ -7,7 +7,7 @@ import { INPUT, chip } from './styles'
  * "Which city?" box with up to 8 suggestions (Up / Down / Enter / Escape) and Popular city chips.
  * Any typed city still works — suggestions only help.
  */
-export default function CityInput({ value, onChange }) {
+export default function CityInput({ value, onChange, label = 'Which city?', showPopular = true }) {
   const id = useId()
   const listId = `${id}-list`
   const [open, setOpen] = useState(false)
@@ -39,7 +39,7 @@ export default function CityInput({ value, onChange }) {
 
   return (
     <div>
-      <label htmlFor={`${id}-city`} className="block text-sm font-medium text-slate-700 mb-1.5">Which city?</label>
+      <label htmlFor={`${id}-city`} className="block text-sm font-medium text-slate-700 mb-1.5">{label}</label>
       <div className="relative">
         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden="true" />
         <input
@@ -81,6 +81,7 @@ export default function CityInput({ value, onChange }) {
         )}
       </div>
 
+      {showPopular && (
       <div className="mt-2.5 flex flex-wrap items-center gap-2">
         <span className="text-xs font-medium text-slate-400 mr-1">Popular cities</span>
         {POPULAR_CITIES.map((name) => {
@@ -92,6 +93,7 @@ export default function CityInput({ value, onChange }) {
           )
         })}
       </div>
+      )}
     </div>
   )
 }

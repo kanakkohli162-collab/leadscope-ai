@@ -18,10 +18,10 @@ function Segmented({ legend, value, onChange, options }) {
 }
 
 /** The filter + sort controls. Used in the left panel (desktop) and in the bottom sheet (mobile). */
-export default function ResultFilters({ filters, setFilters, sort, setSort }) {
+export default function ResultFilters({ filters, setFilters, sort, setSort, defaultSort = 'score', hasService = false }) {
   const id = useId()
   const set = (key) => (value) => setFilters((f) => ({ ...f, [key]: value }))
-  const changed = JSON.stringify(filters) !== JSON.stringify(DEFAULT_FILTERS) || sort !== 'score'
+  const changed = JSON.stringify(filters) !== JSON.stringify(DEFAULT_FILTERS) || sort !== defaultSort
 
   return (
     <div className="space-y-5">
@@ -33,7 +33,7 @@ export default function ResultFilters({ filters, setFilters, sort, setSort }) {
           onChange={(e) => setSort(e.target.value)}
           className="w-full px-3 py-2 border border-slate-300 bg-inset rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-600"
         >
-          {SORTS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+          {SORTS.filter((s) => hasService || !s.needsService).map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
         </select>
       </div>
 
@@ -63,7 +63,7 @@ export default function ResultFilters({ filters, setFilters, sort, setSort }) {
       {changed && (
         <button
           type="button"
-          onClick={() => { setFilters(DEFAULT_FILTERS); setSort('score') }}
+          onClick={() => { setFilters(DEFAULT_FILTERS); setSort(defaultSort) }}
           className={`text-sm font-medium text-aqua hover:text-aqua-light rounded ${FOCUS}`}
         >
           Reset filters

@@ -1,151 +1,115 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Users, Gauge, Flame, Trophy, Lightbulb, Search, BarChart3 } from 'lucide-react'
+import {
+  Search, Lightbulb, Sparkles, Loader2, FileDown, Flame, MapPin, Target, Trophy, AlertTriangle, ArrowRight,
+} from 'lucide-react'
 import {
   ResponsiveContainer, PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  LineChart, Line, FunnelChart, Funnel, LabelList,
 } from 'recharts'
 import PageLoader from '@/components/ui/PageLoader'
+import { useToast } from '@/hooks/useToast'
 import { useLeads } from '@/features/leads/hooks/useLeads'
-import { areaOf } from '@/features/leads/utils/leadArea'
+import { getInsightSummary } from '@/services/leadService'
+import ChartCard, { EmptyChart } from '../components/ChartCard'
+import CountUp from '../components/CountUp'
+import OpportunityMatrix from '../components/OpportunityMatrix'
+import { RANGES, filterLeads, computeInsights } from '../utils/insightsData'
+import { LIGHT, PRIORITY_COLORS, SENTIMENT_COLORS, TOOLTIP, AXIS, ANIM } from '../utils/chartTheme'
+import { downloadInsightsReport } from '../utils/insightsReport'
 
-const AZURE = '#0497F6'
-const AQUA = '#4EB9E5'
-const GLOW = '#75DFFF'
-const HOT = '#F5A524'
-const GREY = '#2A5F8A'
-const PIPELINE = ['New', 'Contacted', 'Follow-up', 'Interested', 'Converted', 'Not Interested']
-const SENTIMENT_COLORS = { Positive: '#34D399', Neutral: '#FBBF24', Negative: '#F87171', 'Not analysed': GREY }
-const tooltipStyle = { borderRadius: 12, background: '#113E62', border: '1px solid #1B4C74', color: '#E6F1F7', fontSize: 13 }
-const tooltipText = { color: '#E6F1F7' }
+const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aqua'
+const FUNNEL_COLORS = ['#447EFC', '#5B8FFD', '#F5A524', '#34A853']
+const INSIGHT_ICONS = { hot: Flame, area: MapPin, action: Target, gap: AlertTriangle, win: Trophy }
+const bucketColor = (min) => (min >= 70 ? PRIORITY_COLORS.High : min >= 40 ? PRIORITY_COLORS.Medium : PRIORITY_COLORS.Low)
 
-function countBy(list, getKey) {
-  const map = {}
-  list.forEach((item) => {
-    const keys = [].concat(getKey(item) || [])
-    keys.forEach((k) => { if (k) map[k] = (map[k] || 0) + 1 })
-  })
-  return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value)
-}
-
-function Card({ title, subtitle, children, className = '' }) {
+/** Horizontal bars on a white card. */
+function HBars({ data, color = LIGHT.accent, empty }) {
+  if (!data.some((d) => d.value > 0)) return <EmptyChart>{empty}</EmptyChart>
   return (
-    <div className={`bg-card rounded-2xl border border-slate-200 p-5 ${className}`}>
-      <h3 className="text-base font-semibold text-slate-800">{title}</h3>
-      {subtitle && <p className="text-xs text-slate-500 mb-4">{subtitle}</p>}
-      {children}
-    </div>
-  )
-}
-
-function Kpi({ icon: Icon, label, value, hint, tone }) {
-  return (
-    <div className="bg-card rounded-2xl border border-slate-200 p-5">
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${tone}1A`, color: tone }}>
-        <Icon size={20} />
-      </div>
-      <p className="mt-4 text-3xl font-bold text-slate-800">{value}</p>
-      <p className="text-sm font-medium text-slate-700">{label}</p>
-      <p className="text-xs text-slate-500">{hint}</p>
-    </div>
-  )
-}
-
-/** Shown instead of a chart when there is nothing to draw yet. */
-function Empty({ children }) {
-  return (
-    <div className="h-[200px] flex flex-col items-center justify-center gap-2 text-center border border-dashed border-line rounded-xl px-6">
-      <BarChart3 size={24} className="text-slate-400" />
-      <p className="text-sm text-slate-500">{children}</p>
-    </div>
-  )
-}
-
-function HBar({ data, color = AZURE, height = 240, empty = 'Nothing to show yet.' }) {
-  if (!data.some((d) => d.value > 0)) return <Empty>{empty}</Empty>
-  return (
-    <ResponsiveContainer width="100%" height={height}>
-      <BarChart data={data} layout="vertical" margin={{ left: 10, right: 20 }}>
-        <CartesianGrid horizontal={false} stroke="#1B4C74" />
-        <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12, fill: '#9DB8CF' }} axisLine={false} tickLine={false} />
-        <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 12, fill: '#9DB8CF' }} axisLine={false} tickLine={false} />
-        <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipText} itemStyle={tooltipText} cursor={{ fill: '#0B3354' }} />
-        <Bar dataKey="value" name="Leads" fill={color} radius={[0, 8, 8, 0]} barSize={18} />
+    <ResponsiveContainer width="100%" height={Math.max(160, data.length * 34)}>
+      <BarChart data={data} layout="vertical" margin={{ left: 4, right: 24 }}>
+        <CartesianGrid horizontal={false} stroke={LIGHT.grid} />
+        <XAxis type="number" allowDecimals={false} {...AXIS} />
+        <YAxis type="category" dataKey="name" width={118} {...AXIS} />
+        <Tooltip {...TOOLTIP} />
+        <Bar dataKey="value" name="Leads" fill={color} radius={[0, 8, 8, 0]} barSize={16} {...ANIM} />
       </BarChart>
     </ResponsiveContainer>
   )
 }
 
+function Legend({ items }) {
+  return (
+    <div className="mt-2 flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs" style={{ color: LIGHT.muted }} data-report-legend>
+      {items.map((p) => (
+        <span key={p.name} className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ background: p.color }} aria-hidden="true" />
+          {p.name} ({p.value})
+        </span>
+      ))}
+    </div>
+  )
+}
+
 export default function AnalyticsPage() {
   const { leads, loading, error } = useLeads()
-  const [locationBy, setLocationBy] = useState('City') // 'City' or 'Area'
+  const toast = useToast()
+  const chartsRef = useRef(null)
+  const [city, setCity] = useState('All')
+  const [category, setCategory] = useState('All')
+  const [range, setRange] = useState('all')
+  const [ai, setAi] = useState(null)
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState('')
 
-  const stats = useMemo(() => {
-    const total = leads.length
-    const avg = total ? Math.round(leads.reduce((s, l) => s + (l.score || 0), 0) / total) : 0
-    const hot = leads.filter((l) => l.priority === 'High').length
-    const contacted = leads.filter((l) => l.status !== 'New').length
-    const converted = leads.filter((l) => l.status === 'Converted').length
-    const noWebsite = leads.filter((l) => !l.hasWebsite).length
+  const cities = useMemo(() => [...new Set(leads.map((l) => l.location).filter(Boolean))].sort(), [leads])
+  const categories = useMemo(() => [...new Set(leads.map((l) => l.category).filter(Boolean))].sort(), [leads])
+  const filtered = useMemo(() => filterLeads(leads, { city, category, range }), [leads, city, category, range])
+  const stats = useMemo(() => computeInsights(filtered), [filtered])
 
-    const priority = ['High', 'Medium', 'Low'].map((p) => ({ name: p, value: leads.filter((l) => l.priority === p).length }))
-    const pipeline = PIPELINE.map((s) => ({ name: s, value: leads.filter((l) => l.status === s).length }))
-    const categories = countBy(leads, (l) => l.category || 'Other').slice(0, 8)
-    const cities = countBy(leads, (l) => l.location || 'Unknown city').slice(0, 8)
-    const areas = countBy(leads, (l) => areaOf(l)).slice(0, 8)
+  const filtersText = [
+    city === 'All' ? 'All cities' : city,
+    category === 'All' ? 'All categories' : category,
+    RANGES.find((r) => r.id === range).label,
+  ].join(' · ')
 
-    // Service gaps (synopsis 8.9). Outdated website / negative reviews only count leads that were checked.
-    const websitesChecked = leads.filter((l) => l.websiteOutdated !== null).length
-    const sentimentDone = leads.filter((l) => l.sentimentLabel).length
-    const gaps = [
-      { name: 'No website', value: leads.filter((l) => !l.hasWebsite).length },
-      { name: 'No phone', value: leads.filter((l) => !l.phone || l.phone === '—').length },
-      { name: 'Incomplete details', value: leads.filter((l) => l.serviceGaps.some((g) => /incomplete/i.test(g))).length },
-      { name: 'Outdated website', value: leads.filter((l) => l.websiteOutdated === true).length },
-      { name: 'Negative reviews', value: leads.filter((l) => l.sentimentLabel === 'Negative').length },
-    ]
-    const topGap = [...gaps].sort((a, b) => b.value - a.value)[0]
+  const summary = [
+    { label: 'Total leads', value: stats.total, suffix: '' },
+    { label: 'Average score', value: stats.avg, suffix: '' },
+    { label: 'Hot leads (70+)', value: stats.hotPct, suffix: '%' },
+    { label: 'Conversion rate', value: stats.convRate, suffix: '%' },
+  ]
 
-    // Review sentiment, saved when Review Sentiment runs on Lead Details
-    const sentiment = ['Positive', 'Neutral', 'Negative', 'Not analysed'].map((name) => ({
-      name,
-      value: name === 'Not analysed'
-        ? leads.filter((l) => !l.sentimentLabel).length
-        : leads.filter((l) => l.sentimentLabel === name).length,
-    }))
-    const buckets = ['0–20', '21–40', '41–60', '61–80', '81–100'].map((name, i) => ({
-      name,
-      value: leads.filter((l) => {
-        const s = l.score || 0
-        return i === 0 ? s <= 20 : s > i * 20 && s <= (i + 1) * 20
-      }).length,
-    }))
-
-    const insights = []
-    if (total) {
-      const pctNoWeb = Math.round((noWebsite / total) * 100)
-      if (pctNoWeb >= 30) insights.push(`${pctNoWeb}% of your leads have no website. Website packages are your biggest opportunity.`)
-      if (topGap?.value) insights.push(`The most common gap is "${topGap.name}" (${topGap.value} leads). Lead with that in your pitch.`)
-      const negative = sentiment[2].value
-      if (negative > 0) insights.push(`${negative} analysed ${negative === 1 ? 'lead has' : 'leads have'} mostly negative reviews. Offer review management.`)
-      if (categories[0]) insights.push(`Most of your leads are ${categories[0].name.toLowerCase()} businesses (${categories[0].value}).`)
-      const newCount = pipeline[0].value
-      if (newCount > 0) insights.push(`${newCount} leads are still "New". Start with the High-priority ones.`)
-      if (contacted > 0) insights.push(`Conversion rate: ${Math.round((converted / contacted) * 100)}% of contacted leads became clients.`)
+  async function askAi() {
+    setAiLoading(true)
+    setAiError('')
+    try {
+      setAi(await getInsightSummary({ filters: filtersText, ...stats.aiCounts }))
+    } catch (e) {
+      setAi(null)
+      setAiError(e instanceof TypeError ? 'We could not reach the server. Please try again in a minute.'
+        : e.message || 'The AI is busy right now. Please try again in a minute.')
+    } finally {
+      setAiLoading(false)
     }
+  }
 
-    return {
-      total, avg, hot, converted, contacted,
-      hotPct: total ? Math.round((hot / total) * 100) : 0,
-      convRate: contacted ? Math.round((converted / contacted) * 100) : 0,
-      priority, pipeline, gaps, categories, cities, areas, buckets, insights,
-      sentiment, sentimentDone, websitesChecked,
-    }
-  }, [leads])
+  function downloadReport() {
+    const ok = downloadInsightsReport({
+      root: chartsRef.current,
+      summary: summary.map((s) => ({ label: s.label, value: `${s.value}${s.suffix}` })),
+      insights: stats.insights.map((i) => i.text),
+      aiSummary: ai,
+      filtersText,
+    })
+    if (!ok) toast.error('Please allow pop-ups for this site to download the report.')
+  }
 
   if (loading) return <PageLoader />
-  if (error) return <p className="text-red-400">{error}</p>
+  if (error) return <p className="text-red-400">Couldn&apos;t load your leads. Please refresh the page.</p>
 
-  if (stats.total === 0) {
+  if (leads.length === 0) {
     return (
       <div className="bg-card rounded-2xl border border-slate-200 p-10 text-center">
         <h1 className="text-xl font-bold text-slate-800">No data to analyse yet</h1>
@@ -157,142 +121,208 @@ export default function AnalyticsPage() {
     )
   }
 
+  const priorityItems = stats.priority.map((p) => ({ ...p, color: PRIORITY_COLORS[p.name] }))
+  const sentimentItems = stats.sentiment.filter((s) => s.value > 0).map((s) => ({ ...s, color: SENTIMENT_COLORS[s.name] }))
+  const selectCls = 'px-3 py-2 border border-slate-300 bg-inset rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-600'
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Insights</h1>
-        <p className="text-slate-500 mt-1">Analysis of your {stats.total} saved leads</p>
-      </div>
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Kpi icon={Users} tone={AZURE} label="Total leads" value={stats.total} hint="Saved in My Leads" />
-        <Kpi icon={Gauge} tone={AQUA} label="Average score" value={stats.avg} hint="Out of 100" />
-        <Kpi icon={Flame} tone={HOT} label="Hot leads" value={`${stats.hotPct}%`} hint={`${stats.hot} with score 70+`} />
-        <Kpi icon={Trophy} tone="#16A34A" label="Conversion rate" value={`${stats.convRate}%`} hint={`${stats.converted} of ${stats.contacted} contacted`} />
-      </div>
-
-      {stats.insights.length > 0 && (
-        <div className="rounded-2xl border border-line p-5 text-white" style={{ background: 'linear-gradient(135deg, #001C36 0%, #0497F6 60%, #4EB9E5 100%)', boxShadow: '0 22px 44px -22px rgba(4,151,246,.55)' }}>
-          <p className="flex items-center gap-2 font-semibold"><Lightbulb size={18} /> What your data says</p>
-          <ul className="mt-3 space-y-1.5 text-sm text-primary-50">
-            {stats.insights.map((t) => <li key={t}>• {t}</li>)}
-          </ul>
+    <div className="space-y-6 min-w-0">
+      {/* Header + actions */}
+      <div className="flex flex-col sm:flex-row sm:items-end gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Insights</h1>
+          <p className="text-slate-500 mt-1 text-sm">What your saved leads tell you — and where to focus next.</p>
         </div>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card title="Priority split" subtitle="How many leads are High, Medium or Low">
-          <ResponsiveContainer width="100%" height={220}>
-            <PieChart>
-              <Pie data={stats.priority} dataKey="value" nameKey="name" innerRadius={55} outerRadius={85} paddingAngle={3} stroke="#113E62">
-                {stats.priority.map((p) => (
-                  <Cell key={p.name} fill={p.name === 'High' ? HOT : p.name === 'Medium' ? AZURE : GREY} />
-                ))}
-              </Pie>
-              <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipText} itemStyle={tooltipText} />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="flex justify-center gap-4 text-xs text-slate-600">
-            {stats.priority.map((p) => (
-              <span key={p.name} className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full" style={{ background: p.name === 'High' ? HOT : p.name === 'Medium' ? AZURE : GREY }} />
-                {p.name} ({p.value})
-              </span>
-            ))}
-          </div>
-        </Card>
-
-        <Card title="Pipeline" subtitle="Where your leads are in the sales process" className="lg:col-span-2">
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={stats.pipeline}>
-              <CartesianGrid vertical={false} stroke="#1B4C74" />
-              <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#9DB8CF' }} axisLine={false} tickLine={false} />
-              <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: '#9DB8CF' }} axisLine={false} tickLine={false} width={28} />
-              <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipText} itemStyle={tooltipText} cursor={{ fill: '#0B3354' }} />
-              <Bar dataKey="value" name="Leads" radius={[8, 8, 0, 0]}>
-                {stats.pipeline.map((p) => (
-                  <Cell key={p.name} fill={p.name === 'Converted' ? '#16A34A' : p.name === 'Not Interested' ? GREY : AZURE} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
+        <div className="flex flex-wrap gap-2 sm:ml-auto">
+          <button type="button" onClick={askAi} disabled={aiLoading || !stats.total}
+            className={`inline-flex items-center gap-2 rounded-md bg-primary-600 hover:bg-primary-700 disabled:opacity-60 px-4 py-2.5 text-sm font-semibold text-white ${FOCUS}`}>
+            {aiLoading ? <Loader2 size={16} className="motion-safe:animate-spin" aria-hidden="true" /> : <Sparkles size={16} aria-hidden="true" />}
+            {aiLoading ? 'Thinking…' : 'AI summary'}
+          </button>
+          <button type="button" onClick={downloadReport} disabled={!stats.total}
+            className={`inline-flex items-center gap-2 rounded-md border border-line bg-card hover:bg-inset disabled:opacity-60 px-4 py-2.5 text-sm font-medium text-slate-700 ${FOCUS}`}>
+            <FileDown size={16} aria-hidden="true" /> Download report (PDF)
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card title="Service gaps" subtitle="What these businesses are missing (what you can sell)">
-          <HBar data={stats.gaps} color={AQUA} empty="No gaps found. Your leads look well set up online." />
-          <p className="mt-2 text-[11px] text-slate-500">
-            &quot;Outdated website&quot; counts only checked websites ({stats.websitesChecked}); &quot;Negative reviews&quot; only analysed leads ({stats.sentimentDone}).
-          </p>
-        </Card>
-        <Card title="Review sentiment" subtitle="What customers feel, from Review Sentiment on each lead">
-          {stats.sentimentDone === 0 ? (
-            <Empty>No reviews analysed yet. Open a lead and use Review Sentiment to fill this chart.</Empty>
-          ) : (
-            <>
-              <ResponsiveContainer width="100%" height={220}>
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
+        <label className="flex items-center gap-2 text-sm text-slate-600">
+          City
+          <select value={city} onChange={(e) => setCity(e.target.value)} className={selectCls}>
+            <option value="All">All cities</option>
+            {cities.map((c) => <option key={c}>{c}</option>)}
+          </select>
+        </label>
+        <label className="flex items-center gap-2 text-sm text-slate-600">
+          Category
+          <select value={category} onChange={(e) => setCategory(e.target.value)} className={selectCls}>
+            <option value="All">All categories</option>
+            {categories.map((c) => <option key={c}>{c}</option>)}
+          </select>
+        </label>
+        <div className="inline-flex w-fit rounded-full border border-line bg-inset p-0.5" role="group" aria-label="Date range">
+          {RANGES.map((r) => (
+            <button key={r.id} type="button" aria-pressed={range === r.id} onClick={() => setRange(r.id)}
+              className={`px-3 py-1 rounded-full text-sm font-medium ${FOCUS} ${range === r.id ? 'bg-primary-600 text-white' : 'text-slate-600 hover:text-slate-800'}`}>
+              {r.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Slim summary row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 rounded-xl border border-line bg-card divide-line divide-x divide-y md:divide-y-0 overflow-hidden">
+        {summary.map((s) => (
+          <div key={s.label} className="px-4 py-3">
+            <p className="text-xs text-slate-500">{s.label}</p>
+            <p className="font-display text-xl font-bold text-slate-800"><CountUp value={s.value} suffix={s.suffix} /></p>
+          </div>
+        ))}
+      </div>
+
+      {stats.total === 0 ? (
+        <div className="bg-card rounded-2xl border border-slate-200 p-8 text-center text-sm text-slate-500">
+          No leads match these filters. Try “All time” or another city / category.
+        </div>
+      ) : (
+        <>
+          {/* AI summary */}
+          {aiError && (
+            <p role="alert" className="flex items-start gap-2 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+              <AlertTriangle size={16} className="shrink-0 mt-0.5" aria-hidden="true" /> {aiError}
+            </p>
+          )}
+          {ai && (
+            <div className="rounded-2xl border border-line p-5 text-white motion-safe:animate-fade-up"
+              style={{ background: 'linear-gradient(135deg, #001C36 0%, #0497F6 60%, #4EB9E5 100%)' }}>
+              <p className="flex items-center gap-2 font-semibold"><Sparkles size={18} aria-hidden="true" /> AI summary</p>
+              <p className="mt-2 text-sm text-primary-50 leading-relaxed">{ai.summary}</p>
+              <ol className="mt-3 space-y-1.5 text-sm list-decimal pl-5 text-white">
+                {ai.recommendations.map((r) => <li key={r}>{r}</li>)}
+              </ol>
+            </div>
+          )}
+
+          {/* Smart insight cards */}
+          {stats.insights.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+              {stats.insights.map((ins, i) => {
+                const Icon = INSIGHT_ICONS[ins.tone] || Lightbulb
+                return (
+                  <div key={ins.text} className="bg-card rounded-xl border border-line p-4 flex gap-3 motion-safe:animate-fade-up motion-safe:transition-transform motion-safe:hover:-translate-y-1"
+                    style={{ animationDelay: `${i * 80}ms` }}>
+                    <span className="w-9 h-9 shrink-0 rounded-lg bg-primary-600/15 text-aqua flex items-center justify-center"><Icon size={18} aria-hidden="true" /></span>
+                    <div className="min-w-0">
+                      <p className="text-sm text-slate-700 leading-snug">{ins.text}</p>
+                      {ins.link && (
+                        <Link to={ins.link.to} className={`mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-aqua hover:text-aqua-light rounded ${FOCUS}`}>
+                          {ins.link.label} <ArrowRight size={12} aria-hidden="true" />
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* Charts (white cards) */}
+          <div ref={chartsRef} className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <ChartCard index={0} reportId="histogram" title="Score distribution" caption="Leads in each 10-point score range">
+              <ResponsiveContainer width="100%" height={230}>
+                <BarChart data={stats.histogram}>
+                  <CartesianGrid vertical={false} stroke={LIGHT.grid} />
+                  <XAxis dataKey="name" {...AXIS} tick={{ ...AXIS.tick, fontSize: 10 }} interval={0} />
+                  <YAxis allowDecimals={false} {...AXIS} width={28} />
+                  <Tooltip {...TOOLTIP} />
+                  <Bar dataKey="value" name="Leads" radius={[6, 6, 0, 0]} {...ANIM}>
+                    {stats.histogram.map((b) => <Cell key={b.name} fill={bucketColor(b.min)} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </ChartCard>
+
+            <ChartCard index={1} reportId="priority" title="Priority split" caption="High, Medium and Low leads">
+              <ResponsiveContainer width="100%" height={210}>
                 <PieChart>
-                  <Pie data={stats.sentiment.filter((s) => s.value > 0)} dataKey="value" nameKey="name" innerRadius={55} outerRadius={85} paddingAngle={3} stroke="#113E62">
-                    {stats.sentiment.filter((s) => s.value > 0).map((s) => <Cell key={s.name} fill={SENTIMENT_COLORS[s.name]} />)}
+                  <Pie data={priorityItems} dataKey="value" nameKey="name" innerRadius={55} outerRadius={85} paddingAngle={3} stroke="#FFFFFF" {...ANIM}>
+                    {priorityItems.map((p) => <Cell key={p.name} fill={p.color} />)}
                   </Pie>
-                  <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipText} itemStyle={tooltipText} />
+                  <Tooltip {...TOOLTIP} />
                 </PieChart>
               </ResponsiveContainer>
-              <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs text-slate-600">
-                {stats.sentiment.map((s) => (
-                  <span key={s.name} className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full" style={{ background: SENTIMENT_COLORS[s.name] }} />
-                    {s.name} ({s.value})
-                  </span>
-                ))}
-              </div>
-            </>
-          )}
-        </Card>
-      </div>
+              <Legend items={priorityItems} />
+            </ChartCard>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card title="Leads by category" subtitle="Types of businesses you saved">
-          <HBar data={stats.categories} color={GLOW} empty="No categories yet." />
-        </Card>
-        <div className="bg-card rounded-2xl border border-slate-200 p-5">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h3 className="text-base font-semibold text-slate-800">Leads by location</h3>
-              <p className="text-xs text-slate-500 mb-4">Top 8 {locationBy === 'City' ? 'cities' : 'areas'} where your leads are</p>
-            </div>
-            <div className="flex shrink-0 rounded-full bg-inset border border-line p-0.5" role="group" aria-label="Group locations by">
-              {['City', 'Area'].map((opt) => (
-                <button
-                  key={opt}
-                  type="button"
-                  aria-pressed={locationBy === opt}
-                  onClick={() => setLocationBy(opt)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium ${locationBy === opt ? 'bg-primary-600 text-white' : 'text-slate-600'}`}
-                >
-                  {opt}
-                </button>
-              ))}
-            </div>
+            <ChartCard index={2} reportId="gaps" title="Service gaps" caption="What these businesses are missing — what you can sell">
+              <HBars data={stats.gaps} empty="No gaps found. Your leads look well set up online." />
+              <p className="mt-2 text-[11px]" style={{ color: LIGHT.muted }}>
+                “Outdated website” counts checked websites only ({stats.websitesChecked}); “Negative reviews” analysed leads only ({stats.sentimentDone}).
+              </p>
+            </ChartCard>
+
+            <ChartCard index={3} reportId="funnel" title="Pipeline funnel" caption="How many leads reached each step">
+              <ResponsiveContainer width="100%" height={230}>
+                <FunnelChart>
+                  <Tooltip {...TOOLTIP} />
+                  <Funnel dataKey="value" nameKey="name" data={stats.funnel} {...ANIM}>
+                    {stats.funnel.map((f, i) => <Cell key={f.name} fill={FUNNEL_COLORS[i]} />)}
+                    <LabelList position="right" fill={LIGHT.ink} stroke="none" dataKey="name" fontSize={12} />
+                    <LabelList position="center" fill="#FFFFFF" stroke="none" dataKey="value" fontSize={13} fontWeight={700} />
+                  </Funnel>
+                </FunnelChart>
+              </ResponsiveContainer>
+            </ChartCard>
+
+            <ChartCard index={4} reportId="categories" title="Leads by category" caption="Types of businesses you saved">
+              <HBars data={stats.categories} color="#447EFC" empty="No categories yet." />
+            </ChartCard>
+
+            <ChartCard index={5} reportId="areas" title="Leads by area" caption="Top 8 areas where your leads are">
+              <HBars data={stats.areas} color="#5BA8F5" empty="No areas yet." />
+            </ChartCard>
+
+            <ChartCard index={6} reportId="weekly" title="Leads saved over time" caption="New leads saved each week">
+              {stats.weekly.length ? (
+                <ResponsiveContainer width="100%" height={220}>
+                  <LineChart data={stats.weekly} margin={{ right: 12 }}>
+                    <CartesianGrid vertical={false} stroke={LIGHT.grid} />
+                    <XAxis dataKey="name" {...AXIS} tick={{ ...AXIS.tick, fontSize: 11 }} />
+                    <YAxis allowDecimals={false} {...AXIS} width={28} />
+                    <Tooltip {...TOOLTIP} />
+                    <Line type="monotone" dataKey="value" name="Leads saved" stroke={LIGHT.accent} strokeWidth={2.5} dot={{ r: 3, fill: LIGHT.accent }} {...ANIM} />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : <EmptyChart>No save dates yet.</EmptyChart>}
+            </ChartCard>
+
+            <ChartCard index={7} reportId="sentiment" title="Review sentiment" caption="From Review Sentiment on each lead">
+              {stats.sentimentDone === 0 ? (
+                <EmptyChart>No reviews analysed yet. Open a lead and use Review Sentiment.</EmptyChart>
+              ) : (
+                <>
+                  <ResponsiveContainer width="100%" height={210}>
+                    <PieChart>
+                      <Pie data={sentimentItems} dataKey="value" nameKey="name" innerRadius={55} outerRadius={85} paddingAngle={3} stroke="#FFFFFF" {...ANIM}>
+                        {sentimentItems.map((s) => <Cell key={s.name} fill={s.color} />)}
+                      </Pie>
+                      <Tooltip {...TOOLTIP} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <Legend items={sentimentItems} />
+                </>
+              )}
+            </ChartCard>
+
+            <ChartCard index={8} reportId="matrix" className="lg:col-span-2" title="Opportunity matrix"
+              caption="Hot leads by category and area — click a cell to open those leads">
+              <OpportunityMatrix matrix={stats.matrix} />
+            </ChartCard>
           </div>
-          <HBar data={locationBy === 'City' ? stats.cities : stats.areas} color={AZURE} empty="No locations yet." />
-        </div>
-      </div>
-
-      <Card title="Score distribution" subtitle="How many leads fall in each score range">
-        <ResponsiveContainer width="100%" height={240}>
-          <BarChart data={stats.buckets}>
-            <CartesianGrid vertical={false} stroke="#1B4C74" />
-            <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#9DB8CF' }} axisLine={false} tickLine={false} />
-            <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: '#9DB8CF' }} axisLine={false} tickLine={false} width={28} />
-            <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipText} itemStyle={tooltipText} cursor={{ fill: '#0B3354' }} />
-            <Bar dataKey="value" name="Leads" radius={[8, 8, 0, 0]}>
-              {stats.buckets.map((b, i) => <Cell key={b.name} fill={i >= 3 ? HOT : i === 2 ? AZURE : GREY} />)}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </Card>
+        </>
+      )}
     </div>
   )
 }

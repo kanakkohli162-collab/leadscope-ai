@@ -2,6 +2,7 @@ package com.leadscope.backend.controller;
 
 import com.leadscope.backend.entity.Lead;
 import com.leadscope.backend.repository.LeadRepository;
+import com.leadscope.backend.service.SearchDeduplicator;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -38,10 +39,22 @@ public class LeadController {
         return findMine(id, auth);
     }
 
+    /** Saves a lead. If the same business (name + address) is already saved, returns that one with alreadySaved = true. */
     @PostMapping
     public Lead addLead(@RequestBody Lead lead, Authentication auth) {
+        String me = auth.getName();
+        if (lead.getBusinessName() != null) {
+            String address = SearchDeduplicator.normalise(lead.getAddress());
+            for (Lead existing : leadRepository.findByOwnerEmailAndBusinessNameIgnoreCase(me, lead.getBusinessName().trim())) {
+                if (SearchDeduplicator.normalise(existing.getAddress()).equals(address)) {
+                    existing.setAlreadySaved(true);
+                    return existing;
+                }
+            }
+        }
         lead.setId(null);
-        lead.setOwnerEmail(auth.getName());
+        lead.setOwnerEmail(me);
+        lead.setAlreadySaved(null);
         return leadRepository.save(lead);
     }
 
@@ -56,6 +69,26 @@ public class LeadController {
     public Lead updateNotes(@PathVariable Long id, @RequestBody Map<String, String> body, Authentication auth) {
         Lead lead = findMine(id, auth);
         lead.setNotes(body.get("notes"));
+        return leadRepository.save(lead);
+    }
+
+    /** PUT /api/leads/1/deal-value { "dealValue": 15000 }  (null clears it). Rupees, whole numbers. */
+    @PutMapping("/{id}/deal-value")
+    public Lead updateDealValue(@PathVariable Long id, @RequestBody Map<String, Object> body, Authentication auth) {
+        Lead lead = findMine(id, auth);
+        Object raw = body.get("dealValue");
+        Long value = null;
+        if (raw != null && !raw.toString().isBlank()) {
+            try {
+                value = Math.round(Double.parseDouble(raw.toString().replace(",", "").trim()));
+            } catch (NumberFormatException e) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please enter the deal value as a number, e.g. 15000");
+            }
+            if (value < 0 || value > 1_000_000_000_000L) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please enter a deal value between 0 and 1,00,00,00,00,000");
+            }
+        }
+        lead.setDealValue(value);
         return leadRepository.save(lead);
     }
 

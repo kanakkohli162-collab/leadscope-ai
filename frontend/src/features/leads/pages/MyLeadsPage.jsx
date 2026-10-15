@@ -1,12 +1,13 @@
 import { useDeferredValue, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Plus, Search, Trash2, FileSpreadsheet, FileText } from 'lucide-react'
+import { Link, useSearchParams } from 'react-router-dom'
+import { Plus, Search, Trash2, FileSpreadsheet, FileText, X } from 'lucide-react'
 import { exportLeadsToExcel, exportLeadsToPdf } from '../utils/exportLeads'
 import PriorityBadge from '@/components/ui/PriorityBadge'
 import ScoreCircle from '@/components/ui/ScoreCircle'
 import { updateLeadStatus, deleteLead } from '@/services/leadService'
 import { countBy, matchesSearch } from '../utils/leadStats'
 import { useLeads } from '../hooks/useLeads'
+import { areaOf } from '../utils/leadArea'
 
 const statuses = ['All', 'New', 'Contacted', 'Follow-up', 'Interested', 'Converted', 'Not Interested']
 
@@ -15,13 +16,20 @@ export default function MyLeadsPage() {
   const [activeStatus, setActiveStatus] = useState('All')
   const [search, setSearch] = useState('')
   const deferredSearch = useDeferredValue(search)
+  // Optional filters from links (e.g. Insights opportunity matrix): ?category=…&area=…&priority=High
+  const [params, setParams] = useSearchParams()
+  const linkFilter = { category: params.get('category'), area: params.get('area'), priority: params.get('priority') }
+  const hasLinkFilter = Boolean(linkFilter.category || linkFilter.area || linkFilter.priority)
 
   const statusCounts = useMemo(() => ({ All: leads.length, ...countBy(leads, 'status') }), [leads])
 
   const filtered = useMemo(
     () => leads.filter((l) =>
-      (activeStatus === 'All' || l.status === activeStatus) && matchesSearch(l, deferredSearch)),
-    [leads, activeStatus, deferredSearch],
+      (activeStatus === 'All' || l.status === activeStatus) && matchesSearch(l, deferredSearch) &&
+      (!linkFilter.category || l.category === linkFilter.category) &&
+      (!linkFilter.area || areaOf(l) === linkFilter.area) &&
+      (!linkFilter.priority || l.priority === linkFilter.priority)),
+    [leads, activeStatus, deferredSearch, linkFilter.category, linkFilter.area, linkFilter.priority],
   )
 
   async function changeStatus(id, status) {
@@ -79,6 +87,18 @@ export default function MyLeadsPage() {
           </Link>
         </div>
       </div>
+
+      {hasLinkFilter && (
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          <span className="text-slate-500">Showing only:</span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-600/15 border border-primary-600/40 px-3 py-1 text-aqua-light">
+            {[linkFilter.priority && `${linkFilter.priority} priority`, linkFilter.category, linkFilter.area && `in ${linkFilter.area}`].filter(Boolean).join(' ')}
+            <button type="button" onClick={() => setParams({})} aria-label="Clear this filter" className="rounded-full hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aqua">
+              <X size={14} />
+            </button>
+          </span>
+        </div>
+      )}
 
       {/* Status Tabs */}
       <div className="flex flex-wrap gap-2">

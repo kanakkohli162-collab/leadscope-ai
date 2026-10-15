@@ -12,6 +12,7 @@ import { useLead } from '../hooks/useLeads'
 import LeadNotFound from '../components/LeadNotFound'
 import ReviewSentimentCard from '../components/ReviewSentimentCard'
 import NearbyCompetitorsCard from '../components/NearbyCompetitorsCard'
+import ContactSocialCard from '../components/ContactSocialCard'
 
 const statuses = ['New', 'Contacted', 'Follow-up', 'Interested', 'Converted', 'Not Interested']
 
@@ -174,6 +175,9 @@ export default function LeadDetailsPage() {
           </div>
         </div>
       </div>
+
+      {/* Contact & social (from the business's own website) */}
+      <ContactSocialCard lead={lead} onLeadChange={setLead} />
 
       {/* Review Sentiment (AI / NLP) */}
       <ReviewSentimentCard lead={lead} />

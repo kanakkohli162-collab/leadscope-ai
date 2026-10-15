@@ -1,5 +1,6 @@
 package com.leadscope.backend.service;
 
+import com.leadscope.backend.dto.SearchResult;
 import com.leadscope.backend.entity.Lead;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -42,6 +43,7 @@ public class GeoapifyService {
         CATEGORY_MAP.put("baker", "commercial.food_and_drink.bakery");
         CATEGORY_MAP.put("cake", "commercial.food_and_drink.bakery");
         CATEGORY_MAP.put("spa", "service.beauty.spa");
+        CATEGORY_MAP.put("hair", "service.beauty.hairdresser");
         CATEGORY_MAP.put("salon", "service.beauty");
         CATEGORY_MAP.put("parlour", "service.beauty");
         CATEGORY_MAP.put("parlor", "service.beauty");
@@ -92,8 +94,9 @@ public class GeoapifyService {
      * @param area  optional part of the city (e.g. "Vijay Nagar"): searches within AREA_RADIUS_METERS of it.
      *              If Geoapify can't find the area, the whole city is searched.
      * @param limit max businesses to return (1 … MAX_RESULTS)
+     * @return businesses (duplicates removed), best opportunities first
      */
-    public List<Lead> search(String category, String city, String area, int limit) {
+    public SearchResult search(String category, String city, String area, int limit) {
         String cityId = findCityId(city);
         if (cityId == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -114,7 +117,28 @@ public class GeoapifyService {
                     : findPlaces(DEFAULT_CATEGORY, cityId, max);
         }
 
+        return toResult(features, category, city);
+    }
+
+    /**
+     * "Find businesses here" on the Opportunity Map: businesses of a type within `radiusMeters` of a point.
+     * Each lead's city comes from the place itself.
+     */
+    public SearchResult searchAround(String category, double lat, double lon, int radiusMeters, int limit) {
+        int max = Math.max(1, Math.min(limit, MAX_RESULTS));
+        List<Map<String, Object>> features;
+        try {
+            features = findPlacesAround(toGeoapifyCategory(category), lat, lon, radiusMeters, max);
+        } catch (HttpClientErrorException e) {
+            features = findPlacesAround(DEFAULT_CATEGORY, lat, lon, radiusMeters, max);   // unknown category -> broad search
+        }
+        return toResult(features, category, null);
+    }
+
+    /** Geoapify places -> scored leads, duplicates removed, best opportunities first. city == null -> each place's own city. */
+    private SearchResult toResult(List<Map<String, Object>> features, String category, String city) {
         List<Lead> results = new ArrayList<>();
+        List<String> placeIds = new ArrayList<>();
         for (Map<String, Object> feature : features) {
             Map<String, Object> p = asMap(feature.get("properties"));
             String name = str(p.get("name"));
@@ -130,7 +154,7 @@ public class GeoapifyService {
             Lead lead = new Lead();
             lead.setBusinessName(name);
             lead.setCategory(category);
-            lead.setCity(city);
+            lead.setCity(city != null ? city : first(str(p.get("city")), str(p.get("county")), str(p.get("state"))));
             lead.setAddress(first(str(p.get("formatted")), str(p.get("address_line2"))));
             lead.setPhone(phone);
             lead.setWebsite(website);
@@ -140,10 +164,12 @@ public class GeoapifyService {
             // OpenStreetMap has no ratings/reviews -> left empty; scoring skips those rules
             scoringService.score(lead, hours != null);
             results.add(lead);
+            placeIds.add(str(p.get("place_id")));
         }
 
-        results.sort(Comparator.comparing(Lead::getScore).reversed());   // best opportunities first
-        return results;
+        SearchResult deduped = SearchDeduplicator.dedupe(results, placeIds);
+        deduped.results().sort(Comparator.comparing(Lead::getScore).reversed());   // best opportunities first
+        return deduped;
     }
 
     // Step 1: city name -> Geoapify place id (prefers Indian cities)
@@ -171,8 +197,19 @@ public class GeoapifyService {
     // ---- Nearby Competitor Check ----
 
     /** Address text -> { lat, lon }, or null if Geoapify can't find it. */
-    @SuppressWarnings("unchecked")
     public double[] geocode(String text) {
+        GeoPoint point = geocodeDetailed(text);
+        return point == null ? null : new double[] { point.lat(), point.lon() };
+    }
+
+    /** approximate = Geoapify only matched a city / district / postcode, not the street or building. */
+    public record GeoPoint(double lat, double lon, boolean approximate) { }
+
+    private static final Set<String> APPROXIMATE_TYPES =
+            Set.of("city", "county", "state", "country", "postcode", "district", "unknown");
+
+    @SuppressWarnings("unchecked")
+    public GeoPoint geocodeDetailed(String text) {
         Map<String, Object> res = restClient.get()
                 .uri(GEOCODE_URL + "?text={t}&format=json&limit=1&bias=countrycode:in&apiKey={k}", text, apiKey)
                 .retrieve()
@@ -182,7 +219,9 @@ public class GeoapifyService {
         if (list.isEmpty()) return null;
         Double lat = number(list.get(0).get("lat"));
         Double lon = number(list.get(0).get("lon"));
-        return lat == null || lon == null ? null : new double[] { lat, lon };
+        String type = str(list.get(0).get("result_type"));
+        if (lat == null || lon == null) return null;
+        return new GeoPoint(lat, lon, type == null || APPROXIMATE_TYPES.contains(type.toLowerCase(Locale.ROOT)));
     }
 
     /**

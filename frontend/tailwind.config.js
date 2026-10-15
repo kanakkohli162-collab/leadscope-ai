@@ -58,8 +58,12 @@ export default {
           '0%': { opacity: '0', transform: 'translateY(12px) scale(0.96)' },
           '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
         },
+        'fade-up': {
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
       },
-      animation: { 'chat-in': 'chat-in 180ms ease-out' },
+      animation: { 'chat-in': 'chat-in 180ms ease-out', 'fade-up': 'fade-up 450ms ease-out backwards' },
     },
   },
   plugins: [],

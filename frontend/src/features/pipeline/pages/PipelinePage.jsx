@@ -1,93 +1,46 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, KanbanSquare, GripVertical } from 'lucide-react'
-import ScoreCircle from '@/components/ui/ScoreCircle'
+import { Search, KanbanSquare, Flame, Wallet, Trophy, TrendingUp, ArrowRight } from 'lucide-react'
 import PageLoader from '@/components/ui/PageLoader'
-import { updateLeadStatus } from '@/services/leadService'
+import { updateLeadStatus, updateDealValue } from '@/services/leadService'
 import { useToast } from '@/hooks/useToast'
 import { useLeads } from '@/features/leads/hooks/useLeads'
-import { areaOf } from '@/features/leads/utils/leadArea'
+import { formatINR } from '@/utils/format'
+import PipelineCard from '../components/PipelineCard'
+import { COLUMNS, STATUSES, OPEN_STATUSES, sumDeals, conversionRates } from '../utils/pipelineStats'
 
 /**
  * Pipeline (Synopsis 8.11 CRM and lead tracking): a Kanban board of the user's leads.
  * Drag a card to another column, or use its status dropdown (mobile / keyboard),
  * to change the lead's status. The change shows at once and is undone if saving fails.
+ * Phones (< 768px) see one column at a time, picked with tabs.
  */
 
-// Same statuses as Lead Details (leadService maps them to the backend values)
-const COLUMNS = [
-  { status: 'New', accent: '#4EB9E5' },
-  { status: 'Contacted', accent: '#0497F6' },
-  { status: 'Follow-up', accent: '#A78BFA' },
-  { status: 'Interested', accent: '#F5A524' },
-  { status: 'Converted', accent: '#34D399' },
-  { status: 'Not Interested', accent: '#8A9BAD' },
-]
-const STATUSES = COLUMNS.map((c) => c.status)
-
-function LeadCard({ lead, saving, onMove, onDragStart, onDragEnd }) {
-  const gap = lead.serviceGaps[0]
-  return (
-    <div
-      draggable={!saving}
-      onDragStart={(e) => onDragStart(e, lead)}
-      onDragEnd={onDragEnd}
-      className={`group bg-card rounded-lg border border-line p-3 shadow-sm cursor-grab active:cursor-grabbing transition-opacity ${
-        saving ? 'opacity-60' : 'hover:border-primary-600'
-      }`}
-    >
-      <div className="flex items-start gap-2.5">
-        <ScoreCircle score={lead.score} size="sm" />
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-slate-800 truncate" title={lead.name}>{lead.name}</p>
-          <p className="text-xs text-slate-500 truncate">{areaOf(lead)}</p>
-        </div>
-        <GripVertical size={16} className="shrink-0 text-slate-400 opacity-0 group-hover:opacity-100" aria-hidden="true" />
-      </div>
-
-      <div className="mt-2.5">
-        {gap ? (
-          <span className="inline-block max-w-full truncate text-[11px] font-medium px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400">
-            {gap}
-          </span>
-        ) : (
-          <span className="inline-block text-[11px] font-medium px-2 py-0.5 rounded-full bg-inset border border-line text-slate-500">
-            No major gaps
-          </span>
-        )}
-      </div>
-
-      <div className="mt-2.5 flex items-center gap-2">
-        <label className="sr-only" htmlFor={`status-${lead.id}`}>Status of {lead.name}</label>
-        <select
-          id={`status-${lead.id}`}
-          value={lead.status}
-          disabled={saving}
-          onChange={(e) => onMove(lead, e.target.value)}
-          className="min-w-0 flex-1 px-2 py-1 border border-slate-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-primary-600"
-        >
-          {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-        </select>
-        <Link to={`/lead/${lead.id}`} className="shrink-0 text-xs font-semibold text-primary-600 hover:text-aqua">
-          View
-        </Link>
-      </div>
-    </div>
-  )
-}
+const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aqua'
 
 export default function PipelinePage() {
   const { leads, setLeads, loading, error } = useLeads()
   const toast = useToast()
   const [query, setQuery] = useState('')
+  const [highOnly, setHighOnly] = useState(false)
+  const [city, setCity] = useState('All')
+  const [tab, setTab] = useState(STATUSES[0])   // column shown on phones
   const [dragging, setDragging] = useState(null) // lead id being dragged
   const [over, setOver] = useState(null)         // column status under the pointer
   const [saving, setSaving] = useState({})       // { [leadId]: true } while the API call runs
 
+  const cities = useMemo(
+    () => [...new Set(leads.map((l) => l.location).filter(Boolean))].sort((a, b) => a.localeCompare(b)),
+    [leads],
+  )
+
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase()
-    return q ? leads.filter((l) => l.name.toLowerCase().includes(q)) : leads
-  }, [leads, query])
+    return leads.filter((l) =>
+      (!q || l.name.toLowerCase().includes(q)) &&
+      (!highOnly || l.priority === 'High') &&
+      (city === 'All' || l.location === city))
+  }, [leads, query, highOnly, city])
 
   const byStatus = useMemo(() => {
     const groups = Object.fromEntries(STATUSES.map((s) => [s, []]))
@@ -96,25 +49,48 @@ export default function PipelinePage() {
     return groups
   }, [visible])
 
+  const pipelineValue = useMemo(() => sumDeals(visible.filter((l) => OPEN_STATUSES.includes(l.status))), [visible])
+  const wonValue = useMemo(() => sumDeals(byStatus.Converted), [byStatus])
+  const rates = useMemo(() => conversionRates(visible), [visible])
+  const filtered = query.trim() || highOnly || city !== 'All'
+
+  const finishSaving = (id) => setSaving((s) => {
+    const next = { ...s }
+    delete next[id]
+    return next
+  })
+
   /** Optimistic move: update the board now, save in the background, undo on failure. */
   async function move(lead, status) {
     if (!lead || lead.status === status || saving[lead.id]) return
-    const previous = lead.status
-    const setStatus = (s) => setLeads((all) => all.map((l) => (l.id === lead.id ? { ...l, status: s } : l)))
-
-    setStatus(status)
+    const previous = lead
+    setLeads((all) => all.map((l) => (l.id === lead.id ? { ...l, status, updatedAt: new Date().toISOString() } : l)))
     setSaving((s) => ({ ...s, [lead.id]: true }))
     try {
-      await updateLeadStatus(lead.id, status)
+      const saved = await updateLeadStatus(lead.id, status)
+      setLeads((all) => all.map((l) => (l.id === lead.id ? saved : l)))
+      if (status === 'Converted') toast.success(`🎉 Client won! ${lead.name} is now Converted.`)
     } catch {
-      setStatus(previous)
+      setLeads((all) => all.map((l) => (l.id === lead.id ? previous : l)))
       toast.error(`Couldn't move ${lead.name} to ${status}. Please try again.`)
     } finally {
-      setSaving((s) => {
-        const next = { ...s }
-        delete next[lead.id]
-        return next
-      })
+      finishSaving(lead.id)
+    }
+  }
+
+  /** Optimistic deal value change, undone if saving fails. */
+  async function changeDealValue(lead, dealValue) {
+    const previous = lead
+    setLeads((all) => all.map((l) => (l.id === lead.id ? { ...l, dealValue } : l)))
+    setSaving((s) => ({ ...s, [lead.id]: true }))
+    try {
+      const saved = await updateDealValue(lead.id, dealValue)
+      setLeads((all) => all.map((l) => (l.id === lead.id ? saved : l)))
+    } catch (e) {
+      setLeads((all) => all.map((l) => (l.id === lead.id ? previous : l)))
+      toast.error(e.message || `Couldn't save the deal value for ${lead.name}. Please try again.`)
+    } finally {
+      finishSaving(lead.id)
     }
   }
 
@@ -162,34 +138,103 @@ export default function PipelinePage() {
   }
 
   return (
-    <div className="space-y-6 min-w-0">
+    <div className="space-y-5 min-w-0">
       <div className="flex flex-col sm:flex-row sm:items-end gap-3">
         <div>
           <h1 className="text-xl font-bold text-slate-800">Pipeline</h1>
-          <p className="text-sm text-slate-500 mt-1">Drag a lead to another column, or change its status on the card.</p>
+          <p className="text-sm text-slate-500 mt-1">Drag leads to update their status.</p>
         </div>
-        <div className="relative sm:ml-auto sm:w-72">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+        <div className="grid grid-cols-2 gap-3 sm:ml-auto">
+          <div className="rounded-xl border border-line bg-card px-4 py-2.5">
+            <p className="flex items-center gap-1.5 text-xs text-slate-500"><Wallet size={13} className="text-aqua" aria-hidden="true" /> Pipeline value</p>
+            <p className="font-display text-lg font-bold text-slate-800">{formatINR(pipelineValue)}</p>
+          </div>
+          <div className="rounded-xl border border-line bg-card px-4 py-2.5">
+            <p className="flex items-center gap-1.5 text-xs text-slate-500"><Trophy size={13} className="text-green-400" aria-hidden="true" /> Won value</p>
+            <p className="font-display text-lg font-bold text-green-300">{formatINR(wonValue)}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
+        <div className="relative sm:w-72">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by name…"
             aria-label="Search leads by name"
-            className="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-600"
+            className="w-full pl-9 pr-3 py-2.5 border border-slate-300 bg-inset rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-600"
           />
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            aria-pressed={highOnly}
+            onClick={() => setHighOnly((h) => !h)}
+            className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium border ${FOCUS} ${
+              highOnly ? 'bg-marigold-500 border-marigold-500 text-abyss' : 'bg-inset border-line text-slate-600 hover:bg-line'
+            }`}
+          >
+            <Flame size={14} aria-hidden="true" /> High only
+          </button>
+          <label className="flex items-center gap-2 text-sm text-slate-600">
+            City
+            <select
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              className="px-3 py-2 border border-slate-300 bg-inset rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-600"
+            >
+              <option value="All">All cities</option>
+              {cities.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </label>
+          {filtered && (
+            <button
+              type="button"
+              onClick={() => { setQuery(''); setHighOnly(false); setCity('All') }}
+              className={`text-sm font-medium text-aqua hover:text-aqua-light rounded ${FOCUS}`}
+            >
+              Clear filters
+            </button>
+          )}
         </div>
       </div>
 
-      {query && visible.length === 0 && (
-        <p className="text-sm text-slate-500">No leads match “{query}”.</p>
+      {filtered && visible.length === 0 && (
+        <p className="text-sm text-slate-500">No leads match these filters.</p>
       )}
 
-      {/* Board: scrolls sideways inside its own box, so the page never gets wider than the screen */}
-      <div className="overflow-x-auto pb-2 -mx-1 px-1">
-        <div className="flex gap-4 min-w-max">
+      {/* Phone tabs: one column at a time */}
+      <div className="md:hidden -mx-1 px-1 overflow-x-auto" role="tablist" aria-label="Pipeline columns">
+        <div className="flex gap-2 w-max pb-1">
+          {COLUMNS.map(({ status, accent }) => (
+            <button
+              key={status}
+              type="button"
+              role="tab"
+              aria-selected={tab === status}
+              onClick={() => setTab(status)}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border whitespace-nowrap ${FOCUS} ${
+                tab === status ? 'bg-primary-600 border-primary-600 text-white' : 'bg-inset border-line text-slate-600'
+              }`}
+            >
+              <span className="w-2 h-2 rounded-full" style={{ background: accent }} aria-hidden="true" />
+              {status}
+              <span className={tab === status ? 'text-white/80' : 'text-slate-400'}>{byStatus[status].length}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Board: on desktop it scrolls sideways inside its own box; its height fits the cards (the page scrolls) */}
+      <div className="md:overflow-x-auto pb-2 md:-mx-1 md:px-1">
+        <div className="flex gap-4 md:min-w-max">
           {COLUMNS.map(({ status, accent }) => {
             const cards = byStatus[status]
             const isOver = over === status
+            const total = sumDeals(cards)
             return (
               <section
                 key={status}
@@ -197,24 +242,29 @@ export default function PipelinePage() {
                 onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (over !== status) setOver(status) }}
                 onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setOver(null) }}
                 onDrop={(e) => handleDrop(e, status)}
-                className={`w-72 shrink-0 flex flex-col rounded-xl border bg-inset/60 transition-colors ${
+                className={`${tab === status ? 'flex' : 'hidden'} md:flex w-full md:w-72 shrink-0 flex-col rounded-xl border bg-inset/60 motion-safe:transition-colors ${
                   isOver ? 'border-primary-600 bg-primary-600/10' : 'border-line'
                 }`}
                 style={{ borderTop: `3px solid ${accent}` }}
               >
-                <header className="flex items-center justify-between px-3 py-2.5">
-                  <h2 className="text-sm font-semibold text-slate-800">{status}</h2>
+                <header className="flex items-center justify-between gap-2 px-3 py-2.5">
+                  <div className="min-w-0">
+                    <h2 className="text-sm font-semibold text-slate-800">{status}</h2>
+                    <p className="text-[11px] text-slate-500">{total ? formatINR(total) : 'No deal value'}</p>
+                  </div>
                   <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-card border border-line text-slate-600">
                     {cards.length}
                   </span>
                 </header>
-                <div className="flex-1 space-y-2.5 px-2.5 pb-3 min-h-[120px] max-h-[65vh] overflow-y-auto">
+                <div className="flex-1 space-y-2.5 px-2.5 pb-3 min-h-[96px]">
                   {cards.map((lead) => (
-                    <LeadCard
+                    <PipelineCard
                       key={lead.id}
                       lead={lead}
+                      statuses={STATUSES}
                       saving={Boolean(saving[lead.id])}
                       onMove={move}
+                      onDealValue={changeDealValue}
                       onDragStart={handleDragStart}
                       onDragEnd={handleDragEnd}
                     />
@@ -230,6 +280,25 @@ export default function PipelinePage() {
           })}
         </div>
       </div>
+
+      {/* Conversion rates */}
+      <section className="bg-card rounded-xl border border-slate-200 p-4 sm:p-5" aria-labelledby="conversion-title">
+        <h2 id="conversion-title" className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+          <TrendingUp size={16} className="text-aqua" aria-hidden="true" /> Conversion rates
+        </h2>
+        <p className="text-xs text-slate-500 mt-0.5">Of the leads that reached a step, how many moved on to the next one.</p>
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {rates.map((r) => (
+            <div key={r.from} className="rounded-lg border border-line bg-inset px-4 py-3">
+              <p className="flex items-center gap-1.5 text-xs text-slate-500">
+                {r.from} <ArrowRight size={12} aria-hidden="true" /> {r.to}
+              </p>
+              <p className="font-display text-2xl font-bold text-slate-800">{r.pct == null ? '—' : `${r.pct}%`}</p>
+              <p className="text-[11px] text-slate-400">{r.of} leads</p>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   )
 }

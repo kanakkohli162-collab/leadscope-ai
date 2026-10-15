@@ -101,10 +101,11 @@ public class CompetitorService {
         }
         if (text == null || text.isBlank()) throw noLocation();
 
-        double[] point = geoapifyService.geocode(text);
+        GeoapifyService.GeoPoint point = geoapifyService.geocodeDetailed(text);
         if (point == null) throw noLocation();
-        lead.setLatitude(point[0]);
-        lead.setLongitude(point[1]);
+        lead.setLatitude(point.lat());
+        lead.setLongitude(point.lon());
+        lead.setLocationApproximate(point.approximate());   // only the city / area was found -> "Approximate location" on the map
         leadRepository.save(lead);
     }
 
