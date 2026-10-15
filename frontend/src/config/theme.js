@@ -1,19 +1,22 @@
 /**
  * LeadScope AI theme: the one place for brand colours and fonts.
- * Approved design: landing page (14 Oct 2026).
+ * Approved design: landing page "deep ocean" palette (14 Oct 2026).
+ * Source of truth: the `C` object in features/landing/pages/LandingPage.jsx.
  */
 export const THEME = {
   colors: {
-    night: '#160524',     // darkest background (hero, dark sections)
-    plum: '#310E50',      // dark cards / gradients
-    magenta: '#B526E8',   // main buttons, links, highlights
-    magentaHover: '#9A1CC7', // button hover
-    glow: '#FF5CD2',      // glow / gradient end
-    violet: '#D63AF0',    // glowing ring (end), gradients
-    lavender: '#FAF4FF',  // light sections, inputs
-    ink: '#200B33',       // main text on light
-    muted: '#715A86',     // secondary text
-    line: '#F0E3FB',      // borders
+    abyss: '#01081A',     // page background
+    deepSea: '#001C36',   // sidebar, topbar, panels
+    card: '#113E62',      // cards, tables, inputs, menus, modals
+    inset: '#0B3354',     // boxes inside cards
+    azure: '#0497F6',     // main buttons, links
+    azureHover: '#0080DD', // button hover
+    aqua: '#4EB9E5',      // glow, accents, active states
+    glow: '#75DFFF',      // light aqua glow / gradient end
+    ink: '#E6F1F7',       // headings + main text
+    muted: '#9DB8CF',     // secondary text
+    placeholder: '#6F8FAA', // placeholder text
+    line: '#1B4C74',      // borders, dividers, chart grid
     hot: '#F5A524',       // ONLY for hot lead scores (70+)
   },
   fonts: {
@@ -21,8 +24,8 @@ export const THEME = {
     body: "Figtree, system-ui, sans-serif",
   },
   gradients: {
-    hero: 'radial-gradient(80% 70% at 75% 30%, #511B80 0%, #160524 60%)',
-    button: 'linear-gradient(135deg, #B526E8 0%, #FF5CD2 100%)',
-    ring: 'linear-gradient(200deg, #B526E8 0%, #FF5CD2 55%, transparent 80%)',
+    hero: 'radial-gradient(80% 70% at 75% 30%, #113E62 0%, #01081A 60%)',
+    button: 'linear-gradient(135deg, #0497F6 0%, #4EB9E5 100%)',
+    ring: 'linear-gradient(200deg, #0497F6 0%, #4EB9E5 55%, transparent 80%)',
   },
 }

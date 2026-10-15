@@ -4,32 +4,32 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Purple-magenta (matches the landing page)
+        // Azure (matches the landing page "deep ocean" theme)
         primary: {
-          50: '#FCF5FF',
-          100: '#F6E6FD',
-          200: '#EBCBFA',
-          300: '#DDA4F5',
-          400: '#CB6FEF',
-          500: '#BE45EC',
-          600: '#B526E8',
-          700: '#9A1CC7',
-          800: '#7A169E',
-          900: '#310E50',
+          50: '#E6F5FE',
+          100: '#CDEBFD',
+          200: '#9BD7FB',
+          300: '#68C2F9',
+          400: '#3FB2F8',
+          500: '#22A6F7',
+          600: '#0497F6',
+          700: '#0080DD',
+          800: '#0067B3',
+          900: '#004E88',
         },
-        // Purple-tinted greys
+        // Remapped for a DARK UI: low numbers = dark surfaces, high numbers = light text
         slate: {
-          50: '#FAF4FF',
-          100: '#F5ECFD',
-          200: '#F0E3FB',
-          300: '#DCC9EB',
-          400: '#A891BD',
-          500: '#715A86',
-          600: '#5A4470',
-          700: '#432E57',
-          800: '#200B33',
-          900: '#160524',
-          950: '#0E0318',
+          50: '#01081A',
+          100: '#001C36',
+          200: '#1B4C74',
+          300: '#2A5F8A',
+          400: '#6F8FAA',
+          500: '#9DB8CF',
+          600: '#B5CBDD',
+          700: '#CFDEEA',
+          800: '#E6F1F7',
+          900: '#F3F8FB',
+          950: '#FFFFFF',
         },
         marigold: {
           50: '#FFF6E5',
@@ -39,9 +39,15 @@ export default {
           600: '#C9860B',
           700: '#9A6508',
         },
-        sidebar: { DEFAULT: '#160524', light: '#310E50' },
-        ink: '#200B33',
-        mist: '#FAF4FF',
+        abyss: '#01081A',   // page background
+        deepsea: '#001C36', // sidebar, topbar, panels
+        card: '#113E62',    // cards, tables, inputs, menus, modals
+        inset: '#0B3354',   // boxes inside cards
+        line: '#1B4C74',    // borders, dividers, chart grid
+        aqua: { DEFAULT: '#4EB9E5', light: '#75DFFF' }, // glow, accents, active states
+        sidebar: { DEFAULT: '#001C36', light: '#113E62' },
+        ink: '#E6F1F7',
+        mist: '#0B3354',
       },
       fontFamily: {
         sans: ['Figtree', 'system-ui', 'sans-serif'],

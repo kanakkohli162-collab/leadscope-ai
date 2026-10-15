@@ -5,8 +5,8 @@ import { ToastContext } from '@/hooks/useToast'
 const AUTO_CLOSE_MS = 3500
 
 const STYLES = {
-  success: { box: 'bg-green-50 border-green-200 text-green-800', icon: CheckCircle },
-  error: { box: 'bg-red-50 border-red-200 text-red-800', icon: AlertCircle },
+  success: { box: 'bg-card border-green-500/40 text-green-300', icon: CheckCircle },
+  error: { box: 'bg-card border-red-500/40 text-red-300', icon: AlertCircle },
 }
 
 /**
@@ -42,7 +42,7 @@ export default function ToastProvider({ children }) {
         {toasts.map((toast) => {
           const { box, icon: Icon } = STYLES[toast.type] || STYLES.success
           return (
-            <div key={toast.id} className={`flex items-start gap-2.5 px-4 py-3 rounded-lg border shadow-lg text-sm font-medium ${box}`}>
+            <div key={toast.id} className={`flex items-start gap-2.5 px-4 py-3 rounded-lg border shadow-lg shadow-black/40 text-sm font-medium ${box}`}>
               <Icon size={18} className="shrink-0 mt-0.5" />
               <p className="flex-1">{toast.message}</p>
               <button type="button" onClick={() => dismiss(toast.id)} className="shrink-0 opacity-60 hover:opacity-100" aria-label="Close message">

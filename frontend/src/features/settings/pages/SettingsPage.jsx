@@ -28,7 +28,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Profile */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6">
+      <div className="bg-card rounded-xl border border-slate-200 p-6">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-full bg-primary-600 text-white flex items-center justify-center text-xl font-bold">
             {initials}
@@ -39,10 +39,10 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="mt-6 divide-y divide-slate-100">
+        <div className="mt-6 divide-y divide-line">
           {rows.map(({ icon: Icon, label, value }) => (
             <div key={label} className="flex items-center gap-3 py-3.5">
-              <span className="w-9 h-9 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center">
+              <span className="w-9 h-9 rounded-lg bg-primary-600/15 text-primary-600 flex items-center justify-center">
                 <Icon size={17} />
               </span>
               <div>
@@ -55,9 +55,9 @@ export default function SettingsPage() {
       </div>
 
       {/* Security */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6">
+      <div className="bg-card rounded-xl border border-slate-200 p-6">
         <div className="flex items-start gap-3">
-          <span className="w-9 h-9 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+          <span className="w-9 h-9 rounded-lg bg-green-500/10 text-green-400 flex items-center justify-center">
             <ShieldCheck size={17} />
           </span>
           <div>
@@ -72,7 +72,7 @@ export default function SettingsPage() {
       {/* Log out */}
       <button
         onClick={logout}
-        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-red-200 text-red-600 font-medium hover:bg-red-50 transition-colors"
+        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-red-500/30 text-red-400 font-medium hover:bg-red-500/10 transition-colors"
       >
         <LogOut size={17} /> Log out
       </button>

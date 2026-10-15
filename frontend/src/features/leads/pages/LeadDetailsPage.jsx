@@ -56,9 +56,9 @@ export default function LeadDetailsPage() {
       </Link>
 
       {/* Header Card */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6">
+      <div className="bg-card rounded-xl border border-slate-200 p-6">
         <div className="flex flex-col md:flex-row md:items-start gap-6">
-          <img src={lead.image} alt={lead.name} className="w-full md:w-48 h-36 object-cover rounded-xl bg-slate-100" />
+          <img src={lead.image} alt={lead.name} className="w-full md:w-48 h-36 object-cover rounded-xl bg-inset" />
           <div className="flex-1">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
@@ -95,7 +95,7 @@ export default function LeadDetailsPage() {
                 <select
                   value={lead.status}
                   onChange={(e) => changeStatus(e.target.value)}
-                  className="border border-slate-200 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="border border-slate-200 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary-600"
                 >
                   {statuses.map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
@@ -108,7 +108,7 @@ export default function LeadDetailsPage() {
       {/* Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Opportunities */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5">
+        <div className="bg-card rounded-xl border border-slate-200 p-5">
           <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
             <AlertTriangle size={18} className="text-amber-500" />
             Opportunities
@@ -118,7 +118,7 @@ export default function LeadDetailsPage() {
           ) : (
             <div className="space-y-2">
               {lead.serviceGaps.map((gap, i) => (
-                <div key={i} className="flex items-center gap-2 text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
+                <div key={i} className="flex items-center gap-2 text-sm text-red-400 bg-red-500/10 rounded-lg px-3 py-2">
                   <AlertTriangle size={14} /> {gap}
                 </div>
               ))}
@@ -128,39 +128,39 @@ export default function LeadDetailsPage() {
 
         {/* Why this lead + action */}
         <div className="space-y-4">
-          <div className="bg-white rounded-xl border border-slate-200 p-5">
+          <div className="bg-card rounded-xl border border-slate-200 p-5">
             <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
               <Lightbulb size={18} className="text-amber-500" />
               Why this lead?
             </h3>
             <p className="text-sm text-slate-600 leading-relaxed">{lead.aiReason}</p>
           </div>
-          <div className="bg-primary-50 rounded-xl border border-primary-100 p-5">
-            <h3 className="font-semibold text-primary-800 mb-2 flex items-center gap-2">
+          <div className="bg-primary-600/10 rounded-xl border border-primary-600/30 p-5">
+            <h3 className="font-semibold text-aqua-light mb-2 flex items-center gap-2">
               <CheckCircle size={18} />
               Suggested Pitch
             </h3>
-            <p className="text-sm text-primary-700">{lead.recommendedAction}</p>
+            <p className="text-sm text-slate-700">{lead.recommendedAction}</p>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-slate-200 p-5 flex flex-col">
+        <div className="bg-card rounded-xl border border-slate-200 p-5 flex flex-col">
           <h3 className="font-semibold text-slate-800 mb-3">Notes</h3>
           <textarea
             value={notes}
             onChange={(e) => { setNotes(e.target.value); setSavedMsg('') }}
             rows={6}
             placeholder="e.g. Called on Monday, interested in a website, call back Friday"
-            className="flex-1 w-full border border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="flex-1 w-full border border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-600"
           />
           <div className="flex items-center gap-3 mt-3">
             <button
               onClick={saveNotes}
               disabled={saving}
-              className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white font-medium px-4 py-2 rounded-lg text-sm"
+              className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white font-medium px-4 py-2 rounded-md text-sm"
             >
               <Save size={16} /> {saving ? 'Saving…' : 'Save Notes'}
             </button>
-            {savedMsg && <span className="text-sm text-green-600">{savedMsg}</span>}
+            {savedMsg && <span className="text-sm text-green-400">{savedMsg}</span>}
           </div>
         </div>
       </div>
@@ -172,7 +172,7 @@ export default function LeadDetailsPage() {
       <div className="flex flex-wrap gap-3">
         <Link
           to={`/outreach?leadId=${lead.id}`}
-          className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-medium px-5 py-2.5 rounded-lg transition-colors"
+          className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-medium px-5 py-2.5 rounded-md transition-colors"
         >
           <Send size={18} /> Write Message
         </Link>

@@ -2,7 +2,7 @@
  * Single source of truth for the sidebar links AND the page titles in the Topbar.
  */
 import {
-  LayoutDashboard, Search, Users, MessageSquare, Settings,
+  LayoutDashboard, Search, Users, BarChart3, MessageSquare, Settings,
 } from 'lucide-react'
 
 export const ROUTES = {
@@ -24,6 +24,7 @@ export const NAV_ITEMS = [
   { to: ROUTES.dashboard, icon: LayoutDashboard, label: 'Dashboard' },
   { to: ROUTES.leadDiscovery, icon: Search, label: 'Find Leads' },
   { to: ROUTES.myLeads, icon: Users, label: 'My Leads' },
+  { to: ROUTES.analytics, icon: BarChart3, label: 'Insights' },
   { to: ROUTES.outreach, icon: MessageSquare, label: 'Write Message' },
   { to: ROUTES.settings, icon: Settings, label: 'Settings' },
 ]

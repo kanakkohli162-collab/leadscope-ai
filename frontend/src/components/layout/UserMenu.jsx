@@ -35,9 +35,9 @@ export default function UserMenu() {
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="flex items-center gap-2 pl-2 pr-1 py-1 rounded-lg hover:bg-slate-100 transition-colors"
+        className="flex items-center gap-2 pl-2 pr-1 py-1 rounded-lg hover:bg-card transition-colors"
       >
-        <div className="w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center text-white text-xs font-semibold">
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0497F6] to-[#4EB9E5] flex items-center justify-center text-white text-xs font-semibold">
           {getInitials(user.name)}
         </div>
         <span className="text-sm font-medium text-slate-700 hidden sm:block max-w-[140px] truncate">{user.name || 'Account'}</span>
@@ -45,8 +45,8 @@ export default function UserMenu() {
       </button>
 
       {open && (
-        <div role="menu" className="absolute right-0 mt-2 w-60 bg-white border border-slate-200 rounded-xl shadow-lg z-50 overflow-hidden">
-          <div className="px-4 py-3 border-b border-slate-100">
+        <div role="menu" className="absolute right-0 mt-2 w-60 bg-card border border-slate-200 rounded-xl shadow-lg shadow-black/40 z-50 overflow-hidden">
+          <div className="px-4 py-3 border-b border-line">
             <p className="text-sm font-semibold text-slate-800 truncate">{user.name || 'Account'}</p>
             <p className="text-xs text-slate-500 truncate">{user.email}</p>
           </div>
@@ -54,7 +54,7 @@ export default function UserMenu() {
             to={ROUTES.settings}
             role="menuitem"
             onClick={() => setOpen(false)}
-            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
+            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-inset"
           >
             <Settings size={16} className="text-slate-400" /> Settings
           </Link>
@@ -62,7 +62,7 @@ export default function UserMenu() {
             type="button"
             role="menuitem"
             onClick={logout}
-            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 border-t border-slate-100"
+            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 border-t border-line"
           >
             <LogOut size={16} /> Log out
           </button>

@@ -31,13 +31,13 @@ function Topbar({ onOpenMobileNav }) {
   }
 
   return (
-    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between gap-3 px-4 sm:px-6 shrink-0">
+    <header className="h-16 bg-deepsea border-b border-line flex items-center justify-between gap-3 px-4 sm:px-6 shrink-0">
       <div className="flex items-center gap-2 min-w-0">
         {/* Hamburger: only on screens where the sidebar is hidden */}
         <button
           type="button"
           onClick={onOpenMobileNav}
-          className="lg:hidden p-2 -ml-2 rounded-lg text-slate-600 hover:bg-slate-100"
+          className="lg:hidden p-2 -ml-2 rounded-lg text-slate-600 hover:bg-card"
           aria-label="Open navigation"
         >
           <Menu size={20} />
@@ -52,9 +52,9 @@ function Topbar({ onOpenMobileNav }) {
           onClick={() => setOpen((o) => !o)}
           aria-haspopup="menu"
           aria-expanded={open}
-          className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-lg hover:bg-slate-100 transition-colors"
+          className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-lg hover:bg-card transition-colors"
         >
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#B526E8] to-[#FF5CD2] flex items-center justify-center text-white text-sm font-semibold">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#0497F6] to-[#4EB9E5] flex items-center justify-center text-white text-sm font-semibold">
             {initials}
           </div>
           <span className="text-sm font-medium text-slate-700 hidden sm:block max-w-[160px] truncate">{name}</span>
@@ -62,8 +62,8 @@ function Topbar({ onOpenMobileNav }) {
         </button>
 
         {open && (
-          <div role="menu" className="absolute right-0 mt-2 w-60 rounded-xl bg-white border border-slate-200 shadow-xl py-2 z-50">
-            <div className="px-4 py-2 border-b border-slate-100">
+          <div role="menu" className="absolute right-0 mt-2 w-60 rounded-xl bg-card border border-slate-200 shadow-xl shadow-black/40 py-2 z-50">
+            <div className="px-4 py-2 border-b border-line">
               <p className="text-sm font-semibold text-slate-800 truncate">{name}</p>
               <p className="text-xs text-slate-500 truncate">{user.email || ''}</p>
             </div>
@@ -71,7 +71,7 @@ function Topbar({ onOpenMobileNav }) {
               to="/settings"
               onClick={() => setOpen(false)}
               role="menuitem"
-              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
+              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-inset"
             >
               <Settings size={16} /> Settings
             </Link>
@@ -79,7 +79,7 @@ function Topbar({ onOpenMobileNav }) {
               type="button"
               onClick={logout}
               role="menuitem"
-              className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50"
+              className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10"
             >
               <LogOut size={16} /> Log out
             </button>

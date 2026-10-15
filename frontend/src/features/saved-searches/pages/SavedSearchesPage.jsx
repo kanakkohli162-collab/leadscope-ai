@@ -12,7 +12,7 @@ export default function SavedSearchesPage() {
         </div>
         <Link
           to="/lead-discovery"
-          className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-medium px-4 py-2.5 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-medium px-4 py-2.5 rounded-md transition-colors"
         >
           <Search size={16} />
           New Search
@@ -23,11 +23,11 @@ export default function SavedSearchesPage() {
         {savedSearches.map((search) => (
           <div
             key={search.id}
-            className="bg-white rounded-xl border border-slate-200 p-5 card-hover"
+            className="bg-card rounded-xl border border-slate-200 p-5 card-hover"
           >
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-primary-600/15 flex items-center justify-center">
                   <Search size={18} className="text-primary-600" />
                 </div>
                 <div>
@@ -35,7 +35,7 @@ export default function SavedSearchesPage() {
                   <p className="text-xs text-slate-500 mt-0.5">Last used: {search.lastUsed}</p>
                 </div>
               </div>
-              <button className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400">
+              <button className="p-1.5 rounded-lg hover:bg-inset text-slate-400">
                 <MoreHorizontal size={16} />
               </button>
             </div>
@@ -52,12 +52,12 @@ export default function SavedSearchesPage() {
             <div className="flex gap-2">
               <Link
                 to="/lead-discovery"
-                className="flex-1 flex items-center justify-center gap-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium py-2 rounded-lg transition-colors"
+                className="flex-1 flex items-center justify-center gap-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium py-2 rounded-md transition-colors"
               >
                 <Play size={14} />
                 Run Search
               </Link>
-              <button className="px-3 py-2 border border-slate-200 hover:bg-red-50 hover:border-red-200 hover:text-red-600 text-slate-400 rounded-lg transition-colors">
+              <button className="px-3 py-2 border border-slate-200 hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400 text-slate-400 rounded-lg transition-colors">
                 <Trash2 size={14} />
               </button>
             </div>

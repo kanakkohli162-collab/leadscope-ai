@@ -24,7 +24,7 @@ const DEFAULT_HELP = {
 }
 
 const CSS = `
-@keyframes cw-pulse { 0% { box-shadow: 0 0 0 0 rgba(181,38,232,.55); } 70% { box-shadow: 0 0 0 16px rgba(181,38,232,0); } 100% { box-shadow: 0 0 0 0 rgba(181,38,232,0); } }
+@keyframes cw-pulse { 0% { box-shadow: 0 0 0 0 rgba(4,151,246,.55); } 70% { box-shadow: 0 0 0 16px rgba(4,151,246,0); } 100% { box-shadow: 0 0 0 0 rgba(4,151,246,0); } }
 @keyframes cw-pop { from { opacity: 0; transform: translateY(8px) scale(.95); } to { opacity: 1; transform: none; } }
 .cw-pulse { animation: cw-pulse 2.4s ease-out infinite; }
 .cw-pop { animation: cw-pop .35s cubic-bezier(.2,.8,.2,1.1) forwards; }
@@ -81,11 +81,11 @@ export default function ChatWidget() {
       )}
 
       {teaser && !open && (
-        <div className="cw-pop fixed bottom-24 right-5 sm:right-6 z-50 w-[290px] rounded-2xl bg-white border border-slate-200 shadow-2xl p-4">
+        <div className="cw-pop fixed bottom-24 right-5 sm:right-6 z-50 w-[290px] rounded-2xl bg-card border border-line shadow-2xl shadow-black/50 p-4">
           <button
             type="button"
             onClick={() => { setTeaser(false); setDismissed((d) => ({ ...d, [help.hello]: true })) }}
-            className="absolute top-2 right-2 p-1 rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            className="absolute top-2 right-2 p-1 rounded-md text-slate-400 hover:bg-inset hover:text-slate-800"
             aria-label="Dismiss"
           >
             <X size={14} />
@@ -94,12 +94,12 @@ export default function ChatWidget() {
           <div className="mt-3 flex flex-col gap-1.5">
             {help.suggestions.slice(0, 2).map((s) => (
               <button key={s} type="button" onClick={() => askFromTeaser(s)}
-                className="text-left text-xs px-3 py-2 rounded-lg bg-primary-50 text-primary-700 hover:bg-primary-100 font-medium transition-colors">
+                className="text-left text-xs px-3 py-2 rounded-lg bg-primary-600/15 text-aqua-light hover:bg-primary-600/25 font-medium transition-colors">
                 {s}
               </button>
             ))}
           </div>
-          <span className="absolute -bottom-2 right-7 w-4 h-4 bg-white border-r border-b border-slate-200 rotate-45" />
+          <span className="absolute -bottom-2 right-7 w-4 h-4 bg-card border-r border-b border-line rotate-45" />
         </div>
       )}
 
@@ -112,7 +112,7 @@ export default function ChatWidget() {
         aria-expanded={open}
         title="Ask AI"
         className={`${open ? '' : 'cw-pulse'} fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-50 h-14 rounded-full
-                    bg-primary-600 hover:bg-primary-700 text-white shadow-xl shadow-primary-600/30
+                    bg-primary-600 hover:bg-primary-700 text-white shadow-xl shadow-[#4EB9E5]/30
                     flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-95
                     ${open ? 'w-14 max-sm:hidden' : 'w-14 sm:w-auto sm:px-5'}`}
       >
