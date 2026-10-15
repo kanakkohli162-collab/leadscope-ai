@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { getCurrentUser } from '@/utils/currentUser'
 import InsideMapSheet from '@/features/leads/components/InsideMapSheet'
+import HeroMapSlider from '@/features/leads/components/HeroMapSlider'
 
 /* ---------- colours: deep ocean theme (taken from the reference image) ---------- */
 const C = {
@@ -344,41 +345,9 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Right: laptop with glowing arc */}
-          <div className="ls-rise relative h-[380px] sm:h-[460px]" style={{ animationDelay: '500ms' }}>
-            {/* glowing arc */}
-            <div aria-hidden="true" className="ls-glow absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[58%] w-[420px] h-[420px] sm:w-[520px] sm:h-[520px] rounded-full"
-              style={{
-                border: '3px solid transparent',
-                background: `radial-gradient(circle at 55% 45%, #0B5C93 0%, #06315A 50%, #01081A 100%) padding-box, linear-gradient(200deg, #FFFFFF 0%, ${C.violet} 45%, transparent 85%) border-box`,
-                boxShadow: '0 0 70px rgba(78,185,229,.45), inset 0 0 70px rgba(117,223,255,.2)',
-                opacity: 0.9,
-              }} />
-            {/* laptop */}
-            <div className="absolute inset-x-0 top-8 flex justify-center" style={{ perspective: '1400px' }}>
-              <div style={{ transform: 'rotateY(-16deg) rotateX(6deg)', transformStyle: 'preserve-3d' }}>
-                <div className="w-[320px] sm:w-[440px] rounded-t-2xl p-2.5" style={{ background: '#020F24', border: '1px solid rgba(255,255,255,.12)', boxShadow: '0 40px 80px -20px rgba(0,0,0,.7)' }}>
-                  <div className="rounded-lg overflow-hidden p-4" style={{ background: `linear-gradient(160deg, ${C.indigo} 0%, #0B3354 100%)` }}>
-                    <div className="flex items-center justify-between">
-                      <span className={`text-sm font-bold text-white ${display}`}>LeadScope<span style={{ color: C.blue }}>.</span></span>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: 'rgba(4,151,246,.25)', color: '#75DFFF' }}>Find Leads</span>
-                    </div>
-                    <p className={`mt-3 text-base font-semibold text-white ${display}`}>Restaurants in Indore</p>
-                    <p className="text-[10px] mb-3" style={{ color: '#7FA0BC' }}>56 businesses · best opportunities first</p>
-                    <MiniLeadList dark delayBase={1000} />
-                  </div>
-                </div>
-                <div className="h-4 w-[360px] sm:w-[500px] -ml-[20px] sm:-ml-[30px] rounded-b-2xl" style={{ background: 'linear-gradient(180deg, #0A2240 0%, #020F24 100%)' }} />
-              </div>
-            </div>
-            {/* floating score card (instead of a rating) */}
-            <div className="ls-float absolute right-0 sm:right-4 bottom-2 rounded-2xl px-5 py-4 flex items-center gap-4 shadow-2xl" style={{ background: C.card, border: `1px solid ${C.line}` }}>
-              <Ring value={100} size={52} delay={1400} />
-              <div>
-                <p className={`text-lg font-bold ${display}`}>Hot lead</p>
-                <p className="text-xs" style={{ color: C.muted }}>No website · Profile incomplete</p>
-              </div>
-            </div>
+          {/* Right: map listing -> lead sheet slider */}
+          <div className="ls-rise relative min-w-0" style={{ animationDelay: '500ms' }}>
+            <HeroMapSlider />
           </div>
         </div>
       </section>
