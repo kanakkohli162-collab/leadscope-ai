@@ -33,13 +33,19 @@ public class PlacesService {
         this.scoringService = scoringService;
     }
 
+    /**
+     * @param area  optional part of the city (e.g. "Vijay Nagar"), added to the text query
+     * @param limit max businesses (Google returns at most 20 per call)
+     */
     @SuppressWarnings("unchecked")
-    public List<Lead> search(String category, String city) {
+    public List<Lead> search(String category, String city, String area, int limit) {
         if (apiKey == null || apiKey.isBlank()) {
             return demoResults(category, city);
         }
 
-        Map<String, Object> requestBody = Map.of("textQuery", category + " in " + city, "pageSize", 20);
+        String where = area == null || area.isBlank() ? city : area + ", " + city;
+        int pageSize = Math.max(1, Math.min(limit, 20));
+        Map<String, Object> requestBody = Map.of("textQuery", category + " in " + where, "pageSize", pageSize);
 
         Map<String, Object> response = restClient.post()
                 .uri(URL)

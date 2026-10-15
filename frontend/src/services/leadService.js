@@ -84,12 +84,13 @@ export const getDashboardSummary = () => request('/dashboard/summary')
 
 /**
  * POST /api/search -> scored businesses (not saved yet).
+ * `area` (optional) narrows the search to part of the city; `limit` = max results.
  * Each result keeps the original backend object in `raw`, so "Add to My Leads"
- * can send it straight to POST /api/leads.
+ * can send it straight to POST /api/leads, plus `scoreBreakdown` for "Why this score?".
  */
-export const searchBusinesses = async (city, category) =>
-  (await request('/search', { method: 'POST', body: JSON.stringify({ city, category }) }))
-    .map((l, i) => ({ ...toUiLead(l), id: `result-${i}`, raw: l }))
+export const searchBusinesses = async (city, category, { area = '', limit } = {}) =>
+  (await request('/search', { method: 'POST', body: JSON.stringify({ city, category, area, limit }) }))
+    .map((l, i) => ({ ...toUiLead(l), id: `result-${i}`, raw: l, scoreBreakdown: l.scoreBreakdown || [] }))
 
 // ---------- Write Message (AI / template) ----------
 

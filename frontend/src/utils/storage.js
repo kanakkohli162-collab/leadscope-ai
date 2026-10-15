@@ -33,4 +33,5 @@ export const STORAGE_KEYS = {
   token: 'token',
   user: 'user',
   sidebarCollapsed: 'ui.sidebarCollapsed',
+  recentSearches: 'leads.recentSearches',
 }

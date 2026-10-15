@@ -6,6 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "leads")
@@ -38,6 +40,10 @@ public class Lead {
 
     @Column(length = 1000)
     private String opportunities;     // e.g. "No website, Incomplete Google profile"
+
+    // "Why this score?" rules, filled by LeadScoringService for search results. Not stored in the database.
+    @Transient
+    private List<Map<String, Object>> scoreBreakdown;
 
     // Last Review Sentiment result (null = never analysed)
     private String sentimentLabel;    // Positive, Neutral, Negative
