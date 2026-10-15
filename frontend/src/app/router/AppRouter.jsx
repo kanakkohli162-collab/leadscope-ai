@@ -13,6 +13,7 @@ const LeadDetailsPage = lazy(() => import('@/features/leads/pages/LeadDetailsPag
 const MyLeadsPage = lazy(() => import('@/features/leads/pages/MyLeadsPage'))
 const OutreachGeneratorPage = lazy(() => import('@/features/outreach/pages/OutreachGeneratorPage'))
 const AnalyticsPage = lazy(() => import('@/features/analytics/pages/AnalyticsPage'))
+const WebsiteCheckerPage = lazy(() => import('@/features/website-checker/pages/WebsiteCheckerPage'))
 const SettingsPage = lazy(() => import('@/features/settings/pages/SettingsPage'))
 
 export default function AppRouter() {
@@ -50,6 +51,7 @@ export default function AppRouter() {
         <Route path="/outreach" element={<OutreachGeneratorPage />} />
         <Route path="/my-leads" element={<MyLeadsPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
+        <Route path="/website-checker" element={<WebsiteCheckerPage />} />
         <Route path="/settings" element={<SettingsPage />} />
 
         {/* Old pages → merged into other screens */}

@@ -102,3 +102,15 @@ export const analyzeSentiment = (reviews) =>
     method: 'POST',
     body: JSON.stringify({ reviews }),
   })
+
+// ---------- Website Checker ----------
+
+/**
+ * POST /api/tools/website-check -> { reachable, statusCode, finalUrl, https, loadTimeMs, mobileFriendly,
+ * title, hasMetaDescription, copyrightYear, outdated, score, issues[], suggestion }
+ */
+export const checkWebsite = (url) =>
+  request('/tools/website-check', {
+    method: 'POST',
+    body: JSON.stringify({ url }),
+  })
