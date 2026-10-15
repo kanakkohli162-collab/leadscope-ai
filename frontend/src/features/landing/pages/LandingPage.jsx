@@ -4,6 +4,7 @@ import {
   Sparkles, Search, Gauge, Lightbulb, Wand2, Check, MapPin, ArrowRight, ChevronDown, Play,
   Mail, MessageCircle, Linkedin, ShieldCheck, Lock, KeyRound, Users,
   Globe, Database, Server, Cpu, Map, Layers, Code2, Target, BarChart3,
+  Phone, Stethoscope, Dumbbell, UtensilsCrossed, Scissors, Coffee,
 } from 'lucide-react'
 import { getCurrentUser } from '@/utils/currentUser'
 import InsideMapSheet from '@/features/leads/components/InsideMapSheet'
@@ -43,11 +44,19 @@ const CSS = `
 .ls-reveal.is-visible { opacity: 1; transform: none; }
 .ls-lift { transition: transform .25s ease, box-shadow .25s ease; }
 .ls-lift:hover { transform: translateY(-4px); box-shadow: 0 22px 44px -22px rgba(4,151,246,.55); }
+@keyframes ls-flash { 0% { box-shadow: 0 0 0 0 rgba(68,126,252,.5); border-color: #447EFC; } 100% { box-shadow: 0 0 0 10px rgba(68,126,252,0); } }
+.ls-flash { animation: ls-flash .7s ease-out; }
+.ls-field { transition: border-color .2s ease, box-shadow .2s ease; }
+.ls-field:focus-within { border-color: #447EFC !important; box-shadow: 0 0 0 3px rgba(68,126,252,.18); }
+.ls-chip { transition: transform .2s ease, background-color .2s ease, color .2s ease; }
+.ls-chip:hover { transform: translateY(-2px); }
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) {
   .ls-rise, .ls-slide, .ls-reveal { opacity:1 !important; transform:none !important; animation:none !important; transition:none !important; }
   .ls-float, .ls-glow, .ls-caret { animation: none !important; }
   .ls-lift:hover { transform: none; }
+  .ls-flash { animation: none !important; }
+  .ls-chip:hover { transform: none; }
   html { scroll-behavior: auto; }
 }
 `
@@ -72,7 +81,7 @@ function Reveal({ children, className = '', delay = 0, as: Tag = 'div', style, .
   )
 }
 
-function Ring({ value, size = 40, delay = 400, dark = false }) {
+function Ring({ value, size = 40, delay = 400, dark = false, light = false }) {
   const [shown, setShown] = useState(reducedMotion() ? value : 0)
   useEffect(() => {
     if (reducedMotion()) return
@@ -86,12 +95,12 @@ function Ring({ value, size = 40, delay = 400, dark = false }) {
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={dark ? 'rgba(255,255,255,.12)' : C.line} strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={dark ? 'rgba(255,255,255,.12)' : light ? '#E3EAF2' : C.line} strokeWidth={stroke} />
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={stroke}
           strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - shown / 100)}
           style={{ transition: 'stroke-dashoffset 1.2s cubic-bezier(.2,.7,.2,1)' }} />
       </svg>
-      <span className={`absolute inset-0 flex items-center justify-center text-xs font-bold ${display}`} style={{ color: dark ? '#fff' : C.ink }}>{value}</span>
+      <span className={`absolute inset-0 flex items-center justify-center text-xs font-bold ${display}`} style={{ color: dark ? '#fff' : light ? '#202124' : C.ink }}>{value}</span>
     </div>
   )
 }
@@ -132,49 +141,45 @@ const LEADS = [
 const AI_MESSAGE =
   "Hi Neelkamal team, I noticed you don't have a website yet. Many people in Indore search online before choosing where to eat. We build simple restaurant websites with a menu and Google listing. Can I share a quick sample?"
 
-const POWERED_BY = [
-  { icon: Map, name: 'OpenStreetMap' }, { icon: Globe, name: 'Geoapify' },
-  { icon: Sparkles, name: 'Gemini AI' }, { icon: Database, name: 'MySQL' }, { icon: Server, name: 'Spring Boot' },
-]
-
 const MINI_FEATURES = [
-  { icon: Search, title: 'Lead Finder', text: 'Real local businesses in any city.' },
-  { icon: Target, title: 'Lead Scoring', text: '0–100 score from digital gaps.' },
-  { icon: Wand2, title: 'AI Messages', text: 'First message written for you.' },
+  { icon: Search, title: 'Find', text: 'Real businesses from any Indian city.' },
+  { icon: Target, title: 'Score', text: 'A 0–100 score based on what is missing online.' },
+  { icon: Wand2, title: 'Message', text: 'Email, WhatsApp or LinkedIn message, ready to edit.' },
 ]
 
 const STATS = [
-  { icon: Search, big: '500', small: 'Businesses per search' },
-  { icon: Gauge, big: '0–100', small: 'Lead score' },
-  { icon: MessageCircle, big: '3', small: 'Outreach channels' },
-  { icon: Sparkles, big: '₹0', small: 'To get started' },
+  { icon: Search, big: '500', small: 'Businesses per search (max)' },
+  { icon: Gauge, big: '0–100', small: 'Score for every business' },
+  { icon: MessageCircle, big: '3', small: 'Ways to contact: Email, WhatsApp, LinkedIn' },
+  { icon: Sparkles, big: 'Free', small: 'No card needed' },
 ]
 
 const TABS = [
-  { id: 'find', icon: Search, label: 'Find', title: 'Find real businesses in any city',
-    text: 'Type a city and a business type. LeadScope pulls real local businesses with their address, phone and website.',
-    points: ['Any city in India', 'Up to 500 businesses per search', 'Filter by priority and website'] },
+  { id: 'find', icon: Search, label: 'Find', title: 'Search a city',
+    text: 'Type a city and a business type. You get a list of real businesses with address, phone and website.',
+    points: ['Works for any city in India', 'Up to 500 businesses in one search', 'Filter by priority or website'] },
   { id: 'score', icon: Gauge, label: 'Score', title: 'See who needs you most',
-    text: 'Every business gets a score from 0 to 100 based on its digital gaps, so the best opportunities come first.',
-    points: ['No website check', 'Business profile check', 'High, Medium and Low priority'] },
-  { id: 'why', icon: Lightbulb, label: 'Explain', title: 'Know exactly what to pitch',
-    text: 'Each lead shows plain-language reasons and the service to offer first. No guesswork before the first call.',
-    points: ['Opportunities listed per lead', 'Suggested first service', 'Notes on every lead'] },
-  { id: 'write', icon: Wand2, label: 'Write', title: 'Send the first message with AI',
-    text: 'Gemini AI writes a personal email, WhatsApp or LinkedIn message for each lead. Edit it, copy it, send it.',
-    points: ['Email, WhatsApp and LinkedIn', 'Edit before sending', 'One-click WhatsApp open'] },
+    text: 'Each business gets a score from 0 to 100. A higher score means more is missing online, so they are shown first.',
+    points: ['Checks if they have a website', 'Checks if their details are complete', 'High, Medium and Low priority'] },
+  { id: 'why', icon: Lightbulb, label: 'Why', title: 'Know what to offer',
+    text: 'Each lead tells you, in plain words, what is missing and which service to offer first.',
+    points: ['What is missing, for each lead', 'The service to offer first', 'Your own notes on every lead'] },
+  { id: 'write', icon: Wand2, label: 'Write', title: 'Write the first message',
+    text: 'AI writes a short, personal message for each lead. You read it, change it if you want, and send it yourself.',
+    points: ['Email, WhatsApp or LinkedIn', 'Edit before you send', 'Open WhatsApp in one click'] },
 ]
 
 const EXAMPLES = [
-  { city: 'Noida', type: 'Dentist' }, { city: 'Lucknow', type: 'Gym' }, { city: 'Indore', type: 'Restaurant' },
-  { city: 'Jaipur', type: 'Salon' }, { city: 'Chandigarh', type: 'Cafe' },
+  { city: 'Noida', type: 'Dentist', icon: Stethoscope }, { city: 'Lucknow', type: 'Gym', icon: Dumbbell },
+  { city: 'Indore', type: 'Restaurant', icon: UtensilsCrossed }, { city: 'Jaipur', type: 'Salon', icon: Scissors },
+  { city: 'Chandigarh', type: 'Cafe', icon: Coffee },
 ]
 
 const SECURITY = [
-  { icon: Lock, text: 'Passwords stored as BCrypt hashes' },
-  { icon: KeyRound, text: 'Secure sign-in with JWT tokens' },
-  { icon: ShieldCheck, text: '15-minute lock after 5 wrong passwords' },
-  { icon: Users, text: 'Every user sees only their own leads' },
+  { icon: Lock, text: 'Your password is stored in a scrambled form, never as plain text' },
+  { icon: KeyRound, text: 'Secure sign-in that keeps your account safe' },
+  { icon: ShieldCheck, text: 'Account locks for 15 minutes after 5 wrong passwords' },
+  { icon: Users, text: 'Only you can see your leads' },
 ]
 
 const BUILT_WITH = [
@@ -186,29 +191,33 @@ const BUILT_WITH = [
 
 const FAQS = [
   { q: 'Where does the business data come from?',
-    a: 'Business names, addresses, phones, websites and opening hours come from OpenStreetMap through the Geoapify Places API. The app can also use Google Places when a key is added.' },
-  { q: 'How is the lead score calculated?',
-    a: 'Points are added for each digital gap: no website, an incomplete business profile, and (when available) a low rating or few reviews. The total is scaled to 0–100. 70 and above is High priority.' },
-  { q: 'Is it free to use?', a: 'Yes. You can sign up without a card and run as many searches as you need.' },
-  { q: 'Are the AI messages sent automatically?',
-    a: 'No. LeadScope writes the message for you; you review, edit and send it yourself by email, WhatsApp or LinkedIn.' },
-  { q: 'Can other users see my leads?',
-    a: 'No. Every lead is linked to your account, and the backend only returns leads that belong to the signed-in user.' },
+    a: 'From OpenStreetMap, a free public map, through the Geoapify service. You get the name, address, phone, website and opening hours when they are listed.' },
+  { q: 'How is the score worked out?',
+    a: 'A business gets points for each thing missing online, like no website or missing details. The total is shown from 0 to 100. A score of 70 or more is High priority.' },
+  { q: 'Is it free?', a: 'Yes. Sign up without a card and start searching.' },
+  { q: 'Does LeadScope send messages for me?',
+    a: 'No. It writes the message. You read it, edit it and send it yourself by email, WhatsApp or LinkedIn.' },
+  { q: 'Can other people see my leads?',
+    a: 'No. Your leads are linked to your account, and only you can see them.' },
+  { q: 'Who is LeadScope for?',
+    a: 'Digital marketing agencies, freelancers, web designers and small IT teams who sell online services to local businesses.' },
 ]
 
-/* ---------- mini app screens ---------- */
-function MiniLeadList({ dark = false, delayBase = 900 }) {
+/* ---------- mini app screens (white, like the "See it in action" box) ---------- */
+const W = { frame: '#E9F5FF', card: '#FFFFFF', head: '#F8F9FA', line: '#EBEBEB', ink: '#202124', muted: '#5F6368', blue: '#447EFC', blueSoft: '#E8F1FF' }
+
+function MiniLeadList({ delayBase = 900 }) {
   return (
     <div className="space-y-2">
       {LEADS.map((l, i) => (
         <div key={l.name} className="ls-slide flex items-center gap-2.5 rounded-xl p-2.5"
-          style={{ animationDelay: `${delayBase + i * 160}ms`, background: dark ? 'rgba(255,255,255,.06)' : C.inset, border: dark ? '1px solid rgba(255,255,255,.08)' : `1px solid ${C.line}` }}>
-          <Ring value={l.score} size={34} delay={delayBase + 100 + i * 160} dark={dark} />
+          style={{ animationDelay: `${delayBase + i * 160}ms`, background: W.card, border: `1px solid ${W.line}` }}>
+          <Ring value={l.score} size={34} delay={delayBase + 100 + i * 160} light />
           <div className="min-w-0 flex-1">
-            <p className="text-[12px] font-semibold truncate" style={{ color: dark ? '#fff' : C.ink }}>{l.name}</p>
-            <p className="text-[10px] truncate" style={{ color: dark ? '#7FA0BC' : C.muted }}>{l.area}</p>
+            <p className="text-[13px] font-semibold truncate" style={{ color: W.ink }}>{l.name}</p>
+            <p className="text-[11px] truncate" style={{ color: W.muted }}>{l.area}</p>
           </div>
-          <span className="hidden sm:inline text-[10px] rounded-md px-1.5 py-0.5" style={{ background: 'rgba(245,165,36,.15)', color: '#FFC870' }}>{l.gap}</span>
+          <span className="hidden sm:inline text-[11px] rounded-md px-1.5 py-0.5" style={{ background: '#FFF4E0', color: '#9A6508' }}>{l.gap}</span>
         </div>
       ))}
     </div>
@@ -217,22 +226,24 @@ function MiniLeadList({ dark = false, delayBase = 900 }) {
 
 function TabPreview({ id }) {
   const frame = (title, body) => (
-    <div className="rounded-2xl overflow-hidden" style={{ background: C.card, border: `1px solid ${C.line}`, boxShadow: '0 30px 70px -30px rgba(0,0,0,.8)' }}>
-      <div className="flex items-center gap-2 px-4 h-10" style={{ borderBottom: `1px solid ${C.line}`, background: C.inset }}>
-        <span className="w-3 h-3 rounded-full bg-[#FF6B6B]" /><span className="w-3 h-3 rounded-full bg-[#F5B83D]" /><span className="w-3 h-3 rounded-full bg-[#34C38F]" />
-        <span className="ml-4 text-xs" style={{ color: C.muted }}>{title}</span>
+    <div className="rounded-[24px] p-2.5 sm:p-3" style={{ background: W.frame, boxShadow: '0 30px 70px -30px rgba(0,0,0,.6)' }}>
+      <div className="rounded-2xl overflow-hidden" style={{ background: W.card, color: W.ink }}>
+        <div className="flex items-center gap-2 px-4 h-10" style={{ borderBottom: `1px solid ${W.line}`, background: W.head }}>
+          <span className="w-3 h-3 rounded-full bg-[#FF6B6B]" /><span className="w-3 h-3 rounded-full bg-[#F5B83D]" /><span className="w-3 h-3 rounded-full bg-[#34C38F]" />
+          <span className="ml-4 text-xs" style={{ color: W.muted }}>{title}</span>
+        </div>
+        <div className="p-5">{body}</div>
       </div>
-      <div className="p-5">{body}</div>
     </div>
   )
   if (id === 'find') return frame('leadscope · Find Leads', (
     <>
       <div className="flex gap-2">
-        <div className="flex-1 flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm" style={{ border: `1px solid ${C.line}` }}><MapPin size={15} /> Indore</div>
-        <div className="flex-1 rounded-xl px-3 py-2.5 text-sm" style={{ border: `1px solid ${C.line}` }}>Restaurant</div>
-        <div className="rounded-xl px-4 py-2.5 text-sm font-semibold text-white" style={{ background: C.blue }}>Search</div>
+        <div className="flex-1 flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm" style={{ border: `1px solid ${W.line}` }}><MapPin size={15} color={W.blue} /> Indore</div>
+        <div className="flex-1 rounded-xl px-3 py-2.5 text-sm" style={{ border: `1px solid ${W.line}` }}>Restaurant</div>
+        <div className="rounded-xl px-4 py-2.5 text-sm font-semibold text-white" style={{ background: W.blue }}>Search</div>
       </div>
-      <p className="mt-4 mb-2 text-xs" style={{ color: C.muted }}>56 businesses found</p>
+      <p className="mt-4 mb-2 text-xs" style={{ color: W.muted }}>56 businesses found</p>
       <MiniLeadList delayBase={0} />
     </>
   ))
@@ -240,16 +251,16 @@ function TabPreview({ id }) {
   if (id === 'why') return frame('leadscope · Lead details', (
     <>
       <div className="flex items-center gap-4">
-        <Ring value={100} size={64} delay={200} />
-        <div><p className={`text-lg font-bold ${display}`}>Neelkamal Restaurant</p><p className="text-sm" style={{ color: C.muted }}>RNT Marg, Indore</p></div>
+        <Ring value={100} size={64} delay={200} light />
+        <div><p className={`text-lg font-bold ${display}`}>Neelkamal Restaurant</p><p className="text-sm" style={{ color: W.muted }}>RNT Marg, Indore</p></div>
       </div>
-      <div className="mt-5 rounded-xl p-4" style={{ background: 'rgba(245,165,36,.12)', border: '1px solid rgba(245,165,36,.35)' }}>
-        <p className="text-sm font-semibold" style={{ color: '#FFC870' }}>Why this lead?</p>
-        <p className="mt-1 text-sm" style={{ color: '#F5D39A' }}>No website and an incomplete business profile.</p>
+      <div className="mt-5 rounded-xl p-4" style={{ background: '#FFF6E5', border: '1px solid #FDE3B0' }}>
+        <p className="text-sm font-semibold" style={{ color: '#9A6508' }}>Why this lead?</p>
+        <p className="mt-1 text-sm" style={{ color: '#7A5206' }}>No website and missing business details.</p>
       </div>
-      <div className="mt-3 rounded-xl p-4" style={{ background: C.inset }}>
-        <p className="text-sm font-semibold" style={{ color: C.blue }}>Suggested pitch</p>
-        <p className="mt-1 text-sm" style={{ color: C.muted }}>Website development + Google profile setup</p>
+      <div className="mt-3 rounded-xl p-4" style={{ background: W.blueSoft }}>
+        <p className="text-sm font-semibold" style={{ color: W.blue }}>Offer first</p>
+        <p className="mt-1 text-sm" style={{ color: W.muted }}>A simple website + Google profile setup</p>
       </div>
     </>
   ))
@@ -258,10 +269,10 @@ function TabPreview({ id }) {
       <div className="flex gap-2">
         {[{ i: Mail, t: 'Email' }, { i: MessageCircle, t: 'WhatsApp' }, { i: Linkedin, t: 'LinkedIn' }].map(({ i: Icon, t }, k) => (
           <span key={t} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
-            style={k === 1 ? { background: C.blue, color: '#fff' } : { background: C.inset, color: C.muted }}><Icon size={13} /> {t}</span>
+            style={k === 1 ? { background: W.blue, color: '#fff' } : { background: '#F1F5FB', color: W.muted }}><Icon size={13} /> {t}</span>
         ))}
       </div>
-      <div className="mt-4 rounded-xl p-4 text-sm leading-relaxed min-h-[150px]" style={{ border: `1px solid ${C.line}`, color: '#CFDEEA' }}>
+      <div className="mt-4 rounded-xl p-4 text-sm leading-relaxed min-h-[150px]" style={{ border: `1px solid ${W.line}`, color: '#3C4043' }}>
         <TypingText text={AI_MESSAGE} startDelay={250} speed={14} />
       </div>
     </>
@@ -279,6 +290,7 @@ export default function LandingPage() {
   const tab = TABS.find((t) => t.id === activeTab)
   const [tryCity, setTryCity] = useState('')
   const [tryType, setTryType] = useState('')
+  const [flash, setFlash] = useState(0)
   const [openFaq, setOpenFaq] = useState(0)
 
   function handleTry(e) {
@@ -315,12 +327,12 @@ export default function LandingPage() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-24 lg:pb-32 grid lg:grid-cols-2 gap-14 items-center">
           {/* Left text */}
           <div>
-            <div className="ls-rise"><Label light>Lead intelligence for agencies</Label></div>
+            <div className="ls-rise"><Label light>For agencies, freelancers and sales teams</Label></div>
             <h1 className={`ls-rise mt-5 text-4xl sm:text-6xl font-bold leading-[1.08] tracking-tight text-white ${display}`} style={{ animationDelay: '120ms' }}>
-              Find Local Businesses That Need Your Services.
+              Find local businesses that need your services
             </h1>
             <p className="ls-rise mt-6 text-lg leading-relaxed max-w-xl" style={{ animationDelay: '260ms', color: '#B5CBDD' }}>
-              LeadScope searches any city, scores every business on its online gaps, and writes your first message with AI.
+              Search any city, see which businesses are missing a website or details, and send your first message with AI.
             </p>
             <div className="ls-rise mt-9 flex flex-wrap items-center gap-5" style={{ animationDelay: '400ms' }}>
               <BlueButton to={startTo} state={startState} className="px-7 py-3.5 text-base">
@@ -329,19 +341,8 @@ export default function LandingPage() {
               <a href="#features" className="group inline-flex items-center gap-3 text-white font-medium">
                 <span className="w-11 h-11 rounded-full flex items-center justify-center transition-transform group-hover:scale-110"
                   style={{ background: C.blue, boxShadow: '0 0 0 6px rgba(4,151,246,.2)' }}><Play size={16} fill="#fff" /></span>
-                See How It Works
+                How it works
               </a>
-            </div>
-
-            <div className="ls-rise mt-14" style={{ animationDelay: '560ms' }}>
-              <Label light>Powered by</Label>
-              <div className="mt-4 flex flex-wrap items-center gap-x-8 gap-y-3">
-                {POWERED_BY.map(({ icon: Icon, name }) => (
-                  <span key={name} className={`inline-flex items-center gap-2 text-lg font-semibold ${display}`} style={{ color: '#9DB8CF' }}>
-                    <Icon size={20} /> {name}
-                  </span>
-                ))}
-              </div>
             </div>
           </div>
 
@@ -360,10 +361,10 @@ export default function LandingPage() {
             <Reveal>
               <Label>What LeadScope does</Label>
               <h2 className={`mt-4 text-3xl sm:text-4xl font-bold leading-tight ${display}`}>
-                A lead tool focused on <span style={{ color: C.blue }}>local businesses</span> &amp; <span style={{ color: C.blue }}>AI outreach</span>
+                One tool to <span style={{ color: C.blue }}>find</span>, <span style={{ color: C.blue }}>score</span> and <span style={{ color: C.blue }}>contact</span> local businesses
               </h2>
               <p className="mt-5 text-[17px] leading-relaxed" style={{ color: C.muted }}>
-                We combine open map data, a clear scoring system and Gemini AI so agencies spend time talking to the right businesses.
+                LeadScope lists businesses from open map data, gives each one a score, and helps you write the first message. You only call the ones that need you.
               </p>
               <BlueButton to={startTo} state={startState} className="mt-7 px-5 py-2.5 text-sm">Create free account <ArrowRight size={15} /></BlueButton>
             </Reveal>
@@ -383,8 +384,8 @@ export default function LandingPage() {
           {/* full width: inside the app */}
           <div className="mt-14">
             <Reveal className="flex items-center justify-between">
-              <Label>Inside LeadScope</Label>
-              <a href="#features" className="text-sm font-semibold inline-flex items-center gap-1" style={{ color: C.blue }}>See all features <ArrowRight size={15} /></a>
+              <Label>See it in action</Label>
+              <a href="#features" className="text-sm font-semibold inline-flex items-center gap-1" style={{ color: C.blue }}>How it works <ArrowRight size={15} /></a>
             </Reveal>
             <div className="mt-5 min-w-0"><InsideMapSheet /></div>
           </div>
@@ -409,7 +410,7 @@ export default function LandingPage() {
         <Reveal className="text-center max-w-2xl mx-auto">
           <Label light>How it works</Label>
           <h2 className={`mt-4 text-3xl sm:text-5xl font-bold text-white ${display}`}>From a city name to your next client</h2>
-          <p className="mt-4 text-lg" style={{ color: '#9DB8CF' }}>Four steps, one tool. Click each one to see it.</p>
+          <p className="mt-4 text-lg" style={{ color: '#9DB8CF' }}>Four simple steps. Click a step to see it.</p>
         </Reveal>
         <div className="mt-10 flex flex-wrap justify-center gap-3" role="tablist">
           {TABS.map(({ id, icon: Icon, label }) => {
@@ -435,7 +436,7 @@ export default function LandingPage() {
               ))}
             </ul>
             <Link to={startTo} state={startState} className="group mt-7 inline-flex items-center gap-1.5 font-semibold" style={{ color: '#4EB9E5' }}>
-              Try it free <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
+              Start free <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
           <div className="ls-rise" style={{ animationDelay: '120ms' }}><TabPreview id={tab.id} /></div>
@@ -444,31 +445,79 @@ export default function LandingPage() {
 
       {/* ================= TRY IT ================= */}
       <section id="try" className="px-4 sm:px-6 pb-24 scroll-mt-10">
-        <Reveal className="max-w-5xl mx-auto rounded-[28px] px-6 sm:px-12 py-14 text-center relative overflow-hidden"
-          style={{ background: `linear-gradient(135deg, #0B3354 0%, ${C.indigo} 50%, #06315A 100%)`, border: '1px solid rgba(255,255,255,.08)' }}>
-          <h2 className={`text-3xl sm:text-4xl font-bold text-white ${display}`}>Who needs your services today?</h2>
-          <p className="mt-3 text-lg" style={{ color: '#B5CBDD' }}>Pick an example or type your own city and business type.</p>
-          <div className="mt-6 flex flex-wrap justify-center gap-2">
-            {EXAMPLES.map((ex) => (
-              <button key={ex.city} type="button" onClick={() => { setTryCity(ex.city); setTryType(ex.type) }}
-                className="rounded-full px-4 py-2 text-sm font-medium text-white hover:-translate-y-0.5 transition-transform"
-                style={{ background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.15)' }}>
-                {ex.type}s in {ex.city}
-              </button>
-            ))}
+        <Reveal className="max-w-5xl mx-auto rounded-[28px] px-4 sm:px-10 py-12 sm:py-14 relative overflow-hidden"
+          style={{ background: `radial-gradient(80% 120% at 50% 0%, #0B4A7A 0%, ${C.indigo} 60%, #01142B 100%)`, border: '1px solid rgba(255,255,255,.08)' }}>
+          <div className="text-center">
+            <h2 className={`text-3xl sm:text-4xl font-bold text-white ${display}`}>Try a search</h2>
+            <p className="mt-3 text-lg" style={{ color: '#B5CBDD' }}>Pick an example, or type a city and a business type.</p>
           </div>
-          <form onSubmit={handleTry} className="mt-6 mx-auto max-w-3xl flex flex-col sm:flex-row gap-2 rounded-2xl p-2" style={{ background: C.card, border: `1px solid ${C.line}` }}>
-            <label className="flex-1 flex items-center gap-2 px-4">
-              <MapPin size={18} style={{ color: C.blue }} />
-              <input value={tryCity} onChange={(e) => setTryCity(e.target.value)} placeholder="City, e.g. Noida" className="w-full py-3 outline-none bg-transparent text-[15px] placeholder:text-[#6F8FAA]" aria-label="City" />
-            </label>
-            <label className="flex-1 flex items-center gap-2 px-4 sm:border-l" style={{ borderColor: C.line }}>
-              <Search size={18} style={{ color: C.blue }} />
-              <input value={tryType} onChange={(e) => setTryType(e.target.value)} placeholder="Business type, e.g. Dentist" className="w-full py-3 outline-none bg-transparent text-[15px] placeholder:text-[#6F8FAA]" aria-label="Business type" />
-            </label>
-            <button type="submit" className="rounded-xl px-7 py-3 font-semibold text-white" style={{ background: C.blue }}>Find leads</button>
-          </form>
-          <p className="mt-3 text-sm" style={{ color: '#9DB8CF' }}>{loggedIn ? 'Opens Find Leads.' : 'Create a free account to see the results.'}</p>
+
+          {/* white card, same style as the app previews */}
+          <div className="mt-8 rounded-[24px] p-2.5 sm:p-3" style={{ background: W.frame, boxShadow: '0 30px 70px -30px rgba(0,0,0,.7)' }}>
+            <div className="rounded-2xl p-4 sm:p-6" style={{ background: W.card, color: W.ink }}>
+
+              {/* examples */}
+              <p className="text-sm font-semibold" style={{ color: W.muted }}>Quick examples</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {EXAMPLES.map((ex) => {
+                  const on = tryCity === ex.city && tryType === ex.type
+                  return (
+                    <button key={ex.city} type="button" aria-pressed={on}
+                      onClick={() => { setTryCity(ex.city); setTryType(ex.type); setFlash((f) => f + 1) }}
+                      className="ls-chip inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm font-medium"
+                      style={on ? { background: W.blue, color: '#fff', border: `1px solid ${W.blue}` } : { background: '#F5F8FC', color: W.ink, border: `1px solid ${W.line}` }}>
+                      <ex.icon size={15} style={{ color: on ? '#fff' : W.blue }} /> {ex.type}s in {ex.city}
+                    </button>
+                  )
+                })}
+              </div>
+
+              {/* search form */}
+              <form key={flash} onSubmit={handleTry} className="mt-5 grid sm:grid-cols-[1fr_1fr_auto] gap-3">
+                <label className={`ls-field flex flex-col rounded-xl px-4 py-2.5 ${flash ? 'ls-flash' : ''}`} style={{ border: `1px solid ${W.line}` }}>
+                  <span className="text-[11px] font-semibold" style={{ color: W.muted }}>City</span>
+                  <span className="flex items-center gap-2">
+                    <MapPin size={17} style={{ color: W.blue }} />
+                    <input value={tryCity} onChange={(e) => setTryCity(e.target.value)} placeholder="e.g. Noida"
+                      className="w-full py-1 outline-none bg-transparent text-[15px] placeholder:text-[#9AA0A6]" aria-label="City" />
+                  </span>
+                </label>
+                <label className={`ls-field flex flex-col rounded-xl px-4 py-2.5 ${flash ? 'ls-flash' : ''}`} style={{ border: `1px solid ${W.line}` }}>
+                  <span className="text-[11px] font-semibold" style={{ color: W.muted }}>Business type</span>
+                  <span className="flex items-center gap-2">
+                    <Search size={17} style={{ color: W.blue }} />
+                    <input value={tryType} onChange={(e) => setTryType(e.target.value)} placeholder="e.g. Dentist"
+                      className="w-full py-1 outline-none bg-transparent text-[15px] placeholder:text-[#9AA0A6]" aria-label="Business type" />
+                  </span>
+                </label>
+                <button type="submit" className="group rounded-xl px-7 py-3 font-semibold text-white inline-flex items-center justify-center gap-2 hover:brightness-110 transition"
+                  style={{ background: W.blue, boxShadow: '0 12px 26px -12px rgba(68,126,252,.9)' }}>
+                  Find leads <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
+                </button>
+              </form>
+
+              {/* what you get */}
+              <div className="mt-6 pt-5 grid sm:grid-cols-3 gap-3" style={{ borderTop: `1px solid ${W.line}` }}>
+                {[
+                  { icon: MapPin, t: 'Name and address', s: 'Real businesses from map data' },
+                  { icon: Phone, t: 'Phone and website', s: 'Shown when they are listed' },
+                  { icon: Gauge, t: 'Score from 0 to 100', s: 'Who needs you most comes first' },
+                ].map(({ icon: Icon, t, s }) => (
+                  <div key={t} className="flex items-start gap-3 rounded-xl p-3" style={{ background: '#F5F8FC' }}>
+                    <span className="w-9 h-9 shrink-0 rounded-lg flex items-center justify-center" style={{ background: W.blueSoft, color: W.blue }}><Icon size={17} /></span>
+                    <div>
+                      <p className="text-sm font-semibold">{t}</p>
+                      <p className="text-xs" style={{ color: W.muted }}>{s}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <p className="mt-5 text-center text-sm" style={{ color: '#9DB8CF' }}>
+            {loggedIn ? 'Opens Find Leads with your search.' : 'Free account needed to see results. No card required.'}
+          </p>
         </Reveal>
       </section>
 
@@ -478,7 +527,7 @@ export default function LandingPage() {
           <div className="grid lg:grid-cols-2 gap-12">
             <Reveal>
               <Label>Security</Label>
-              <h2 className={`mt-4 text-3xl sm:text-4xl font-bold leading-tight ${display}`}>Your leads stay <span style={{ color: C.blue }}>private</span> and <span style={{ color: C.blue }}>protected</span></h2>
+              <h2 className={`mt-4 text-3xl sm:text-4xl font-bold leading-tight ${display}`}>Your account and leads stay <span style={{ color: C.blue }}>private</span></h2>
               <div className="mt-8 grid sm:grid-cols-2 gap-4">
                 {SECURITY.map(({ icon: Icon, text }) => (
                   <div key={text} className="ls-lift rounded-2xl bg-[#113E62] border border-[#1B4C74] p-5">
@@ -489,8 +538,8 @@ export default function LandingPage() {
               </div>
             </Reveal>
             <Reveal delay={150}>
-              <Label>Built with</Label>
-              <h2 className={`mt-4 text-3xl sm:text-4xl font-bold leading-tight ${display}`}>A modern, <span style={{ color: C.blue }}>reliable</span> stack</h2>
+              <Label>Made with</Label>
+              <h2 className={`mt-4 text-3xl sm:text-4xl font-bold leading-tight ${display}`}>Trusted <span style={{ color: C.blue }}>tools</span> behind LeadScope</h2>
               <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {BUILT_WITH.map(({ icon: Icon, name }) => (
                   <div key={name} className="ls-lift flex flex-col items-center gap-2 rounded-2xl bg-[#113E62] border border-[#1B4C74] py-5">
@@ -538,12 +587,12 @@ export default function LandingPage() {
           <h2 className={`relative text-3xl sm:text-5xl font-bold max-w-3xl mx-auto leading-tight text-white ${display}`}>
             Your next client is already in your city.
           </h2>
-          <p className="relative mt-4 text-lg" style={{ color: '#B5CBDD' }}>Run your first search in under a minute.</p>
+          <p className="relative mt-4 text-lg" style={{ color: '#B5CBDD' }}>Your first search takes less than a minute.</p>
           <BlueButton to={startTo} state={startState} className="relative mt-8 px-8 py-4 text-lg">
             Start Finding Leads <ArrowRight size={19} />
           </BlueButton>
           <div className="relative mt-8 flex flex-wrap justify-center gap-x-8 gap-y-2" style={{ color: '#B5CBDD' }}>
-            {['Free to use', 'No card needed', 'Set up in a minute'].map((t) => (
+            {['Free to use', 'No card needed', 'Works for any city'].map((t) => (
               <span key={t} className="inline-flex items-center gap-1.5"><Check size={16} style={{ color: '#4EB9E5' }} /> {t}</span>
             ))}
           </div>
@@ -555,21 +604,21 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 grid grid-cols-2 md:grid-cols-4 gap-10">
           <div className="col-span-2 md:col-span-1">
             <p className={`text-2xl font-bold text-white ${display}`}>LeadScope<span style={{ color: C.blue }}>.</span></p>
-            <p className="mt-4 text-sm leading-relaxed max-w-xs">Lead intelligence and outreach for digital marketing agencies.</p>
+            <p className="mt-4 text-sm leading-relaxed max-w-xs">Find and contact local businesses that need online services.</p>
           </div>
           <div>
             <p className="font-semibold text-white">Product</p>
             <ul className="mt-4 space-y-3 text-sm">
-              <li><a href="#features" className="hover:text-white">Lead Finder</a></li>
-              <li><a href="#features" className="hover:text-white">Lead Scoring</a></li>
-              <li><a href="#features" className="hover:text-white">AI Message Writer</a></li>
+              <li><a href="#features" className="hover:text-white">Find businesses</a></li>
+              <li><a href="#features" className="hover:text-white">Score leads</a></li>
+              <li><a href="#features" className="hover:text-white">Write messages</a></li>
               <li><a href="#try" className="hover:text-white">Try it</a></li>
             </ul>
           </div>
           <div>
-            <p className="font-semibold text-white">Trust</p>
+            <p className="font-semibold text-white">About</p>
             <ul className="mt-4 space-y-3 text-sm">
-              <li><a href="#about" className="hover:text-white">About</a></li>
+              <li><a href="#about" className="hover:text-white">What it does</a></li>
               <li><a href="#faq" className="hover:text-white">FAQ</a></li>
               <li>Data © OpenStreetMap contributors</li>
             </ul>
