@@ -1,7 +1,8 @@
 import { memo, useEffect, useRef, useState } from 'react'
 import { Send, Bot, User, X, RotateCcw } from 'lucide-react'
 
-const MessageBubble = memo(function MessageBubble({ role, content }) {
+// Also used by the full-page Ask AI (pages/ChatPage.jsx)
+export const MessageBubble = memo(function MessageBubble({ role, content }) {
   const isUser = role === 'user'
   return (
     <div className={`flex gap-2 ${isUser ? 'justify-end' : 'justify-start'}`}>
@@ -19,7 +20,7 @@ const MessageBubble = memo(function MessageBubble({ role, content }) {
   )
 })
 
-function TypingIndicator() {
+export function TypingIndicator() {
   return (
     <div className="flex gap-2 items-center">
       <div className="w-7 h-7 rounded-full bg-primary-600/20 text-aqua-light flex items-center justify-center"><Bot size={15} /></div>

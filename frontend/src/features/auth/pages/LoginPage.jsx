@@ -5,6 +5,8 @@ import {
   UtensilsCrossed, Plus, Store, Dumbbell,
 } from 'lucide-react'
 import { login, register, forgotPassword, saveSession } from '@/services/authService'
+import Logo from '@/components/ui/Logo'
+import LogoMark from '@/components/ui/LogoMark'
 
 /* All sizes scale with screen height: clamp(min, vh, max) */
 const CSS = `
@@ -48,18 +50,6 @@ const CSS = `
   .lp-pop, .lp-rise { opacity: 1 !important; animation: none !important; }
 }
 `
-
-function LogoMark({ vh = 5, min = 28, max = 54 }) {
-  const h = `clamp(${min}px, ${vh}vh, ${max}px)`
-  return (
-    <div className="flex items-end gap-[3px] shrink-0" style={{ height: h }}>
-      {[0.45, 0.7, 1].map((r, i) => (
-        <span key={i} className="rounded-[3px]"
-          style={{ width: `calc(${h} * .24)`, height: `calc(${h} * ${r})`, background: i === 2 ? 'linear-gradient(180deg,#75DFFF,#0497F6)' : 'linear-gradient(180deg,#4EB9E5,#0080DD)' }} />
-      ))}
-    </div>
-  )
-}
 
 /* Pins: x, y = tip position in % of the page */
 const PINS = [
@@ -239,9 +229,8 @@ export default function LoginPage() {
       {/* ===== Top nav ===== */}
       <header className="relative z-20 flex items-center justify-between"
         style={{ padding: 'clamp(16px,3.4vh,36px) clamp(20px,4.6vw,72px) 0' }}>
-        <Link to="/" className="flex items-center lp-rise" style={{ gap: 'clamp(8px,1.4vh,16px)' }}>
-          <LogoMark vh={5.4} min={30} max={58} />
-          <span className="lp-logo font-bold tracking-tight">LeadScope <span className="text-[#4EB9E5]">AI</span></span>
+        <Link to="/" aria-label="LeadScope" className="flex items-center lp-rise rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4EB9E5]">
+          <Logo size="clamp(30px, 5.4vh, 58px)" textClassName="lp-logo" />
         </Link>
         <nav className="lp-nav hidden sm:flex items-center lp-rise" style={{ gap: 'clamp(18px,3vw,40px)' }}>
           <Link to="/" className="hover:text-[#75DFFF] transition-colors">Home</Link>
@@ -281,9 +270,9 @@ export default function LoginPage() {
         <section className="lp-rise w-full bg-[#113E62] text-[#E6F1F7] border border-[#1B4C74] rounded-[24px] mx-auto"
           style={{ maxWidth: 640, padding: 'clamp(24px,5vh,56px) clamp(22px,3.4vw,64px)', boxShadow: '0 40px 80px -30px rgba(0,0,0,.7), 0 0 60px -24px rgba(78,185,229,.45)', animationDelay: '250ms' }}>
           <div className="flex items-center justify-center" style={{ gap: 'clamp(10px,1.8vh,20px)' }}>
-            <LogoMark vh={7} min={36} max={72} />
+            <LogoMark size="clamp(36px, 7vh, 72px)" />
             <div>
-              <p className="lp-rlogo font-extrabold leading-none tracking-tight">LeadScope <span className="text-[#4EB9E5]">AI</span></p>
+              <p className="lp-rlogo font-display font-extrabold leading-none tracking-tight text-white">LeadScope<span className="text-[#0497F6]">.</span></p>
               <p className="lp-rtag mt-1.5 text-[#9DB8CF]">Local Businesses. Real Opportunities.</p>
             </div>
           </div>

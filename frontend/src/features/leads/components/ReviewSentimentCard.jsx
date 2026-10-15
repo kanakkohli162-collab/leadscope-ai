@@ -10,7 +10,11 @@ const STYLE = {
   Negative: { icon: Frown, text: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/30' },
 }
 
-export default function ReviewSentimentCard({ lead }) {
+/**
+ * Review sentiment for a lead (Lead Details, Review Analyzer) or for pasted reviews only (no lead).
+ * With a lead, the backend also saves the result on it. `onResult(result)` is called after each analysis.
+ */
+export default function ReviewSentimentCard({ lead, onResult }) {
   const [reviews, setReviews] = useState('')
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -30,7 +34,9 @@ export default function ReviewSentimentCard({ lead }) {
     setError('')
     setResult(null)
     try {
-      setResult(await analyzeSentiment(reviews, lead?.id))
+      const res = await analyzeSentiment(reviews, lead?.id)
+      setResult(res)
+      onResult?.(res)
     } catch (e) {
       setError(e.message || 'Something went wrong. Please try again.')
     } finally {
@@ -84,6 +90,7 @@ export default function ReviewSentimentCard({ lead }) {
           {loading && <Loader2 size={16} className="animate-spin" />}
           {loading ? 'Analysing…' : 'Analyse Sentiment'}
         </button>
+        {result && lead && <span className="text-xs text-green-400">Saved on {lead.name}</span>}
         {reviews && !loading && (
           <button
             onClick={() => { setReviews(''); setResult(null); setError('') }}

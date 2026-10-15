@@ -10,6 +10,7 @@ import { getCurrentUser } from '@/utils/currentUser'
 import { useLogout } from '@/hooks/useLogout'
 import InsideMapSheet from '@/features/leads/components/InsideMapSheet'
 import HeroMapSlider from '@/features/leads/components/HeroMapSlider'
+import Logo from '@/components/ui/Logo'
 
 /* ---------- colours: deep ocean theme (taken from the reference image) ---------- */
 const C = {
@@ -320,8 +321,8 @@ export default function LandingPage() {
       <section className="relative overflow-hidden" style={{ background: 'radial-gradient(70% 85% at 72% 40%, #0B4A7A 0%, #001C36 45%, #01081A 85%)' }}>
         {/* Top bar */}
         <header className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
-          <Link to="/" className={`text-2xl font-bold text-white ${display}`}>
-            LeadScope<span style={{ color: C.blue }}>.</span>
+          <Link to="/" aria-label="LeadScope" className="inline-flex rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4EB9E5]">
+            <Logo size={40} textClassName="text-2xl" />
           </Link>
           <nav className="hidden lg:flex items-center gap-8 text-[15px]" style={{ color: '#B5CBDD' }}>
             <a href="#about" className="text-white font-medium relative after:absolute after:left-0 after:-bottom-2 after:h-0.5 after:w-full after:bg-[#0497F6]">Home</a>
@@ -631,7 +632,9 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-10 grid gap-10 sm:grid-cols-2 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           {/* brand */}
           <div>
-            <Link to="/" className={`text-2xl font-bold text-white ${display}`}>LeadScope<span style={{ color: C.blue }}>.</span></Link>
+            <Link to="/" aria-label="LeadScope" className="inline-flex rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4EB9E5]">
+              <Logo size={40} textClassName="text-2xl" />
+            </Link>
             <p className="mt-3 text-sm leading-relaxed max-w-xs">Find and contact local businesses that need online services.</p>
             <BlueButton to={loggedIn ? '/dashboard' : '/login'} state={loggedIn ? undefined : { mode: 'signup' }} className="mt-5 px-5 py-2.5 text-sm">
               {loggedIn ? 'Open dashboard' : 'Start free'} <ArrowRight size={15} />
