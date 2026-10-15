@@ -1,8 +1,10 @@
 import { memo, useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import clsx from 'clsx'
-import { Sparkles, PanelLeftClose, PanelLeftOpen, X } from 'lucide-react'
-import { NAV_ITEMS } from '@/config/navigation'
+import { PanelLeftClose, PanelLeftOpen, X } from 'lucide-react'
+import LogoMark from '@/components/ui/LogoMark'
+import Logo from '@/components/ui/Logo'
+import { NAV_GROUPS } from '@/config/navigation'
 import { getCurrentUser } from '@/utils/currentUser'
 
 function Sidebar({ collapsed, onToggleCollapsed, mobileOpen, onCloseMobile }) {
@@ -42,14 +44,13 @@ function Sidebar({ collapsed, onToggleCollapsed, mobileOpen, onCloseMobile }) {
         style={{ backgroundImage: 'radial-gradient(120% 60% at 0% 0%, rgba(4,151,246,.22) 0%, rgba(4,151,246,0) 60%), radial-gradient(90% 50% at 100% 100%, rgba(78,185,229,.14) 0%, rgba(78,185,229,0) 65%)' }}
       >
         <div className={clsx('flex items-center h-16 px-4', collapsed ? 'lg:justify-center lg:px-0' : 'justify-between')}>
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0497F6] to-[#4EB9E5] flex items-center justify-center shrink-0 shadow-lg shadow-[#4EB9E5]/40">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <div className={clsx('min-w-0', collapsed && 'lg:hidden')}>
-              <p className="font-display text-lg font-bold leading-tight text-white">LeadScope AI</p>
-              <p className="text-[11px] text-[#9DB8CF]">Find businesses that need you</p>
-            </div>
+          {/* Collapsed (desktop): only the mark; otherwise the full logo + tagline */}
+          <div className={clsx('hidden', collapsed && 'lg:block')}>
+            <LogoMark size={36} label="LeadScope" />
+          </div>
+          <div className={clsx('min-w-0', collapsed && 'lg:hidden')}>
+            <Logo size={34} textClassName="text-lg" />
+            <p className="mt-1 text-[11px] text-[#9DB8CF] truncate">Find businesses that need you</p>
           </div>
 
           <button
@@ -73,8 +74,16 @@ function Sidebar({ collapsed, onToggleCollapsed, mobileOpen, onCloseMobile }) {
           )}
         </div>
 
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto overflow-x-hidden">
-          {NAV_ITEMS.map((item) => {
+        <nav className="flex-1 px-3 py-3 overflow-y-auto overflow-x-hidden">
+          {NAV_GROUPS.map((group, gi) => (
+            <div key={group.label} className={gi > 0 ? 'mt-4' : ''}>
+              {/* Section label: hidden when collapsed (a thin line keeps the groups apart instead) */}
+              <p className={clsx('px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#6F8FAA]', collapsed && 'lg:hidden')}>
+                {group.label}
+              </p>
+              {collapsed && gi > 0 && <div className="hidden lg:block mx-3 mb-2 border-t border-line" aria-hidden="true" />}
+              <div className="space-y-1">
+          {group.items.map((item) => {
             const Icon = item.icon
             const forceActive = item.match && pathname.startsWith(item.match)
             return (
@@ -97,6 +106,9 @@ function Sidebar({ collapsed, onToggleCollapsed, mobileOpen, onCloseMobile }) {
               </NavLink>
             )
           })}
+              </div>
+            </div>
+          ))}
         </nav>
 
         {collapsed && (

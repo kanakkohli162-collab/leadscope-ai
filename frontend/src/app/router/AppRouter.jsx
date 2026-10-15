@@ -17,6 +17,9 @@ const PipelinePage = lazy(() => import('@/features/pipeline/pages/PipelinePage')
 const OpportunityMapPage = lazy(() => import('@/features/opportunity-map/pages/OpportunityMapPage'))
 const WebsiteCheckerPage = lazy(() => import('@/features/website-checker/pages/WebsiteCheckerPage'))
 const SettingsPage = lazy(() => import('@/features/settings/pages/SettingsPage'))
+const ChatPage = lazy(() => import('@/features/chat/pages/ChatPage'))
+const ReviewAnalyzerPage = lazy(() => import('@/features/reviews/pages/ReviewAnalyzerPage'))
+const ExportReportsPage = lazy(() => import('@/features/reports/pages/ExportReportsPage'))
 
 export default function AppRouter() {
   return (
@@ -56,13 +59,14 @@ export default function AppRouter() {
         <Route path="/opportunity-map" element={<OpportunityMapPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/website-checker" element={<WebsiteCheckerPage />} />
+        <Route path="/review-analyzer" element={<ReviewAnalyzerPage />} />
+        <Route path="/chatbot" element={<ChatPage />} />
+        <Route path="/export" element={<ExportReportsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
 
         {/* Old pages → merged into other screens */}
-        <Route path="/export" element={<Navigate to="/my-leads" replace />} />
         <Route path="/saved-searches" element={<Navigate to="/lead-discovery" replace />} />
         <Route path="/ai-analysis/:id" element={<Navigate to="/my-leads" replace />} />
-        <Route path="/chatbot" element={<Navigate to="/dashboard" replace />} />
       </Route>
 
       {/* Unknown address → front page */}
