@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, KanbanSquare, Flame, Wallet, Trophy, TrendingUp, ArrowRight } from 'lucide-react'
 import PageLoader from '@/components/ui/PageLoader'
+import WhitePanel from '@/components/ui/WhitePanel'
 import { updateLeadStatus, updateDealValue } from '@/services/leadService'
 import { useToast } from '@/hooks/useToast'
 import { useLeads } from '@/features/leads/hooks/useLeads'
@@ -156,6 +157,7 @@ export default function PipelinePage() {
         </div>
       </div>
 
+      <WhitePanel as="div" bodyClassName="space-y-5">
       {/* Filters */}
       <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
         <div className="relative sm:w-72">
@@ -280,9 +282,10 @@ export default function PipelinePage() {
           })}
         </div>
       </div>
+      </WhitePanel>
 
       {/* Conversion rates */}
-      <section className="bg-card rounded-xl border border-slate-200 p-4 sm:p-5" aria-labelledby="conversion-title">
+      <WhitePanel aria-labelledby="conversion-title">
         <h2 id="conversion-title" className="text-sm font-semibold text-slate-800 flex items-center gap-2">
           <TrendingUp size={16} className="text-aqua" aria-hidden="true" /> Conversion rates
         </h2>
@@ -298,7 +301,7 @@ export default function PipelinePage() {
             </div>
           ))}
         </div>
-      </section>
+      </WhitePanel>
     </div>
   )
 }

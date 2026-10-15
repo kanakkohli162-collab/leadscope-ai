@@ -1,53 +1,41 @@
 /** @type {import('tailwindcss').Config} */
+
+/*
+ * Theme colours are CSS variables (set in src/styles/index.css):
+ *   :root      -> the dark "deep ocean" values (unchanged look everywhere)
+ *   .ls-light  -> light values, used inside white panels (components/ui/WhitePanel.jsx)
+ * So the same classes (text-slate-800, bg-card, border-line …) read correctly on dark AND on white.
+ * Format "R G B" keeps opacity modifiers working, e.g. bg-primary-600/15.
+ */
+const v = (name) => `rgb(var(--c-${name}) / <alpha-value>)`
+const scale = (name, shades) => Object.fromEntries(shades.map((s) => [s, v(`${name}-${s}`)]))
+
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
-        // Azure (matches the landing page "deep ocean" theme)
-        primary: {
-          50: '#E6F5FE',
-          100: '#CDEBFD',
-          200: '#9BD7FB',
-          300: '#68C2F9',
-          400: '#3FB2F8',
-          500: '#22A6F7',
-          600: '#0497F6',
-          700: '#0080DD',
-          800: '#0067B3',
-          900: '#004E88',
-        },
-        // Remapped for a DARK UI: low numbers = dark surfaces, high numbers = light text
-        slate: {
-          50: '#01081A',
-          100: '#001C36',
-          200: '#1B4C74',
-          300: '#2A5F8A',
-          400: '#6F8FAA',
-          500: '#9DB8CF',
-          600: '#B5CBDD',
-          700: '#CFDEEA',
-          800: '#E6F1F7',
-          900: '#F3F8FB',
-          950: '#FFFFFF',
-        },
-        marigold: {
-          50: '#FFF6E5',
-          100: '#FDE3B0',
-          400: '#F8B84A',
-          500: '#F5A524',
-          600: '#C9860B',
-          700: '#9A6508',
-        },
+        // Azure (matches the landing page "deep ocean" theme); #447EFC family inside white panels
+        primary: scale('primary', [50, 100, 200, 300, 400, 500, 600, 700, 800, 900]),
+        // Remapped for a DARK UI: low numbers = dark surfaces, high numbers = light text (flipped in .ls-light)
+        slate: scale('slate', [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950]),
+        marigold: scale('marigold', [50, 100, 400, 500, 600, 700]),
         abyss: '#01081A',   // page background
-        deepsea: '#001C36', // sidebar, topbar, panels
-        card: '#113E62',    // cards, tables, inputs, menus, modals
-        inset: '#0B3354',   // boxes inside cards
-        line: '#1B4C74',    // borders, dividers, chart grid
-        aqua: { DEFAULT: '#4EB9E5', light: '#75DFFF' }, // glow, accents, active states
+        deepsea: v('deepsea'), // sidebar, topbar, panels, dropdown lists
+        card: v('card'),    // cards, tables, inputs, menus, modals
+        inset: v('inset'),  // boxes inside cards
+        line: v('line'),    // borders, dividers, chart grid
+        aqua: { DEFAULT: v('aqua'), light: v('aqua-light') }, // glow, accents, active states
         sidebar: { DEFAULT: '#001C36', light: '#113E62' },
-        ink: '#E6F1F7',
-        mist: '#0B3354',
+        ink: v('ink'),
+        mist: v('mist'),
+        // Only the light text shades of these change inside white panels (for contrast); the rest stay Tailwind's
+        red: scale('red', [200, 300, 400]),
+        green: scale('green', [300, 400]),
+        emerald: scale('emerald', [300, 400]),
+        amber: scale('amber', [300, 400]),
+        orange: scale('orange', [300]),
+        teal: scale('teal', [300]),
       },
       fontFamily: {
         sans: ['Figtree', 'system-ui', 'sans-serif'],

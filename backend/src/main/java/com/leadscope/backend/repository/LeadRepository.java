@@ -20,6 +20,13 @@ public interface LeadRepository extends JpaRepository<Lead, Long> {
     // Same business name (for "Already in My Leads")
     List<Lead> findByOwnerEmailAndBusinessNameIgnoreCase(String ownerEmail, String businessName);
 
+    // Delete my account: remove all of this owner's leads
+    @org.springframework.transaction.annotation.Transactional
+    long deleteByOwnerEmail(String ownerEmail);
+
+    // Usage this month
+    long countByOwnerEmailAndCreatedAtAfter(String ownerEmail, java.time.LocalDateTime after);
+
     // One lead, only if it belongs to this owner
     Optional<Lead> findByIdAndOwnerEmail(Long id, String ownerEmail);
 

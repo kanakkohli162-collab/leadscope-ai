@@ -23,7 +23,7 @@ function ResultCard({
   const checkerUrl = `/website-checker?url=${encodeURIComponent(r.website || '')}${savedId ? `&leadId=${savedId}` : ''}`
 
   return (
-    <div className={`bg-card rounded-xl border p-4 sm:p-5 flex flex-col min-w-0 ${selected ? 'border-primary-600 ring-1 ring-primary-600' : 'border-slate-200'}`}>
+    <div className={`ls-lift bg-card rounded-xl border p-4 sm:p-5 flex flex-col min-w-0 ${selected ? 'border-primary-600 ring-1 ring-primary-600' : 'border-line'}`}>
       <div className="flex items-start gap-3">
         <input
           type="checkbox"

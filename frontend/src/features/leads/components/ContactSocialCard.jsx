@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import WhitePanel from '@/components/ui/WhitePanel'
 import { Contact, Loader2, RefreshCw, Mail, MessageCircle, Send } from 'lucide-react'
 import { enrichLead } from '@/services/leadService'
 import SocialIcons from './SocialIcons'
@@ -42,7 +43,7 @@ export default function ContactSocialCard({ lead, onLeadChange }) {
   }
 
   return (
-    <div className="bg-card rounded-xl border border-slate-200 p-5 space-y-4">
+    <WhitePanel bodyClassName="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
@@ -129,6 +130,6 @@ export default function ContactSocialCard({ lead, onLeadChange }) {
           </div>
         </div>
       )}
-    </div>
+    </WhitePanel>
   )
 }

@@ -4,6 +4,8 @@ import com.leadscope.backend.dto.SearchResult;
 import com.leadscope.backend.service.GeoapifyService;
 import com.leadscope.backend.service.PlacesService;
 import com.leadscope.backend.service.SearchDeduplicator;
+import com.leadscope.backend.service.UsageService;
+import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +32,7 @@ public class SearchController {
 
     private final PlacesService placesService;
     private final GeoapifyService geoapifyService;
+    private final UsageService usageService;
     private final String googleKey;
     private final int dailyCap;          // 0 = no cap
 
@@ -38,10 +41,12 @@ public class SearchController {
 
     public SearchController(PlacesService placesService,
                             GeoapifyService geoapifyService,
+                            UsageService usageService,
                             @Value("${google.places.key:}") String googleKey,
                             @Value("${app.search.daily-cap:1000}") int dailyCap) {
         this.placesService = placesService;
         this.geoapifyService = geoapifyService;
+        this.usageService = usageService;
         this.googleKey = googleKey;
         this.dailyCap = dailyCap;
     }
@@ -53,7 +58,13 @@ public class SearchController {
     }
 
     @PostMapping
-    public SearchResult search(@RequestBody Map<String, Object> body) {
+    public SearchResult search(@RequestBody Map<String, Object> body, Authentication auth) {
+        SearchResult result = runSearch(body);
+        usageService.record(auth == null ? null : auth.getName(), UsageService.Kind.SEARCH);   // "Usage this month"
+        return result;
+    }
+
+    private SearchResult runSearch(Map<String, Object> body) {
         String city = text(body.get("city"));
         String category = text(body.get("category"));
         String area = text(body.get("area"));

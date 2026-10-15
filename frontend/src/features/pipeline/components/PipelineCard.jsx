@@ -73,7 +73,7 @@ export default function PipelineCard({ lead, statuses, saving, onMove, onDealVal
       draggable={!saving && !editing}
       onDragStart={(e) => onDragStart(e, lead)}
       onDragEnd={onDragEnd}
-      className={`group bg-card rounded-lg border border-line p-3 shadow-sm cursor-grab active:cursor-grabbing motion-safe:transition-opacity ${
+      className={`group ls-lift bg-card rounded-lg border border-line p-3 shadow-sm cursor-grab active:cursor-grabbing ${
         saving ? 'opacity-60' : 'hover:border-primary-600'
       }`}
     >

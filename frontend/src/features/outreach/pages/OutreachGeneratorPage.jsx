@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import WhitePanel from '@/components/ui/WhitePanel'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   Copy, Check, Download, RefreshCw, Mail, MessageCircle, Linkedin, Sparkles, ListOrdered, Loader2, BookmarkPlus,
@@ -11,6 +12,7 @@ import { useTypewriter } from '@/hooks/useTypewriter'
 import { generateMessage, generateSequence } from '@/services/leadService'
 import { useLeads } from '@/features/leads/hooks/useLeads'
 import { toWhatsAppNumber } from '@/features/leads/utils/contactChannel'
+import { getCurrentUser } from '@/utils/currentUser'
 import LeadPicker from '../components/LeadPicker'
 import { checkMessage } from '../utils/messageQuality'
 import { loadTemplates, saveTemplate, deleteTemplate, fillTemplate, loadHistory, addToHistory } from '../utils/messageStore'
@@ -71,9 +73,12 @@ export default function OutreachGeneratorPage() {
   const [params] = useSearchParams()
   const [leadId, setLeadId] = useState('')
   const [service, setService] = useState(SERVICES[0])
-  const [channel, setChannel] = useState('whatsapp')
-  const [tone, setTone] = useState('Friendly')
-  const [language, setLanguage] = useState('English')
+  // Defaults from Settings, else WhatsApp / Friendly / English
+  const [channel, setChannel] = useState(() => getCurrentUser().defaultChannel || 'whatsapp')
+  const [tone, setTone] = useState(() => getCurrentUser().defaultTone || 'Friendly')
+  const [language, setLanguage] = useState(() => getCurrentUser().defaultLanguage || 'English')
+  // Website problems from the Website Checker (?issues=…), given to the AI as extra facts
+  const [context, setContext] = useState(() => params.get('issues') || '')
   const [twoVersions, setTwoVersions] = useState(false)
 
   const [result, setResult] = useState(null)      // { source, note, messages, used }
@@ -101,7 +106,7 @@ export default function OutreachGeneratorPage() {
 
   const typed = useTypewriter(draft?.body || '', runKey)
   const quality = useMemo(() => (draft ? checkMessage({ ...draft, channel, lead }) : []), [draft, channel, lead])
-  const options = { service, channel, tone, language }
+  const options = { service, channel, tone, language, context: context || undefined }
   const whatsapp = toWhatsAppNumber(lead?.phone)
 
   function reset() {
@@ -185,13 +190,13 @@ export default function OutreachGeneratorPage() {
 
   if (!leads.length) {
     return (
-      <div className="bg-card rounded-xl border border-slate-200 p-10 text-center">
+      <WhitePanel as="div" bodyClassName="text-center !p-8 sm:!p-10">
         <h2 className="text-lg font-semibold text-slate-800">No leads yet</h2>
         <p className="text-sm text-slate-500 mt-1">Add a lead first, then come back to write a message.</p>
         <Link to="/lead-discovery" className="inline-block mt-4 bg-primary-600 text-white font-medium px-5 py-2.5 rounded-md">
           Find Leads →
         </Link>
-      </div>
+      </WhitePanel>
     )
   }
 
@@ -209,7 +214,7 @@ export default function OutreachGeneratorPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* ---------- Left: choices ---------- */}
         <div className="space-y-4 min-w-0">
-          <div className="bg-card rounded-xl border border-slate-200 p-5">
+          <WhitePanel as="div">
             <LeadPicker leads={leads} value={leadId} onChange={(id) => { setLeadId(id); reset() }} />
             {lead && (
               <div className="mt-4 flex items-center gap-3 p-3 bg-inset rounded-lg">
@@ -220,9 +225,9 @@ export default function OutreachGeneratorPage() {
                 </div>
               </div>
             )}
-          </div>
+          </WhitePanel>
 
-          <div className="bg-card rounded-xl border border-slate-200 p-5 space-y-4">
+          <WhitePanel as="div" bodyClassName="space-y-4">
             <div>
               <label htmlFor="msg-service" className="block text-sm font-medium text-slate-700 mb-2">Service to offer</label>
               <select
@@ -234,6 +239,15 @@ export default function OutreachGeneratorPage() {
                 {SERVICES.map((s) => <option key={s}>{s}</option>)}
               </select>
             </div>
+            {context && (
+              <div className="rounded-lg border border-marigold-500/40 bg-marigold-500/10 px-3 py-2.5 text-xs text-slate-600">
+                <p className="font-semibold text-marigold-400">Website issues included</p>
+                <p className="mt-0.5">{context}</p>
+                <button type="button" onClick={() => setContext('')} className={`mt-1 font-medium text-slate-500 hover:text-slate-800 underline rounded ${FOCUS}`}>
+                  Don’t use these
+                </button>
+              </div>
+            )}
             <ChipGroup label="Channel" options={CHANNELS} value={channel} onChange={(c) => { setChannel(c); reset() }} />
             <ChipGroup label="Tone" options={TONES} value={tone} onChange={setTone} />
             <ChipGroup label="Language" options={LANGUAGES} value={language} onChange={setLanguage} />
@@ -244,7 +258,7 @@ export default function OutreachGeneratorPage() {
               </span>
               <input type="checkbox" checked={twoVersions} onChange={(e) => setTwoVersions(e.target.checked)} className={`w-4 h-4 accent-primary-600 ${FOCUS}`} />
             </label>
-          </div>
+          </WhitePanel>
 
           <button
             type="button"
@@ -266,7 +280,7 @@ export default function OutreachGeneratorPage() {
           </button>
 
           {/* Templates */}
-          <div className="bg-card rounded-xl border border-slate-200 p-5">
+          <WhitePanel as="div">
             <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-2"><FileText size={15} className="text-aqua" aria-hidden="true" /> My templates</h3>
             {templates.length ? (
               <ul className="mt-3 space-y-2">
@@ -285,11 +299,11 @@ export default function OutreachGeneratorPage() {
             ) : (
               <p className="mt-2 text-xs text-slate-500">Write a message you like and click <b className="text-slate-700">Save as template</b>. The business name is filled in for each lead.</p>
             )}
-          </div>
+          </WhitePanel>
 
           {/* History for this lead */}
           {history.length > 0 && (
-            <div className="bg-card rounded-xl border border-slate-200 p-5">
+            <WhitePanel as="div">
               <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-2"><History size={15} className="text-aqua" aria-hidden="true" /> Message history</h3>
               <ul className="mt-3 space-y-2">
                 {history.map((h) => (
@@ -305,7 +319,7 @@ export default function OutreachGeneratorPage() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </WhitePanel>
           )}
         </div>
 
@@ -317,7 +331,7 @@ export default function OutreachGeneratorPage() {
             </p>
           )}
 
-          <div className="bg-card rounded-xl border border-slate-200 p-5 flex flex-col">
+          <WhitePanel as="div" bodyClassName="flex flex-col">
             {/* A / B versions */}
             {result?.messages?.length > 1 && (
               <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -429,18 +443,18 @@ export default function OutreachGeneratorPage() {
                 {writing ? 'Writing your message…' : <span>Choose a lead and options, then click <b className="mx-1 text-slate-600">Write message</b>.</span>}
               </div>
             )}
-          </div>
+          </WhitePanel>
 
           {/* Follow-up sequence */}
           {sequence && (
-            <div className="space-y-3">
+            <WhitePanel as="div" bodyClassName="space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h2 className="text-base font-semibold text-slate-800 flex items-center gap-2"><ListOrdered size={17} className="text-aqua" aria-hidden="true" /> Follow-up sequence</h2>
                 {sequence.source !== 'AI' && <p className="text-xs text-amber-300">{sequence.note || 'Written from a template.'}</p>}
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {sequence.steps.map((s) => (
-                  <div key={s.day} className="bg-card rounded-xl border border-slate-200 p-4 flex flex-col">
+                  <div key={s.day} className="ls-lift bg-inset rounded-xl border border-line p-4 flex flex-col">
                     <p className="text-xs font-bold text-aqua-light">{s.label}</p>
                     {s.subject && <p className="mt-2 text-sm font-semibold text-slate-800">{s.subject}</p>}
                     <p className="mt-2 text-sm text-slate-600 whitespace-pre-line flex-1">{s.body}</p>
@@ -450,7 +464,7 @@ export default function OutreachGeneratorPage() {
                   </div>
                 ))}
               </div>
-            </div>
+            </WhitePanel>
           )}
         </div>
       </div>

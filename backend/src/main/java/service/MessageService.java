@@ -19,8 +19,15 @@ import java.util.*;
 @Service
 public class MessageService {
 
-    public record Options(String service, String channel, String tone, String language) {
+    /** context = extra facts for the AI (e.g. Website Checker issues), optional, max 600 characters. */
+    public record Options(String service, String channel, String tone, String language, String context) {
+        public Options(String service, String channel, String tone, String language) {
+            this(service, channel, tone, language, null);
+        }
+
         public Options {
+            context = context == null || context.isBlank() ? null
+                    : context.trim().substring(0, Math.min(600, context.trim().length()));
             service = blankTo(service, "Website Development");
             channel = blankTo(channel, "email").toLowerCase(Locale.ROOT);
             if (!List.of("email", "whatsapp", "linkedin").contains(channel)) channel = "email";
@@ -144,8 +151,14 @@ public class MessageService {
                 + "Business: " + lead.getBusinessName() + " (" + nz(lead.getCategory(), "local business") + ", " + nz(lead.getCity(), "") + ")\n"
                 + (lead.getRating() != null ? "Rating: " + lead.getRating() + " from " + lead.getReviewCount() + " reviews\n" : "")
                 + "Problems we noticed: " + nz(lead.getOpportunities(), "none found") + "\n"
-                + "Service we offer: " + o.service() + "\n"
-                + "Sign off as: " + signature(sender) + "\n";
+                + "Service to offer: " + o.service() + "\n"
+                + (servicesOffered(sender).isEmpty() ? ""
+                    : "The agency ONLY offers: " + String.join(", ", servicesOffered(sender))
+                    + ". Do not offer anything else; pick the closest of these to the service above.\n")
+                + (o.context() != null ? "Extra facts we found (use them): " + o.context() + "\n" : "")
+                + (hasOwnSignature(sender)
+                    ? "End the message with exactly this signature, on its own lines:\n" + signature(sender) + "\n"
+                    : "Sign off as: " + signature(sender) + "\n");
     }
 
     private List<Map<String, String>> parseList(String json, String field, int expected) {
@@ -198,7 +211,9 @@ public class MessageService {
         String name = lead.getBusinessName();
         String city = nz(lead.getCity(), "your area");
         String gap = firstGap(lead);
-        String problem = gap == null ? "there may be room to grow your online presence"
+        String service = serviceFor(sender, o.service());
+        String problem = o.context() != null ? "I checked your website and noticed: " + o.context().toLowerCase(Locale.ROOT)
+                : gap == null ? "there may be room to grow your online presence"
                 : "I noticed one thing that may be costing you customers: " + gap.toLowerCase(Locale.ROOT);
         String opener = variant == 0
                 ? "I came across " + name + " in " + city + " and " + problem + "."
@@ -209,29 +224,53 @@ public class MessageService {
 
         return switch (o.channel()) {
             case "whatsapp" -> msg("", "Hi " + name + " team! " + opener + " We help businesses like yours with "
-                    + o.service() + ". " + ask + "\n\n- " + signature(sender));
-            case "linkedin" -> msg("", "Hello! " + opener + " We help local businesses with " + o.service() + ". " + ask);
+                    + service + ". " + ask + signOff(sender, false));
+            case "linkedin" -> msg("", "Hello! " + opener + " We help local businesses with " + service + ". " + ask);
             default -> msg(variant == 0 ? "A quick idea for " + name : "More customers for " + name + "?",
-                    "Hi,\n\n" + opener + "\n\nWe help businesses like yours with " + o.service()
+                    "Hi,\n\n" + opener + "\n\nWe help businesses like yours with " + service
                             + ", so more people can find and choose you online.\n\n"
-                            + ask + "\n\nBest regards,\n" + signature(sender));
+                            + ask + signOff(sender, true));
         };
     }
 
     private List<Map<String, String>> sequenceTemplate(Lead lead, User sender, Options o) {
         String name = lead.getBusinessName();
-        String sign = signature(sender);
         String gap = firstGap(lead);
         String reminder = "Hi " + name + " team, just following up on my message from a few days ago"
                 + (gap == null ? "" : " about \"" + gap.toLowerCase(Locale.ROOT) + "\"")
                 + ". Would a quick 10-minute call this week work for you?";
         String last = "Hi " + name + " team, I don't want to fill your inbox, so this is my last note. "
-                + "If you'd like help with " + o.service() + " later, just reply here and I'll be happy to help.";
+                + "If you'd like help with " + serviceFor(sender, o.service()) + " later, just reply here and I'll be happy to help.";
         boolean email = o.channel().equals("email");
         return new ArrayList<>(List.of(
                 template(lead, sender, o, 0),
-                msg(email ? "Following up: " + name : "", reminder + (email ? "\n\nBest regards,\n" + sign : "\n\n- " + sign)),
-                msg(email ? "Last note for " + name : "", last + (email ? "\n\nBest regards,\n" + sign : "\n\n- " + sign))));
+                msg(email ? "Following up: " + name : "", reminder + signOff(sender, email)),
+                msg(email ? "Last note for " + name : "", last + signOff(sender, email))));
+    }
+
+    /** The agency's own signature as written; otherwise "Best regards," (email) or "- " before the name. */
+    private String signOff(User sender, boolean email) {
+        if (hasOwnSignature(sender)) return "\n\n" + signature(sender);
+        return email ? "\n\nBest regards,\n" + signature(sender) : "\n\n- " + signature(sender);
+    }
+
+    /**
+     * The service to name in a template: the requested one if the agency offers it (Settings),
+     * otherwise the services the agency does offer. No services set in Settings = the requested one.
+     */
+    private static String serviceFor(User sender, String requested) {
+        List<String> offered = servicesOffered(sender);
+        if (offered.isEmpty()) return requested;
+        String r = requested.toLowerCase(Locale.ROOT);
+        String wanted = r.contains("social") ? "Social media"
+                : r.contains("google") || r.contains("review") ? "Google listing"
+                : r.contains("seo") && !r.contains("website") ? "SEO"
+                : r.contains("ads") ? "Ads"
+                : r.contains("brand") ? "Branding"
+                : "Websites";
+        if (offered.contains(wanted)) return requested;
+        return offered.size() == 1 ? offered.get(0)
+                : String.join(", ", offered.subList(0, offered.size() - 1)) + " and " + offered.get(offered.size() - 1);
     }
 
     // ---------- helpers ----------
@@ -249,10 +288,24 @@ public class MessageService {
         return null;
     }
 
+    /** The agency's own signature (Settings), else "Name, Agency" (+ phone / website when set). */
     private String signature(User sender) {
-        String person = sender.getName() == null ? "" : sender.getName();
+        if (hasOwnSignature(sender)) return sender.getSignature().trim();
+        String person = nz(sender.getSenderName(), nz(sender.getName(), ""));
         String agency = sender.getAgencyName() == null ? "" : sender.getAgencyName();
-        return agency.isBlank() ? person : person + ", " + agency;
+        String line = agency.isBlank() ? person : person + ", " + agency;
+        if (sender.getSenderPhone() != null && !sender.getSenderPhone().isBlank()) line += "\n" + sender.getSenderPhone().trim();
+        if (sender.getSenderWebsite() != null && !sender.getSenderWebsite().isBlank()) line += "\n" + sender.getSenderWebsite().trim();
+        return line;
+    }
+
+    private static boolean hasOwnSignature(User sender) {
+        return sender.getSignature() != null && !sender.getSignature().isBlank();
+    }
+
+    private static List<String> servicesOffered(User sender) {
+        if (sender.getServicesOffered() == null) return List.of();
+        return Arrays.stream(sender.getServicesOffered().split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList();
     }
 
     private static String nz(String s, String fallback) {

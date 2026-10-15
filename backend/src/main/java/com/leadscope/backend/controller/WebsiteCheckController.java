@@ -1,6 +1,7 @@
 package com.leadscope.backend.controller;
 
 import com.leadscope.backend.repository.LeadRepository;
+import com.leadscope.backend.service.UsageService;
 import com.leadscope.backend.service.WebsiteCheckService;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -13,10 +14,13 @@ public class WebsiteCheckController {
 
     private final WebsiteCheckService websiteCheckService;
     private final LeadRepository leadRepository;
+    private final UsageService usageService;
 
-    public WebsiteCheckController(WebsiteCheckService websiteCheckService, LeadRepository leadRepository) {
+    public WebsiteCheckController(WebsiteCheckService websiteCheckService, LeadRepository leadRepository,
+                                  UsageService usageService) {
         this.websiteCheckService = websiteCheckService;
         this.leadRepository = leadRepository;
+        this.usageService = usageService;
     }
     // leadId is optional: when given (and it is the user's own lead), the result is saved on that lead for Insights
     public record WebsiteCheckRequest(String url, Long leadId) {}
@@ -24,6 +28,7 @@ public class WebsiteCheckController {
     @PostMapping("/website-check")
     public Map<String, Object> check(@RequestBody WebsiteCheckRequest request, Authentication auth) {
         Map<String, Object> result = websiteCheckService.check(request.url());
+        usageService.record(auth.getName(), UsageService.Kind.WEBSITE_CHECK);
         if (request.leadId() != null) {
             leadRepository.findByIdAndOwnerEmail(request.leadId(), auth.getName()).ifPresent(lead -> {
                 lead.setWebsiteHealthScore((Integer) result.get("score"));

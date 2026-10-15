@@ -5,9 +5,11 @@ import {
   Scale, Info, TrendingUp,
 } from 'lucide-react'
 import PageLoader from '@/components/ui/PageLoader'
+import WhitePanel from '@/components/ui/WhitePanel'
 import { useToast } from '@/hooks/useToast'
 import { searchBusinesses, createLead, getLeads, enrichLead } from '@/services/leadService'
 import { storage, STORAGE_KEYS } from '@/utils/storage'
+import { getCurrentUser } from '@/utils/currentUser'
 import { exportLeadsToExcel } from '../utils/exportLeads'
 import CityInput from '../components/discovery/CityInput'
 import CategoryPicker from '../components/discovery/CategoryPicker'
@@ -42,8 +44,9 @@ export default function LeadDiscoveryPage() {
   const navigate = useNavigate()
 
   // ---- form ----
-  const [city, setCity] = useState('')
-  const [category, setCategory] = useState('')
+  // Start with the defaults from Settings (if any)
+  const [city, setCity] = useState(() => getCurrentUser().defaultCity || '')
+  const [category, setCategory] = useState(() => getCurrentUser().defaultBusinessType || '')
   const [area, setArea] = useState('')
   const [service, setService] = useState('')        // "What do you sell?" (optional)
   const [compareOpen, setCompareOpen] = useState(false)
@@ -256,10 +259,8 @@ export default function LeadDiscoveryPage() {
   return (
     <div className="space-y-6 min-w-0">
       {/* ---------- Search form ---------- */}
-      <form
-        onSubmit={(e) => { e.preventDefault(); runSearch({ city, category, area }) }}
-        className="bg-card rounded-xl border border-slate-200 p-4 sm:p-5"
-      >
+      <WhitePanel as="div">
+      <form onSubmit={(e) => { e.preventDefault(); runSearch({ city, category, area }) }}>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="text-lg font-semibold text-slate-800">Find Leads</h2>
@@ -351,12 +352,17 @@ export default function LeadDiscoveryPage() {
           <p id="search-hint" className="mt-2 text-xs text-slate-400 sm:text-right">Choose a city and a business type</p>
         )}
       </form>
+      </WhitePanel>
 
       {/* ---------- Compare cities ---------- */}
       {compareOpen && <CompareCities category={category} initialCity={city} onClose={() => setCompareOpen(false)} />}
 
       {/* ---------- While searching ---------- */}
-      {loading && <SearchProgress key={`${searchedFor?.city}-${searchedFor?.category}`} city={searchedFor?.city} done={done} />}
+      {loading && (
+        <WhitePanel as="div">
+          <SearchProgress key={`${searchedFor?.city}-${searchedFor?.category}`} city={searchedFor?.city} done={done} />
+        </WhitePanel>
+      )}
 
       {/* ---------- Error ---------- */}
       {error && !loading && (
@@ -373,14 +379,14 @@ export default function LeadDiscoveryPage() {
 
       {/* ---------- Before the first search ---------- */}
       {!searchedFor && !loading && (
-        <div className="bg-card rounded-xl border border-dashed border-slate-300 p-8 sm:p-10 text-center text-sm text-slate-500">
+        <WhitePanel as="div" bodyClassName="text-center text-sm text-slate-500 !py-8 sm:!py-10">
           New here? Try <b className="text-slate-700">Indore</b> + <b className="text-slate-700">Restaurants</b> to see how it works.
-        </div>
+        </WhitePanel>
       )}
 
       {/* ---------- No results ---------- */}
       {searchedFor && !loading && !error && results.length === 0 && (
-        <div className="bg-card rounded-xl border border-slate-200 p-8 text-center">
+        <WhitePanel as="div" bodyClassName="text-center">
           <Lightbulb size={28} className="mx-auto text-marigold-500" aria-hidden="true" />
           <h3 className="mt-3 text-base font-semibold text-slate-800">
             No {searchedFor.category.toLowerCase()} found in {searchedFor.area ? `${searchedFor.area}, ` : ''}{searchedFor.city}
@@ -388,7 +394,7 @@ export default function LeadDiscoveryPage() {
           <p className="mt-1 text-sm text-slate-500 max-w-md mx-auto">
             Tip: try a bigger nearby city, a broader type (for example “Clinics” instead of a specialist){searchedFor.area ? ', or leave the Area box empty' : ''}.
           </p>
-        </div>
+        </WhitePanel>
       )}
 
       {/* ---------- Results ---------- */}
@@ -429,14 +435,14 @@ export default function LeadDiscoveryPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)] gap-6 items-start">
             {/* Desktop filter panel */}
-            <aside className="hidden lg:block bg-card rounded-xl border border-slate-200 p-4 sticky top-4" aria-label="Filters">
+            <WhitePanel as="aside" className="hidden lg:block sticky top-4" bodyClassName="!p-4" aria-label="Filters">
               <h3 className="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2">
                 <SlidersHorizontal size={16} aria-hidden="true" /> Filters
               </h3>
               <ResultFilters {...filterProps} />
-            </aside>
+            </WhitePanel>
 
-            <div className="min-w-0 space-y-4">
+            <WhitePanel as="div" bodyClassName="space-y-4">
               {/* Toolbar */}
               <div className="flex flex-wrap items-center gap-3">
                 <label className="inline-flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
@@ -478,7 +484,7 @@ export default function LeadDiscoveryPage() {
               </div>
 
               {visible.length === 0 ? (
-                <div className="bg-card rounded-xl border border-slate-200 p-8 text-center text-sm text-slate-500">
+                <div className="rounded-xl border border-dashed border-line p-8 text-center text-sm text-slate-500">
                   No businesses match these filters.{' '}
                   <button type="button" onClick={() => { setFilters(DEFAULT_FILTERS); setSort(defaultSort) }} className={`font-semibold text-aqua underline underline-offset-2 rounded ${FOCUS}`}>
                     Reset filters
@@ -511,7 +517,7 @@ export default function LeadDiscoveryPage() {
 
               {/* Sticky bar for selected results */}
               {selectedResults.length > 0 && (
-                <div className="sticky bottom-4 z-20 flex flex-wrap items-center gap-2 rounded-xl border border-primary-600 bg-deepsea/95 backdrop-blur px-4 py-3 shadow-lg shadow-black/40">
+                <div className="sticky bottom-4 z-20 flex flex-wrap items-center gap-2 rounded-xl border border-primary-600 bg-white/95 backdrop-blur px-4 py-3 shadow-lg shadow-black/20">
                   <p className="text-sm font-semibold text-slate-800 mr-auto">{selectedResults.length} selected</p>
                   <button
                     type="button"
@@ -533,7 +539,7 @@ export default function LeadDiscoveryPage() {
                   </button>
                 </div>
               )}
-            </div>
+            </WhitePanel>
           </div>
         </>
       )}

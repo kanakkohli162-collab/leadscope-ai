@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import WhitePanel from '@/components/ui/WhitePanel'
 import { MapPinned, Loader2, CheckCircle, XCircle, RefreshCw } from 'lucide-react'
 import { getCompetitors } from '@/services/leadService'
 
@@ -33,7 +34,7 @@ export default function NearbyCompetitorsCard({ lead }) {
   }
 
   return (
-    <div className="bg-card rounded-xl border border-slate-200 p-5 space-y-4">
+    <WhitePanel bodyClassName="space-y-4">
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
@@ -120,6 +121,6 @@ export default function NearbyCompetitorsCard({ lead }) {
           Press <b>Compare with nearby businesses</b> to see who else is close by and who has a website.
         </p>
       )}
-    </div>
+    </WhitePanel>
   )
 }
