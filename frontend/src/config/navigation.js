@@ -1,6 +1,3 @@
-/**
- * Single source of truth for the sidebar links AND the page titles in the Topbar.
- */
 import {
   LayoutDashboard, Search, Users, KanbanSquare, MapPinned, BarChart3, MessageSquare, Globe, Settings,
   Bot, MessageSquareText, Download,
@@ -25,7 +22,6 @@ export const ROUTES = {
   settings: '/settings',
 }
 
-// Sidebar sections (small labels, hidden when the sidebar is collapsed). Only pages with REAL data.
 export const NAV_GROUPS = [
   { label: 'Main', items: [
     { to: ROUTES.dashboard, icon: LayoutDashboard, label: 'Dashboard' },
@@ -51,10 +47,8 @@ export const NAV_GROUPS = [
   ] },
 ]
 
-// All sidebar links in one list (used for the Topbar page title)
 export const NAV_ITEMS = NAV_GROUPS.flatMap((g) => g.items)
 
-/** Title shown in the Topbar for the current path. Prefix match handles /lead/12 etc. */
 const TITLE_PREFIXES = [
   ['/lead/', 'Lead Details'],
   ['/ai-analysis/', 'AI Lead Analysis'],

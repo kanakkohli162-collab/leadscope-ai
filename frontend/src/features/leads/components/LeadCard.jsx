@@ -4,10 +4,6 @@ import { MapPin, Star, Globe } from 'lucide-react'
 import PriorityBadge from '@/components/ui/PriorityBadge'
 import ScoreCircle from '@/components/ui/ScoreCircle'
 
-/**
- * One result card on the Lead Discovery page.
- * memo → when the filters change, cards whose `lead` didn't change are not re-rendered.
- */
 function LeadCard({ lead }) {
   return (
     <div className="bg-card rounded-xl border border-slate-200 p-5 card-hover">

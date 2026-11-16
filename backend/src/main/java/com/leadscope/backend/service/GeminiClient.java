@@ -10,16 +10,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * One place that calls Google Gemini (same key + model settings as before: gemini.key, gemini.model).
- * Used by Write Message and the Insights "AI summary".
- */
 @Service
 public class GeminiClient {
 
-    /** Why Gemini could not answer, in plain words for the page. */
     public static class AiUnavailable extends RuntimeException {
-        private final String reason;   // "busy", "limit", "off"
+        private final String reason;
 
         public AiUnavailable(String reason, String message) {
             super(message);
@@ -45,7 +40,6 @@ public class GeminiClient {
         return apiKey != null && !apiKey.isBlank();
     }
 
-    /** Sends a prompt, returns the text answer. `json` = ask Gemini to answer with JSON only. */
     @SuppressWarnings("unchecked")
     public String ask(String prompt, boolean json) {
         if (!isEnabled()) throw new AiUnavailable("off", "AI is not set up, so a ready-made template was used.");

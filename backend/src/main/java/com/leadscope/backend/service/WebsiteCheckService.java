@@ -19,21 +19,12 @@ import java.util.concurrent.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Website Checker (Synopsis 8.5 "Digital Presence Analysis – website appears outdated").
- * Opens a business website once and reports: does it open, HTTPS, mobile-friendly,
- * speed, page description and how old the © year is. Score starts at 100 and loses
- * points for each problem.
- *
- * Safety: only public http/https websites are fetched. Every address (and every
- * redirect) is resolved first, and private / internal addresses are refused.
- */
 @Service
 public class WebsiteCheckService {
 
     private static final Duration TIMEOUT = Duration.ofSeconds(8);
     private static final int MAX_REDIRECTS = 3;
-    private static final int MAX_BYTES = 1024 * 1024; // read at most 1 MB of HTML
+    private static final int MAX_BYTES = 1024 * 1024;
     private static final String USER_AGENT =
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
 
@@ -43,7 +34,6 @@ public class WebsiteCheckService {
     private static final Pattern COPYRIGHT = Pattern.compile("(©|&copy;|&#169;|copyright)(.{0,80})", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     private static final Pattern YEAR = Pattern.compile("\\b(19[9]\\d|20\\d\\d)\\b");
 
-    // Redirects are followed by hand, so each new address can be checked first
     private final HttpClient http = HttpClient.newBuilder()
             .followRedirects(HttpClient.Redirect.NEVER)
             .connectTimeout(TIMEOUT)
@@ -59,10 +49,8 @@ public class WebsiteCheckService {
         return report(fetchSafely(input));
     }
 
-    /** A fetched homepage, for other features (e.g. Contacts & social). `html` is empty when it did not open. */
     public record Page(boolean reachable, String finalUrl, String html, String problem) { }
 
-    /** Opens a public website with the same safety rules as the checker (no private IPs, 8 s timeout, max 1 MB). */
     public Page fetchPage(String input) {
         Fetch f = fetchSafely(input);
         return new Page(f.reachable, f.finalUrl.toString(), f.reachable ? f.html : "", f.problem);
@@ -77,7 +65,6 @@ public class WebsiteCheckService {
         URI first = toUri(schemeTyped ? text : "https://" + text);
 
         Fetch fetch = fetch(first);
-        // No scheme typed and https did not open → try plain http once
         if (!fetch.reachable && fetch.statusCode == null && !schemeTyped) {
             Fetch plain = fetch(toUri("http://" + text));
             if (plain.reachable || plain.statusCode != null) fetch = plain;
@@ -85,7 +72,6 @@ public class WebsiteCheckService {
         return fetch;
     }
 
-    // ---------- fetching ----------
 
     private static class Fetch {
         boolean reachable;
@@ -93,7 +79,7 @@ public class WebsiteCheckService {
         URI finalUrl;
         long loadTimeMs;
         String html = "";
-        String problem; // why it did not open, in plain words
+        String problem;
     }
 
     private Fetch fetch(URI start) {
@@ -149,7 +135,6 @@ public class WebsiteCheckService {
         return f;
     }
 
-    /** Reads at most 1 MB, and gives up when the 8-second deadline passes. */
     private String readLimited(InputStream in, long deadline) throws Exception {
         Future<byte[]> job = readers.submit(() -> {
             try (in) {
@@ -166,7 +151,6 @@ public class WebsiteCheckService {
         }
     }
 
-    // ---------- safety ----------
 
     private static class BlockedAddress extends Exception { }
 
@@ -187,11 +171,10 @@ public class WebsiteCheckService {
         } catch (BlockedAddress e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This address can't be checked. Please enter a public website.");
         } catch (UnknownHostException e) {
-            return URI.create(text.replace(" ", "%20")); // fetch() reports "does not exist"
+            return URI.create(text.replace(" ", "%20"));
         }
     }
 
-    /** Refuses anything that is not a public website: wrong scheme, odd port, or a private address. */
     private void checkPublic(URI uri) throws BlockedAddress, UnknownHostException {
         String scheme = uri.getScheme() == null ? "" : uri.getScheme().toLowerCase();
         if (!scheme.equals("http") && !scheme.equals("https")) throw new BlockedAddress();
@@ -209,20 +192,19 @@ public class WebsiteCheckService {
     private boolean isPrivate(InetAddress a) {
         if (a.isAnyLocalAddress() || a.isLoopbackAddress() || a.isLinkLocalAddress()
                 || a.isSiteLocalAddress() || a.isMulticastAddress()) {
-            return true; // 0.0.0.0, 127.x, ::1, 169.254.x, fe80::, 10.x, 172.16–31.x, 192.168.x
+            return true;
         }
         byte[] b = a.getAddress();
         if (b.length == 4) {
             int x = b[0] & 0xFF, y = b[1] & 0xFF;
-            return x == 0                                // 0.0.0.0/8
-                    || (x == 100 && y >= 64 && y <= 127) // 100.64.0.0/10 carrier NAT
-                    || (x == 198 && (y == 18 || y == 19)) // 198.18.0.0/15 test networks
-                    || x >= 240;                         // reserved + broadcast
+            return x == 0
+                    || (x == 100 && y >= 64 && y <= 127)
+                    || (x == 198 && (y == 18 || y == 19))
+                    || x >= 240;
         }
-        return (b[0] & 0xFE) == 0xFC; // fc00::/7 private IPv6
+        return (b[0] & 0xFE) == 0xFC;
     }
 
-    // ---------- report ----------
 
     private Map<String, Object> report(Fetch f) {
         boolean https = "https".equalsIgnoreCase(f.finalUrl.getScheme());
@@ -235,7 +217,6 @@ public class WebsiteCheckService {
         boolean outdated = year != null && thisYear - year >= 3;
         boolean slow = f.reachable && f.loadTimeMs > 3000;
 
-        // Score: start at 100 and take points off for each problem
         int score = 100;
         if (!f.reachable) score -= 40;
         if (!https) score -= 20;
@@ -304,7 +285,6 @@ public class WebsiteCheckService {
         return t.length() > 120 ? t.substring(0, 120) + "…" : t;
     }
 
-    /** Latest year written near "©" or "copyright" (future years are ignored). */
     private Integer copyrightYear(String html) {
         String text = html.replaceAll("(?is)<(script|style)[^>]*>.*?</\\1>", " ").replaceAll("<[^>]+>", " ");
         int thisYear = Year.now().getValue();

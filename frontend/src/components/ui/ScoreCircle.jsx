@@ -1,7 +1,3 @@
-/**
- * Lead score as a ring gauge (0–100).
- * Hot (70+) = marigold, warm (40–69) = azure, cold = deep blue.
- */
 export default function ScoreCircle({ score = 0, size = 'md' }) {
   const dims = { sm: 44, md: 56, lg: 84 }
   const px = dims[size] || dims.md

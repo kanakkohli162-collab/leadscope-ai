@@ -1,7 +1,3 @@
-/**
- * Export leads to Excel (CSV) or PDF, straight from the browser.
- * No backend needed: the leads are already loaded on the page.
- */
 
 const COLUMNS = [
   ['Business', (l) => l.name],
@@ -19,14 +15,12 @@ const COLUMNS = [
 
 const today = () => new Date().toISOString().slice(0, 10)
 
-/** Excel: a .csv file opens directly in Excel / Google Sheets */
 export function exportLeadsToExcel(leads) {
   const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`
   const rows = [
     COLUMNS.map(([h]) => escape(h)).join(','),
     ...leads.map((l) => COLUMNS.map(([, get]) => escape(get(l))).join(',')),
   ]
-  // \uFEFF makes Excel read Hindi / ₹ / special characters correctly
   const blob = new Blob(['\uFEFF' + rows.join('\n')], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -36,7 +30,6 @@ export function exportLeadsToExcel(leads) {
   URL.revokeObjectURL(url)
 }
 
-/** PDF: opens a clean printable report; choose "Save as PDF" */
 export function exportLeadsToPdf(leads) {
   const esc = (v) => String(v ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))
   const head = COLUMNS.filter(([h]) => h !== 'Notes' && h !== 'Address')

@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ---------- Theme colours (used by tailwind.config.js) ----------
-   :root     = dark "deep ocean" values (sidebar, topbar, page, stat cards)
-   .ls-light = light values inside white panels (components/ui/WhitePanel.jsx), so the same
-               classes read dark-on-white there. Values are "R G B" so bg-primary-600/15 etc. still work. */
 :root {
   --c-primary-50: 230 245 254;
   --c-primary-100: 205 235 253;
@@ -118,7 +114,6 @@ body {
   color: #E6F1F7;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -137,14 +132,11 @@ body {
   scrollbar-color: #1B4C74 #001C36;
 }
 
-/* ---------- Deep-ocean theme for the logged-in app (.ls-app = AppLayout root) ---------- */
 
-/* Safety net: any white surface inside the app becomes a dark card */
 .ls-app .bg-white {
   background-color: #113E62;
 }
 
-/* Inputs, selects, textareas */
 .ls-app input:not([type='checkbox']):not([type='radio']),
 .ls-app select,
 .ls-app textarea {
@@ -170,9 +162,7 @@ body {
   accent-color: #0497F6;
 }
 
-/* ---------- White panels (.ls-light) inside the app: light inputs, surfaces and badges ---------- */
 
-/* The dark "safety net" above must not turn real white surfaces dark inside white panels */
 .ls-app .ls-light .bg-white {
   background-color: #FFFFFF;
 }
@@ -214,17 +204,14 @@ body {
   background: #DADCE0;
 }
 
-/* Score ring track: dark navy on dark cards, light grey on white panels */
 .ls-ring-track {
   stroke: rgb(var(--c-ring-track));
 }
 
-/* Smooth transitions */
 .transition-smooth {
   transition: all 0.2s ease-in-out;
 }
 
-/* Card hover effect */
 .card-hover {
   transition: all 0.2s ease;
 }
@@ -233,7 +220,6 @@ body {
   box-shadow: 0 22px 44px -22px rgba(4, 151, 246, 0.55);
 }
 
-/* Priority badges */
 .badge-high {
   @apply bg-red-500/15 text-red-300 border border-red-500/30;
 }
@@ -244,7 +230,6 @@ body {
   @apply bg-green-500/15 text-green-300 border border-green-500/30;
 }
 
-/* Light (white panel) priority badges: High orange, Medium blue, Low grey */
 .ls-light .badge-high {
   background-color: #FFF1D6;
   color: #9A6508;
@@ -261,7 +246,6 @@ body {
   border-color: #E0E3E7;
 }
 
-/* Status badges */
 .status-new {
   @apply bg-primary-600/20 text-primary-300;
 }
@@ -281,7 +265,6 @@ body {
   @apply bg-slate-300/30 text-slate-500;
 }
 
-/* Light (white panel) status badges */
 .ls-light .status-new { background-color: #E8F1FF; color: #2F66E0; }
 .ls-light .status-contacted { background-color: #E6F6FB; color: #0B6E8C; }
 .ls-light .status-followup { background-color: #FFF1E6; color: #B45309; }
@@ -289,7 +272,6 @@ body {
 .ls-light .status-converted { background-color: #E6F4EA; color: #188038; }
 .ls-light .status-notinterested { background-color: #F1F3F4; color: #5F6368; }
 
-/* Subtle lift for cards inside white panels (off with reduced motion) */
 .ls-lift {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }

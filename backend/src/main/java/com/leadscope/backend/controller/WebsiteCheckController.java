@@ -22,7 +22,6 @@ public class WebsiteCheckController {
         this.leadRepository = leadRepository;
         this.usageService = usageService;
     }
-    // leadId is optional: when given (and it is the user's own lead), the result is saved on that lead for Insights
     public record WebsiteCheckRequest(String url, Long leadId) {}
 
     @PostMapping("/website-check")

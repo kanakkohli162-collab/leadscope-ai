@@ -1,7 +1,6 @@
 import { memo, useEffect, useRef, useState } from 'react'
 import { Send, Bot, User, X, RotateCcw } from 'lucide-react'
 
-// Also used by the full-page Ask AI (pages/ChatPage.jsx)
 export const MessageBubble = memo(function MessageBubble({ role, content }) {
   const isUser = role === 'user'
   return (

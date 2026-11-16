@@ -7,11 +7,10 @@ import { checklist, betterPerCheck, scoreColor } from '../utils/checkItems'
 const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aqua'
 const INPUT = 'w-full px-3 py-2.5 border border-slate-300 bg-inset rounded-lg text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-600'
 
-/** "Compare with a competitor": two websites side by side; the better one is highlighted on each check. */
 export default function CompareSites({ initialUrl }) {
   const [urls, setUrls] = useState([initialUrl || '', ''])
   const [loading, setLoading] = useState(false)
-  const [results, setResults] = useState(null)   // [{ url, result } | { url, error }] x2
+  const [results, setResults] = useState(null)
 
   async function compare(e) {
     e.preventDefault()

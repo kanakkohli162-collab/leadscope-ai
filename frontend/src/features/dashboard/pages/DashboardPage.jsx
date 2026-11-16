@@ -11,7 +11,6 @@ import { getDashboardSummary } from '@/services/leadService'
 import { useLeads } from '@/features/leads/hooks/useLeads'
 import { getCurrentUser } from '@/utils/currentUser'
 
-// Pipeline stages in order, with the colour of each segment (fixed colours, readable on the white panel)
 const PIPELINE = [
   { status: 'New', color: 'bg-[#4EB9E5]' },
   { status: 'Contacted', color: 'bg-[#447EFC]' },
@@ -53,7 +52,6 @@ export default function DashboardPage() {
     getDashboardSummary().then(setSummary).catch((e) => setError(e.message))
   }, [])
 
-  // { Indore: 4, Noida: 2 } -> [{ name: 'Indore', value: 4 }, ...]
   const cityData = useMemo(
     () => Object.entries(summary?.leadsByCity || {})
       .map(([name, value]) => ({ name: name || 'Unknown', value }))
@@ -61,10 +59,8 @@ export default function DashboardPage() {
     [summary],
   )
 
-  // Hottest 5 leads (highest score first)
   const hottest = useMemo(() => [...leads].sort((a, b) => b.score - a.score).slice(0, 5), [leads])
 
-  // How many leads are in each pipeline stage
   const pipeline = useMemo(
     () => PIPELINE.map((p) => ({ ...p, count: leads.filter((l) => l.status === p.status).length })),
     [leads],
@@ -75,7 +71,6 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Greeting */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
           <p className="text-sm text-slate-500">{today}</p>
@@ -91,7 +86,6 @@ export default function DashboardPage() {
       </div>
 
       {summary.totalLeads === 0 ? (
-        /* Empty state */
         <WhitePanel bodyClassName="text-center !p-8 sm:!p-10">
           <div className="mx-auto w-14 h-14 rounded-2xl bg-primary-600/15 text-aqua flex items-center justify-center">
             <MapPin size={26} />
@@ -109,7 +103,6 @@ export default function DashboardPage() {
         </WhitePanel>
       ) : (
         <>
-          {/* Stat tiles */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <StatTile icon={Users} tone="violet" label="Total leads" value={summary.totalLeads} hint="Saved in My Leads" />
             <StatTile icon={Flame} tone="marigold" label="Hot leads" value={summary.highPriority} hint="Score 70 or more" />
@@ -117,7 +110,6 @@ export default function DashboardPage() {
             <StatTile icon={Trophy} tone="emerald" label="Converted" value={summary.won} hint="Became clients" />
           </div>
 
-          {/* Pipeline bar */}
           <WhitePanel>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-display text-lg font-bold text-ink">Pipeline</h3>
@@ -147,7 +139,6 @@ export default function DashboardPage() {
           </WhitePanel>
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            {/* Chart */}
             <WhitePanel className="lg:col-span-3">
               <h3 className="font-display text-lg font-bold text-ink">Leads by city</h3>
               <p className="text-xs text-slate-500 mb-4">Where your saved leads are located</p>
@@ -162,7 +153,6 @@ export default function DashboardPage() {
               </ResponsiveContainer>
             </WhitePanel>
 
-            {/* Hottest leads */}
             <WhitePanel className="lg:col-span-2">
               <h3 className="font-display text-lg font-bold text-ink">Hottest leads</h3>
               <p className="text-xs text-slate-500 mb-3">Contact these first</p>

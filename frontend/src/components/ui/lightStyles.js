@@ -1,7 +1,3 @@
-/**
- * Class helpers for content inside a WhitePanel (light palette).
- * Most existing classes already turn light inside a panel (via .ls-light), these are for new or explicit uses.
- */
 
 export const LIGHT = {
   text: '#202124',
@@ -12,11 +8,9 @@ export const LIGHT = {
   grid: '#EEF1F4',
 }
 
-/** Light input / select / textarea */
 export const lightInput =
   'w-full px-3 py-2.5 bg-white border border-[#EBEBEB] rounded-lg text-sm text-[#202124] placeholder:text-[#9AA0A6] focus:outline-none focus:border-[#447EFC] focus:ring-4 focus:ring-[rgba(68,126,252,.25)]'
 
-/** Light table parts */
 export const lightTable = {
   table: 'w-full text-sm text-[#202124]',
   head: 'bg-[#F5F8FC] text-left text-xs font-semibold text-[#5F6368]',
@@ -24,7 +18,6 @@ export const lightTable = {
   cell: 'px-4 py-3',
 }
 
-/** Light chips by meaning: hot, problem, success, medium, low, neutral */
 const CHIP_TONES = {
   hot: 'bg-[#FFF1D6] text-[#9A6508] border-[#F5A524]/40',
   problem: 'bg-[#FDECEC] text-[#C5221F] border-[#C5221F]/20',
@@ -36,7 +29,6 @@ const CHIP_TONES = {
 export const lightChip = (tone = 'neutral') =>
   `inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${CHIP_TONES[tone] || CHIP_TONES.neutral}`
 
-/** Recharts on white: axis text, grid and white tooltips */
 export const lightChart = {
   axis: { tick: { fontSize: 12, fill: '#5F6368' }, axisLine: false, tickLine: false },
   grid: '#EEF1F4',

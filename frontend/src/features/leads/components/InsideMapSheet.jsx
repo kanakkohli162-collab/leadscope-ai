@@ -1,11 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Search, X, MapPin, Phone, Globe, Clock, ChevronDown, ChevronRight, UtensilsCrossed, Coffee, Pizza, Soup } from 'lucide-react'
 
-/*
- * "Map list -> place -> lead sheet" preview for the "Inside LeadScope" part (full width).
- * Light blue frame, white card, blue round button (colours from the reference image).
- * It moves through the businesses on its own; hovering a business or a row selects it.
- */
 const K = {
   bg: '#E9F5FF', card: '#FFFFFF', blue: '#447EFC', blueSoft: '#E8F1FF', ink: '#202124',
   muted: '#5F6368', line: '#EBEBEB', head: '#484E53', panel: '#99D0E0', red: '#C5221F', green: '#188038',
@@ -71,7 +66,6 @@ export default function InsideMapSheet() {
       <div className="rounded-2xl p-3 sm:p-4" style={{ background: K.card }}>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-[0.9fr_0.9fr_auto_1.7fr] gap-3 lg:gap-4 items-stretch [&>*]:min-w-0">
-          {/* 1. map list */}
           <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${K.line}` }}>
             <div className="m-2.5 flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] shadow-sm" style={{ border: `1px solid ${K.line}`, color: K.ink }}>
               <span className="flex-1 truncate">restaurants in Indore</span>
@@ -97,7 +91,6 @@ export default function InsideMapSheet() {
             </ul>
           </div>
 
-          {/* 2. selected place */}
           <div className="rounded-xl overflow-hidden flex flex-col" style={{ border: `3px solid ${K.panel}` }}>
             <div key={`img-${active}`} className="ims-in h-24 flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${P.tint}, #fff)` }}>
               <P.icon size={44} color={K.head} strokeWidth={1.3} />
@@ -114,7 +107,6 @@ export default function InsideMapSheet() {
             </div>
           </div>
 
-          {/* 3. round blue button */}
           <div className="sm:col-span-2 lg:col-span-1 flex lg:flex-col items-center gap-3">
             <span className="flex-1 h-px lg:h-auto lg:w-px" style={{ background: K.line }} />
             <span className="ims-pulse w-11 h-11 rounded-full flex items-center justify-center text-white" style={{ background: K.blue }}
@@ -129,7 +121,6 @@ export default function InsideMapSheet() {
             <span className="flex-1 h-px lg:h-auto lg:w-px" style={{ background: K.line }} />
           </div>
 
-          {/* 4. lead sheet */}
           <div className="sm:col-span-2 lg:col-span-1 relative rounded-xl overflow-hidden flex flex-col" style={{ border: `1px solid ${K.line}` }}>
             {hovering && <div className="ims-scan" aria-hidden="true" />}
             <div className="overflow-x-auto">

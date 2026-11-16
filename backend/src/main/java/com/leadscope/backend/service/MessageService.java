@@ -8,18 +8,9 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.util.*;
 
-/**
- * Writes personalised outreach messages for a lead.
- * Uses Gemini AI when a key is set; otherwise (or if Gemini is busy / at its limit) uses a smart template
- * and says why in `note`.
- *
- * Options: channel (whatsapp / email / linkedin), tone (Friendly / Professional / Short),
- * language (English / Hindi / Hinglish). Email gets a subject + body; LinkedIn connection notes stay under 300 characters.
- */
 @Service
 public class MessageService {
 
-    /** context = extra facts for the AI (e.g. Website Checker issues), optional, max 600 characters. */
     public record Options(String service, String channel, String tone, String language, String context) {
         public Options(String service, String channel, String tone, String language) {
             this(service, channel, tone, language, null);
@@ -45,10 +36,6 @@ public class MessageService {
         this.gemini = gemini;
     }
 
-    /**
-     * One or two versions (A / B) of a first message.
-     * Returns { source, note, messages: [{ subject, body }], message (first one as plain text), used: {...} }
-     */
     public Map<String, Object> write(Lead lead, User sender, Options o, int versions) {
         int count = versions >= 2 ? 2 : 1;
         List<Map<String, String>> messages = null;
@@ -79,12 +66,11 @@ public class MessageService {
         result.put("source", source);
         result.put("note", note);
         result.put("messages", messages);
-        result.put("message", asText(messages.get(0)));   // older pages read this
+        result.put("message", asText(messages.get(0)));
         result.put("used", used(lead));
         return result;
     }
 
-    /** Day 1 message, Day 3 reminder, Day 7 final follow-up. Returns { source, note, steps: [{ day, label, subject, body }] } */
     public Map<String, Object> sequence(Lead lead, User sender, Options o) {
         List<Map<String, String>> steps = null;
         String note = null;
@@ -125,7 +111,6 @@ public class MessageService {
         return result;
     }
 
-    // ---------- prompt ----------
 
     private String basePrompt(Lead lead, User sender, Options o) {
         String length = switch (o.channel()) {
@@ -176,7 +161,6 @@ public class MessageService {
         return out.size() >= expected ? new ArrayList<>(out.subList(0, expected)) : null;
     }
 
-    /** No subject outside email; LinkedIn cut to 300 characters (at a word). */
     private void fitChannel(Map<String, String> m, Options o) {
         if (!o.channel().equals("email")) m.put("subject", "");
         if (o.channel().equals("linkedin") && m.get("body").length() > LINKEDIN_MAX_CHARS) {
@@ -191,7 +175,6 @@ public class MessageService {
         return subject.isBlank() ? m.get("body") : "Subject: " + subject + "\n\n" + m.get("body");
     }
 
-    /** What the message was based on (shown as chips under the message). */
     private Map<String, Object> used(Lead lead) {
         Map<String, Object> u = new LinkedHashMap<>();
         u.put("businessName", lead.getBusinessName());
@@ -205,7 +188,6 @@ public class MessageService {
         return u;
     }
 
-    // ---------- templates (no AI key, or AI busy) — English ----------
 
     private Map<String, String> template(Lead lead, User sender, Options o, int variant) {
         String name = lead.getBusinessName();
@@ -248,16 +230,11 @@ public class MessageService {
                 msg(email ? "Last note for " + name : "", last + signOff(sender, email))));
     }
 
-    /** The agency's own signature as written; otherwise "Best regards," (email) or "- " before the name. */
     private String signOff(User sender, boolean email) {
         if (hasOwnSignature(sender)) return "\n\n" + signature(sender);
         return email ? "\n\nBest regards,\n" + signature(sender) : "\n\n- " + signature(sender);
     }
 
-    /**
-     * The service to name in a template: the requested one if the agency offers it (Settings),
-     * otherwise the services the agency does offer. No services set in Settings = the requested one.
-     */
     private static String serviceFor(User sender, String requested) {
         List<String> offered = servicesOffered(sender);
         if (offered.isEmpty()) return requested;
@@ -273,7 +250,6 @@ public class MessageService {
                 : String.join(", ", offered.subList(0, offered.size() - 1)) + " and " + offered.get(offered.size() - 1);
     }
 
-    // ---------- helpers ----------
 
     private static Map<String, String> msg(String subject, String body) {
         Map<String, String> m = new LinkedHashMap<>();
@@ -288,7 +264,6 @@ public class MessageService {
         return null;
     }
 
-    /** The agency's own signature (Settings), else "Name, Agency" (+ phone / website when set). */
     private String signature(User sender) {
         if (hasOwnSignature(sender)) return sender.getSignature().trim();
         String person = nz(sender.getSenderName(), nz(sender.getName(), ""));

@@ -6,7 +6,7 @@ import CityInput from './CityInput'
 import { FOCUS } from './styles'
 import { friendlySearchError } from '../../utils/searchErrors'
 
-const COMPARE_LIMIT = 20   // small, to save the daily API quota
+const COMPARE_LIMIT = 20
 
 function statsOf(results) {
   const total = results.length
@@ -21,7 +21,6 @@ function statsOf(results) {
   }
 }
 
-/** Better market = bigger share of hot leads; if equal, more businesses without a website. */
 function betterOf(a, b) {
   if (!a || !b || (!a.total && !b.total)) return null
   if (a.hotPct !== b.hotPct) return a.hotPct > b.hotPct ? 0 : 1
@@ -29,14 +28,10 @@ function betterOf(a, b) {
   return null
 }
 
-/**
- * Compare cities: the same business type in two cities (20 results each),
- * side by side, with a "Better market" label.
- */
 export default function CompareCities({ category, initialCity, onClose }) {
   const [cities, setCities] = useState([initialCity || '', ''])
   const [loading, setLoading] = useState(false)
-  const [columns, setColumns] = useState(null)   // [{ city, stats } | { city, error }] x2
+  const [columns, setColumns] = useState(null)
 
   const type = category.trim()
   const ready = type && cities[0].trim() && cities[1].trim() && cities[0].trim().toLowerCase() !== cities[1].trim().toLowerCase()

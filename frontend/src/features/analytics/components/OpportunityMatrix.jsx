@@ -1,10 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { LIGHT } from '../utils/chartTheme'
 
-/**
- * Opportunity matrix: top categories (rows) × top areas (columns). Each cell = hot leads, darker = more.
- * Hover shows details; click opens My Leads filtered to that category + area.
- */
 export default function OpportunityMatrix({ matrix }) {
   const navigate = useNavigate()
   const { categories, areas, cells, max } = matrix

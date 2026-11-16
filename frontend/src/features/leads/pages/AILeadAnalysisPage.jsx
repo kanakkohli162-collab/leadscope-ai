@@ -13,7 +13,6 @@ export default function AILeadAnalysisPage() {
   const { id } = useParams()
   const lead = findLeadById(leads, id)
 
-  // Unknown id in the URL (e.g. /lead/999) → friendly message instead of a crash
   if (!lead) return <LeadNotFound id={id} />
 
   const analysisCards = [
@@ -55,7 +54,6 @@ export default function AILeadAnalysisPage() {
         <ArrowLeft size={16} /> Back to lead details
       </Link>
 
-      {/* Header */}
       <div className="bg-card rounded-xl border border-slate-200 p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -82,7 +80,6 @@ export default function AILeadAnalysisPage() {
         </div>
       </div>
 
-      {/* Analysis Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {analysisCards.map((card) => (
           <div
@@ -98,7 +95,6 @@ export default function AILeadAnalysisPage() {
         ))}
       </div>
 
-      {/* AI Generated Reason */}
       <div className="bg-card rounded-xl border border-slate-200 p-6">
         <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
           <Brain size={18} className="text-primary-600" />
@@ -107,7 +103,6 @@ export default function AILeadAnalysisPage() {
         <p className="text-slate-600 leading-relaxed">{lead.aiReason}</p>
       </div>
 
-      {/* Recommended Action */}
       <div className="bg-primary-600/15 rounded-xl border border-primary-600/30 p-6">
         <h3 className="font-semibold text-aqua-light mb-2 flex items-center gap-2">
           <CheckCircle size={18} />

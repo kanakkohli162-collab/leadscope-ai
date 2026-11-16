@@ -12,10 +12,6 @@ const EXAMPLES = [
 ]
 const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aqua'
 
-/**
- * Ask AI as a full page (Synopsis: chatbot): same answers as the floating Ask AI button,
- * from the user's saved leads. The floating button is hidden on this page.
- */
 export default function ChatPage() {
   const chat = useChat()
   const [input, setInput] = useState('')

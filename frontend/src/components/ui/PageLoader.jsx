@@ -1,4 +1,3 @@
-/** Spinner shown while a lazily-loaded page's JS file downloads. */
 export default function PageLoader({ fullScreen = false }) {
   return (
     <div

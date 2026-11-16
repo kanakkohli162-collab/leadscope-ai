@@ -38,7 +38,6 @@ const chip = (active) => `inline-flex items-center gap-1.5 px-3 py-1.5 rounded-f
   active ? 'bg-primary-600 text-white' : 'bg-inset border border-line text-slate-600 hover:bg-line'
 }`
 
-/** Plain-words error for a failed request (the backend already falls back to templates when the AI is busy). */
 function friendlyError(err) {
   const msg = err?.message || ''
   if (err instanceof TypeError || /failed to fetch|networkerror/i.test(msg)) return 'We could not reach the server. It may be waking up — please try again in a minute.'
@@ -73,27 +72,24 @@ export default function OutreachGeneratorPage() {
   const [params] = useSearchParams()
   const [leadId, setLeadId] = useState('')
   const [service, setService] = useState(SERVICES[0])
-  // Defaults from Settings, else WhatsApp / Friendly / English
   const [channel, setChannel] = useState(() => getCurrentUser().defaultChannel || 'whatsapp')
   const [tone, setTone] = useState(() => getCurrentUser().defaultTone || 'Friendly')
   const [language, setLanguage] = useState(() => getCurrentUser().defaultLanguage || 'English')
-  // Website problems from the Website Checker (?issues=…), given to the AI as extra facts
   const [context, setContext] = useState(() => params.get('issues') || '')
   const [twoVersions, setTwoVersions] = useState(false)
 
-  const [result, setResult] = useState(null)      // { source, note, messages, used }
+  const [result, setResult] = useState(null)
   const [picked, setPicked] = useState(0)
-  const [draft, setDraft] = useState(null)        // { subject, body } being edited
-  const [runKey, setRunKey] = useState(0)         // new value = type the message out again
+  const [draft, setDraft] = useState(null)
+  const [runKey, setRunKey] = useState(0)
   const [writing, setWriting] = useState(false)
   const [error, setError] = useState('')
-  const [sequence, setSequence] = useState(null)  // { source, note, steps }
+  const [sequence, setSequence] = useState(null)
   const [seqLoading, setSeqLoading] = useState(false)
   const [copied, setCopied] = useState('')
   const [templates, setTemplates] = useState(loadTemplates)
   const [history, setHistory] = useState([])
 
-  // Pre-select the lead from ?leadId=… (when coming from Lead Details / Find Leads), else the top-scored lead
   useEffect(() => {
     if (!leadId && leads.length) {
       const best = [...leads].sort((a, b) => b.score - a.score)[0]
@@ -212,7 +208,6 @@ export default function OutreachGeneratorPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* ---------- Left: choices ---------- */}
         <div className="space-y-4 min-w-0">
           <WhitePanel as="div">
             <LeadPicker leads={leads} value={leadId} onChange={(id) => { setLeadId(id); reset() }} />
@@ -279,7 +274,6 @@ export default function OutreachGeneratorPage() {
             {seqLoading ? 'Writing sequence…' : 'Follow-up sequence (Day 1 / 3 / 7)'}
           </button>
 
-          {/* Templates */}
           <WhitePanel as="div">
             <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-2"><FileText size={15} className="text-aqua" aria-hidden="true" /> My templates</h3>
             {templates.length ? (
@@ -301,7 +295,6 @@ export default function OutreachGeneratorPage() {
             )}
           </WhitePanel>
 
-          {/* History for this lead */}
           {history.length > 0 && (
             <WhitePanel as="div">
               <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-2"><History size={15} className="text-aqua" aria-hidden="true" /> Message history</h3>
@@ -323,7 +316,6 @@ export default function OutreachGeneratorPage() {
           )}
         </div>
 
-        {/* ---------- Right: message ---------- */}
         <div className="lg:col-span-2 space-y-4 min-w-0">
           {error && (
             <p role="alert" className="flex items-start gap-2 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300">
@@ -332,7 +324,6 @@ export default function OutreachGeneratorPage() {
           )}
 
           <WhitePanel as="div" bodyClassName="flex flex-col">
-            {/* A / B versions */}
             {result?.messages?.length > 1 && (
               <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {result.messages.map((m, i) => (
@@ -388,7 +379,6 @@ export default function OutreachGeneratorPage() {
                   </p>
                 )}
 
-                {/* What the AI used */}
                 {result?.used && (
                   <div className="mt-3 flex flex-wrap items-center gap-1.5">
                     <span className="text-xs text-slate-400 mr-1">What the AI used:</span>
@@ -401,7 +391,6 @@ export default function OutreachGeneratorPage() {
                   </div>
                 )}
 
-                {/* Send actions */}
                 <div className="flex flex-wrap gap-2 mt-4">
                   <button type="button" onClick={() => copy(asText(draft), 'main')} className={BTN}>
                     {copied === 'main' ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />} {copied === 'main' ? 'Copied!' : 'Copy'}
@@ -420,7 +409,6 @@ export default function OutreachGeneratorPage() {
                   <button type="button" onClick={write} disabled={writing} className={BTN}><RefreshCw size={14} aria-hidden="true" /> Regenerate</button>
                 </div>
 
-                {/* Quality check */}
                 <div className="mt-5 rounded-lg border border-line bg-inset p-4">
                   <p className="text-sm font-semibold text-slate-800">Message check</p>
                   <ul className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
@@ -445,7 +433,6 @@ export default function OutreachGeneratorPage() {
             )}
           </WhitePanel>
 
-          {/* Follow-up sequence */}
           {sequence && (
             <WhitePanel as="div" bodyClassName="space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">

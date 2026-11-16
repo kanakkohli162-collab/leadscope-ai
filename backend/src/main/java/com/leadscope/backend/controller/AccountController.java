@@ -15,15 +15,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.YearMonth;
 import java.util.*;
 
-/**
- * Settings page: the logged-in user's own account only (the user comes from the token, never from the request).
- *   GET    /api/account              -> profile, agency profile, defaults, last login, usage this month
- *   PUT    /api/account/profile      { name, agencyName }
- *   PUT    /api/account/password     { currentPassword, newPassword }
- *   PUT    /api/account/agency       { servicesOffered[], senderName, senderPhone, senderWebsite, signature }
- *   PUT    /api/account/preferences  { defaultCity, defaultBusinessType, defaultTone, defaultLanguage, defaultChannel }
- *   DELETE /api/account              { confirm: "DELETE" } -> deletes all leads + the account
- */
 @RestController
 @RequestMapping("/api/account")
 public class AccountController {
@@ -65,7 +56,7 @@ public class AccountController {
         result.put("user", UserResponse.of(u));
         result.put("agency", agency);
         result.put("serviceOptions", SERVICES);
-        result.put("lastLoginAt", u.getPreviousLoginAt());   // the login before this session
+        result.put("lastLoginAt", u.getPreviousLoginAt());
         result.put("currentLoginAt", u.getLastLoginAt());
         result.put("memberSince", u.getCreatedAt());
         result.put("usage", usage);
@@ -93,7 +84,7 @@ public class AccountController {
         if (next == null || next.length() < 8 || !next.matches(".*[A-Za-z].*") || !next.matches(".*\\d.*")) {
             throw bad("The new password needs at least 8 characters, with a letter and a number.");
         }
-        if (next.length() > 72) throw bad("Please use a password of 72 characters or less.");   // BCrypt limit
+        if (next.length() > 72) throw bad("Please use a password of 72 characters or less.");
         if (passwordEncoder.matches(next, u.getPassword())) throw bad("The new password must be different from the current one.");
         u.setPassword(passwordEncoder.encode(next));
         userRepository.save(u);
@@ -140,14 +131,12 @@ public class AccountController {
         return Map.of("message", "Your account and all your leads were deleted.");
     }
 
-    // ---------- helpers ----------
 
     private User me(Authentication auth) {
         return userRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Please sign in to continue."));
     }
 
-    /** "Websites, SEO" -> ["Websites", "SEO"] */
     public static List<String> splitServices(String text) {
         if (text == null || text.isBlank()) return List.of();
         return Arrays.stream(text.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList();

@@ -3,24 +3,18 @@ import WhitePanel from '@/components/ui/WhitePanel'
 import { MessageSquareText, Loader2, ExternalLink, Smile, Meh, Frown } from 'lucide-react'
 import { analyzeSentiment } from '@/services/leadService'
 
-// Colour + icon for each result
 const STYLE = {
   Positive: { icon: Smile, text: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30' },
   Neutral: { icon: Meh, text: 'text-amber-300', bg: 'bg-amber-500/10', border: 'border-amber-500/30' },
   Negative: { icon: Frown, text: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/30' },
 }
 
-/**
- * Review sentiment for a lead (Lead Details, Review Analyzer) or for pasted reviews only (no lead).
- * With a lead, the backend also saves the result on it. `onResult(result)` is called after each analysis.
- */
 export default function ReviewSentimentCard({ lead, onResult }) {
   const [reviews, setReviews] = useState('')
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // Opens this business on Google Maps so the user can copy real reviews
   const mapsUrl = lead
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${lead.name} ${lead.location || ''}`)}`
     : null
@@ -49,7 +43,6 @@ export default function ReviewSentimentCard({ lead, onResult }) {
 
   return (
     <WhitePanel bodyClassName="space-y-4">
-      {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
@@ -72,7 +65,6 @@ export default function ReviewSentimentCard({ lead, onResult }) {
         )}
       </div>
 
-      {/* Input */}
       <textarea
         rows={5}
         value={reviews}
@@ -103,7 +95,6 @@ export default function ReviewSentimentCard({ lead, onResult }) {
 
       {error && <p className="text-sm text-red-400">{error}</p>}
 
-      {/* Result */}
       {result && s && (
         <div className={`rounded-xl border ${s.border} ${s.bg} p-4 space-y-4`}>
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -119,7 +110,6 @@ export default function ReviewSentimentCard({ lead, onResult }) {
             </div>
           </div>
 
-          {/* Positive / Neutral / Negative bar */}
           <div>
             <div className="flex h-3 rounded-full overflow-hidden bg-inset">
               <div className="bg-emerald-500" style={{ width: `${pct(result.positive)}%` }} />

@@ -3,10 +3,6 @@ import { Briefcase, LayoutGrid, Search, X } from 'lucide-react'
 import { CATEGORY_GROUPS, POPULAR_CATEGORIES } from '../../data/businessCategories'
 import { FOCUS, INPUT, chip } from './styles'
 
-/**
- * "What type of business?" box + Popular chips + an "All categories" panel (grouped, searchable).
- * Clicking a chip fills the box; typing any other text still works.
- */
 export default function CategoryPicker({ value, onChange }) {
   const id = useId()
   const [showAll, setShowAll] = useState(false)

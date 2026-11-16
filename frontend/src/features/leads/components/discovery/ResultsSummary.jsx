@@ -1,10 +1,6 @@
 import { Flame, Globe, PhoneOff, Building2 } from 'lucide-react'
 import { FOCUS, LEVEL_COLORS } from './styles'
 
-/**
- * Summary of the whole search: total, hot (70+), without website, without phone,
- * and a stacked High / Medium / Low bar. Clicking a number applies that filter.
- */
 export default function ResultsSummary({ results, onPick }) {
   const total = results.length
   const levels = { High: 0, Medium: 0, Low: 0 }

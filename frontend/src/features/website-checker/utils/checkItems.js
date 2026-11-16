@@ -1,9 +1,5 @@
 import { storage, STORAGE_KEYS } from '@/utils/storage'
 
-/**
- * The Website Checker checklist: each check with its state (good / bad / unknown),
- * a short label and a plain-English explanation of why it matters.
- */
 export function checklist(r) {
   const opened = r.reachable
   const secs = (r.loadTimeMs / 1000).toFixed(1)
@@ -54,10 +50,6 @@ export function checklist(r) {
   ]
 }
 
-/**
- * Which of two sites is better on each check: 0 = first, 1 = second, null = same / can't tell.
- * Booleans: good beats bad; speed: faster wins; up to date: newer © year wins.
- */
 export function betterPerCheck(a, b) {
   const ca = checklist(a)
   const cb = checklist(b)
@@ -78,11 +70,9 @@ export function betterPerCheck(a, b) {
   return out
 }
 
-/** Red (0) → amber → green (100) */
 export const scoreColor = (score) => `hsl(${Math.round(Math.max(0, Math.min(100, score)) * 1.25)}, 72%, 48%)`
 export const scoreLabel = (score) => (score >= 75 ? 'Healthy' : score >= 50 ? 'Needs work' : 'Poor')
 
-// ---- recent checks (this browser): last 10 ----
 
 const MAX_RECENT = 10
 

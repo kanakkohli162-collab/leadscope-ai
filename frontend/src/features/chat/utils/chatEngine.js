@@ -1,8 +1,3 @@
-/**
- * Ask AI: answers questions about the user's REAL saved leads.
- * Understands: priority, website, phone, city, category, status, reviews, counts, summary.
- * Filters can be combined, e.g. "high priority gyms in Lucknow without website".
- */
 
 export const SUGGESTIONS = [
   'Show high-priority leads',
@@ -37,12 +32,10 @@ const uniq = (arr) => [...new Set(arr.filter(Boolean))]
 export function getAIResponse(query, leads = []) {
   const q = ` ${query.toLowerCase()} `
 
-  // ---- greetings / help ----
   if (/\b(hi|hello|hey|help|what can you do)\b/.test(q)) {
     return "Hi! I can answer questions about your saved leads. Try:\n• Show high-priority leads\n• Which businesses have no website?\n• Leads from Noida\n• Show businesses with poor reviews\n• Give me a summary"
   }
 
-  // ---- general questions (work even with no leads) ----
   if (/(how does|how is).*(scor)/.test(q) || q.includes('scoring')) {
     return "📈 Every business gets a score from 0 to 100 based on its digital gaps:\n• No website: biggest boost\n• Incomplete profile (no phone / opening hours)\n• Low rating or few reviews (when available)\n\n70+ = High priority, 40–69 = Medium, below 40 = Low."
   }
@@ -54,7 +47,6 @@ export function getAIResponse(query, leads = []) {
     return 'You have no saved leads yet. Go to Find Leads, search a city and business type, and add some leads. Then ask me again!'
   }
 
-  // ---- detect filters ----
   const city = uniq(leads.map((l) => l.location)).find((c) => q.includes(c.toLowerCase()))
   const category = uniq(leads.map((l) => l.category)).find((c) => {
     const lc = c.toLowerCase()
@@ -71,7 +63,6 @@ export function getAIResponse(query, leads = []) {
   const hasWebsite = /(with|has|have)\s*(a\s*)?website/.test(q) && !noWebsite
   const noPhone = /(no|without|missing)\s*(a\s*)?(phone|number|contact)/.test(q)
 
-  // ---- poor reviews / low ratings (Synopsis 8.10 example) ----
   if (/(poor|bad|low|negative)\s*(review|rating)/.test(q)) {
     const rated = leads.filter((l) => typeof l.rating === 'number')
     if (!rated.length) {
@@ -83,7 +74,6 @@ export function getAIResponse(query, leads = []) {
       : 'Good news: none of your rated leads have poor ratings (below 3.5★).'
   }
 
-  // ---- special intents ----
   if (/(summary|overview|report|stats|statistics)/.test(q)) {
     const high = leads.filter((l) => l.priority === 'High').length
     const noWeb = leads.filter((l) => !l.hasWebsite).length
@@ -102,7 +92,6 @@ export function getAIResponse(query, leads = []) {
     return `🔥 Contact ${top.name} first (score ${top.score}).\nWhy: ${(top.serviceGaps || []).join(', ') || 'strong opportunity'}.\nSuggested pitch: ${top.recommendedAction}.${rest.length ? `\n\nNext in line:\n${list(rest)}` : ''}`
   }
 
-  // ---- apply filters ----
   let result = [...leads]
   const used = []
   if (city) { result = result.filter((l) => l.location === city); used.push(`in ${city}`) }

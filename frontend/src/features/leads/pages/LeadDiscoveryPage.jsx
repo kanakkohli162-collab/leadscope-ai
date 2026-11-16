@@ -25,17 +25,14 @@ import { FOCUS, INPUT, chip } from '../components/discovery/styles'
 import { friendlySearchError } from '../utils/searchErrors'
 import { sellServiceById, hasReviewData } from '../data/sellServices'
 
-// The map (Leaflet) is only downloaded when the user opens the Map view
 const ResultsMap = lazy(() => import('../components/discovery/ResultsMap'))
 
 const RESULT_LIMITS = [20, 50, 100]
 const MAX_RECENT = 5
 
-/** Same business in search results and in My Leads -> same key (name + address, like the backend's duplicate check). */
 const normalise = (text) => (text && text !== '—' ? text.toLowerCase().replace(/[^\p{L}\p{N}]/gu, '') : '')
 const keyOf = (name, address) => `${normalise(name)}|${normalise(address)}`
 
-/** "good" ≥ 50% without website, "average" 25–49%, "low" below 25% */
 const opportunityLevel = (pct) => (pct >= 50 ? 'good' : pct >= 25 ? 'average' : 'low')
 const resultKey = (r) => keyOf(r.name, r.raw?.address)
 
@@ -43,12 +40,10 @@ export default function LeadDiscoveryPage() {
   const toast = useToast()
   const navigate = useNavigate()
 
-  // ---- form ----
-  // Start with the defaults from Settings (if any)
   const [city, setCity] = useState(() => getCurrentUser().defaultCity || '')
   const [category, setCategory] = useState(() => getCurrentUser().defaultBusinessType || '')
   const [area, setArea] = useState('')
-  const [service, setService] = useState('')        // "What do you sell?" (optional)
+  const [service, setService] = useState('')
   const [compareOpen, setCompareOpen] = useState(false)
   const [limit, setLimit] = useState(50)
   const [recent, setRecent] = useState(() => {
@@ -56,15 +51,13 @@ export default function LeadDiscoveryPage() {
     return Array.isArray(list) ? list.slice(0, MAX_RECENT) : []
   })
 
-  // ---- search ----
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
-  const [done, setDone] = useState(false)            // all progress steps ticked
+  const [done, setDone] = useState(false)
   const [searchedFor, setSearchedFor] = useState(null)
   const [error, setError] = useState('')
   const [duplicatesRemoved, setDuplicatesRemoved] = useState(0)
 
-  // ---- results view ----
   const [filters, setFilters] = useState(DEFAULT_FILTERS)
   const [sort, setSort] = useState('score')
   const [view, setView] = useState('list')
@@ -72,7 +65,6 @@ export default function LeadDiscoveryPage() {
   const [selected, setSelected] = useState(() => new Set())
   const [scoreFor, setScoreFor] = useState(null)
 
-  // ---- saved leads: business key -> lead (for the "Saved" chip, Find contacts and social icons) ----
   const [savedLeads, setSavedLeads] = useState({})
   const [savingId, setSavingId] = useState(null)
   const [enrichingId, setEnrichingId] = useState(null)
@@ -87,7 +79,7 @@ export default function LeadDiscoveryPage() {
         leads.forEach((l) => { map[keyOf(l.name, l.address)] = l })
         setSavedLeads((prev) => ({ ...map, ...prev }))
       })
-      .catch(() => { /* "Saved" chips are a bonus; search still works */ })
+      .catch(() => {})
     return () => { active = false }
   }, [])
 
@@ -119,7 +111,6 @@ export default function LeadDiscoveryPage() {
     setSheetOpen(false)
     setDuplicatesRemoved(0)
 
-    // Remember it (newest first, no duplicates, max 5)
     const same = (s) => ['city', 'category', 'area'].every((k) => (s[k] || '').toLowerCase() === query[k].toLowerCase())
     const nextRecent = [query, ...recent.filter((s) => !same(s))].slice(0, MAX_RECENT)
     setRecent(nextRecent)
@@ -128,7 +119,7 @@ export default function LeadDiscoveryPage() {
     try {
       const found = await searchBusinesses(query.city, query.category, { area: query.area, limit })
       setDone(true)
-      await new Promise((r) => setTimeout(r, 400))   // let the user see all steps ticked
+      await new Promise((r) => setTimeout(r, 400))
       setResults(found.results)
       setDuplicatesRemoved(found.duplicatesRemoved)
     } catch (err) {
@@ -144,7 +135,6 @@ export default function LeadDiscoveryPage() {
     storage.remove(STORAGE_KEYS.recentSearches)
   }
 
-  // ---- saving ----
   const saveResult = useCallback(async (r, { quiet = false } = {}) => {
     const existing = savedLeads[resultKey(r)]
     if (existing) return existing.id
@@ -182,7 +172,7 @@ export default function LeadDiscoveryPage() {
   }, [toast])
 
   const writeMessage = useCallback(async (r) => {
-    const id = await saveResult(r, { quiet: true })   // a message needs a saved lead
+    const id = await saveResult(r, { quiet: true })
     if (id) navigate(`/outreach?leadId=${id}`)
     else toast.error('Could not open Write Message. Please try again.')
   }, [saveResult, navigate, toast])
@@ -199,12 +189,10 @@ export default function LeadDiscoveryPage() {
   const showScore = useCallback((r) => setScoreFor(r), [])
   const closeScore = useCallback(() => setScoreFor(null), [])
 
-  // ---- filtered view ----
   const fitRank = sellService && !(sellService.needsReviewData && !hasReviewData(results)) ? sellService.fitRank : null
   const visible = useMemo(() => applyFilters(results, filters, sort, fitRank), [results, filters, sort, fitRank])
   const reviewDataMissing = sellService?.needsReviewData && results.length > 0 && !hasReviewData(results)
 
-  // City opportunity line
   const noWebsitePct = results.length ? Math.round((results.filter((r) => !r.hasWebsite).length / results.length) * 100) : 0
   const hotCount = results.filter((r) => r.score >= 70).length
   const selectedResults = useMemo(() => results.filter((r) => selected.has(r.id)), [results, selected])
@@ -243,7 +231,6 @@ export default function LeadDiscoveryPage() {
     })
   }
 
-  // Escape closes the mobile filter sheet
   useEffect(() => {
     if (!sheetOpen) return undefined
     const onKey = (e) => e.key === 'Escape' && setSheetOpen(false)
@@ -258,7 +245,6 @@ export default function LeadDiscoveryPage() {
 
   return (
     <div className="space-y-6 min-w-0">
-      {/* ---------- Search form ---------- */}
       <WhitePanel as="div">
       <form onSubmit={(e) => { e.preventDefault(); runSearch({ city, category, area }) }}>
         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -354,17 +340,14 @@ export default function LeadDiscoveryPage() {
       </form>
       </WhitePanel>
 
-      {/* ---------- Compare cities ---------- */}
       {compareOpen && <CompareCities category={category} initialCity={city} onClose={() => setCompareOpen(false)} />}
 
-      {/* ---------- While searching ---------- */}
       {loading && (
         <WhitePanel as="div">
           <SearchProgress key={`${searchedFor?.city}-${searchedFor?.category}`} city={searchedFor?.city} done={done} />
         </WhitePanel>
       )}
 
-      {/* ---------- Error ---------- */}
       {error && !loading && (
         <div role="alert" className="flex items-start gap-3 rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-300">
           <AlertCircle size={18} className="shrink-0 mt-0.5" aria-hidden="true" />
@@ -377,14 +360,12 @@ export default function LeadDiscoveryPage() {
         </div>
       )}
 
-      {/* ---------- Before the first search ---------- */}
       {!searchedFor && !loading && (
         <WhitePanel as="div" bodyClassName="text-center text-sm text-slate-500 !py-8 sm:!py-10">
           New here? Try <b className="text-slate-700">Indore</b> + <b className="text-slate-700">Restaurants</b> to see how it works.
         </WhitePanel>
       )}
 
-      {/* ---------- No results ---------- */}
       {searchedFor && !loading && !error && results.length === 0 && (
         <WhitePanel as="div" bodyClassName="text-center">
           <Lightbulb size={28} className="mx-auto text-marigold-500" aria-hidden="true" />
@@ -397,7 +378,6 @@ export default function LeadDiscoveryPage() {
         </WhitePanel>
       )}
 
-      {/* ---------- Results ---------- */}
       {showResults && (
         <>
           {isDemo && (
@@ -406,7 +386,6 @@ export default function LeadDiscoveryPage() {
             </p>
           )}
 
-          {/* City opportunity line */}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-line bg-inset px-4 py-3 text-sm">
             <TrendingUp size={16} className="text-aqua shrink-0" aria-hidden="true" />
             <p className="text-slate-600 min-w-0">
@@ -434,7 +413,6 @@ export default function LeadDiscoveryPage() {
           <ResultsSummary results={results} onPick={pickSummary} />
 
           <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)] gap-6 items-start">
-            {/* Desktop filter panel */}
             <WhitePanel as="aside" className="hidden lg:block sticky top-4" bodyClassName="!p-4" aria-label="Filters">
               <h3 className="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2">
                 <SlidersHorizontal size={16} aria-hidden="true" /> Filters
@@ -443,7 +421,6 @@ export default function LeadDiscoveryPage() {
             </WhitePanel>
 
             <WhitePanel as="div" bodyClassName="space-y-4">
-              {/* Toolbar */}
               <div className="flex flex-wrap items-center gap-3">
                 <label className="inline-flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
                   <input
@@ -515,7 +492,6 @@ export default function LeadDiscoveryPage() {
                 </div>
               )}
 
-              {/* Sticky bar for selected results */}
               {selectedResults.length > 0 && (
                 <div className="sticky bottom-4 z-20 flex flex-wrap items-center gap-2 rounded-xl border border-primary-600 bg-white/95 backdrop-blur px-4 py-3 shadow-lg shadow-black/20">
                   <p className="text-sm font-semibold text-slate-800 mr-auto">{selectedResults.length} selected</p>
@@ -544,7 +520,6 @@ export default function LeadDiscoveryPage() {
         </>
       )}
 
-      {/* ---------- Mobile filter sheet ---------- */}
       {sheetOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/60" onClick={() => setSheetOpen(false)} aria-hidden="true" />

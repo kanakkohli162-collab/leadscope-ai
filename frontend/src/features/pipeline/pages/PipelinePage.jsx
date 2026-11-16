@@ -10,12 +10,6 @@ import { formatINR } from '@/utils/format'
 import PipelineCard from '../components/PipelineCard'
 import { COLUMNS, STATUSES, OPEN_STATUSES, sumDeals, conversionRates } from '../utils/pipelineStats'
 
-/**
- * Pipeline (Synopsis 8.11 CRM and lead tracking): a Kanban board of the user's leads.
- * Drag a card to another column, or use its status dropdown (mobile / keyboard),
- * to change the lead's status. The change shows at once and is undone if saving fails.
- * Phones (< 768px) see one column at a time, picked with tabs.
- */
 
 const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aqua'
 
@@ -25,10 +19,10 @@ export default function PipelinePage() {
   const [query, setQuery] = useState('')
   const [highOnly, setHighOnly] = useState(false)
   const [city, setCity] = useState('All')
-  const [tab, setTab] = useState(STATUSES[0])   // column shown on phones
-  const [dragging, setDragging] = useState(null) // lead id being dragged
-  const [over, setOver] = useState(null)         // column status under the pointer
-  const [saving, setSaving] = useState({})       // { [leadId]: true } while the API call runs
+  const [tab, setTab] = useState(STATUSES[0])
+  const [dragging, setDragging] = useState(null)
+  const [over, setOver] = useState(null)
+  const [saving, setSaving] = useState({})
 
   const cities = useMemo(
     () => [...new Set(leads.map((l) => l.location).filter(Boolean))].sort((a, b) => a.localeCompare(b)),
@@ -61,7 +55,6 @@ export default function PipelinePage() {
     return next
   })
 
-  /** Optimistic move: update the board now, save in the background, undo on failure. */
   async function move(lead, status) {
     if (!lead || lead.status === status || saving[lead.id]) return
     const previous = lead
@@ -79,7 +72,6 @@ export default function PipelinePage() {
     }
   }
 
-  /** Optimistic deal value change, undone if saving fails. */
   async function changeDealValue(lead, dealValue) {
     const previous = lead
     setLeads((all) => all.map((l) => (l.id === lead.id ? { ...l, dealValue } : l)))
@@ -158,7 +150,6 @@ export default function PipelinePage() {
       </div>
 
       <WhitePanel as="div" bodyClassName="space-y-5">
-      {/* Filters */}
       <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
         <div className="relative sm:w-72">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true" />
@@ -208,7 +199,6 @@ export default function PipelinePage() {
         <p className="text-sm text-slate-500">No leads match these filters.</p>
       )}
 
-      {/* Phone tabs: one column at a time */}
       <div className="md:hidden -mx-1 px-1 overflow-x-auto" role="tablist" aria-label="Pipeline columns">
         <div className="flex gap-2 w-max pb-1">
           {COLUMNS.map(({ status, accent }) => (
@@ -230,7 +220,6 @@ export default function PipelinePage() {
         </div>
       </div>
 
-      {/* Board: on desktop it scrolls sideways inside its own box; its height fits the cards (the page scrolls) */}
       <div className="md:overflow-x-auto pb-2 md:-mx-1 md:px-1">
         <div className="flex gap-4 md:min-w-max">
           {COLUMNS.map(({ status, accent }) => {
@@ -284,7 +273,6 @@ export default function PipelinePage() {
       </div>
       </WhitePanel>
 
-      {/* Conversion rates */}
       <WhitePanel aria-labelledby="conversion-title">
         <h2 id="conversion-title" className="text-sm font-semibold text-slate-800 flex items-center gap-2">
           <TrendingUp size={16} className="text-aqua" aria-hidden="true" /> Conversion rates

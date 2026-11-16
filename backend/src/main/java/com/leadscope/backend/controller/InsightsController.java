@@ -15,8 +15,6 @@ public class InsightsController {
         this.summaryService = summaryService;
     }
 
-    // POST /api/insights/summary  body: aggregated counts only (no names, phones or addresses)
-    //   -> { summary, recommendations: [3] }
     @PostMapping("/summary")
     public Map<String, Object> summary(@RequestBody Map<String, Object> counts) {
         return summaryService.summarise(counts);

@@ -16,16 +16,6 @@ import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * POST /api/search  { "city": "...", "category": "...", "area": "..." (optional), "limit": 50 (optional, 1-500) }
- *     -> { results: scored businesses (not saved, each with a scoreBreakdown), duplicatesRemoved }
- * Map search ("Find businesses here"): { "category": "...", "lat": 22.7, "lon": 75.8, "radius": 1500 } (city not needed,
- * radius 500-5000 m, Geoapify only)
- * GET  /api/search/status                                 -> data source + searches left today
- *
- * Data source (pluggable):  Google key -> Google Places,  else Geoapify key -> Geoapify (free),  else Demo.
- * No per-user limit. One app-wide safety cap per day keeps us inside the free API quota.
- */
 @RestController
 @RequestMapping("/api/search")
 public class SearchController {
@@ -34,7 +24,7 @@ public class SearchController {
     private final GeoapifyService geoapifyService;
     private final UsageService usageService;
     private final String googleKey;
-    private final int dailyCap;          // 0 = no cap
+    private final int dailyCap;
 
     private LocalDate day = LocalDate.now();
     private int usedToday = 0;
@@ -60,7 +50,7 @@ public class SearchController {
     @PostMapping
     public SearchResult search(@RequestBody Map<String, Object> body, Authentication auth) {
         SearchResult result = runSearch(body);
-        usageService.record(auth == null ? null : auth.getName(), UsageService.Kind.SEARCH);   // "Usage this month"
+        usageService.record(auth == null ? null : auth.getName(), UsageService.Kind.SEARCH);
         return result;
     }
 
@@ -95,12 +85,12 @@ public class SearchController {
             }
         }
 
-        if (!provider.equals("Demo")) useOneSearch();      // demo searches are free -> not counted
+        if (!provider.equals("Demo")) useOneSearch();
 
         try {
             return switch (provider) {
                 case "Geoapify" -> geoapifyService.search(category, city, area, limit);
-                default -> SearchDeduplicator.dedupe(placesService.search(category, city, area, limit), null);   // Google, or demo
+                default -> SearchDeduplicator.dedupe(placesService.search(category, city, area, limit), null);
             };
         } catch (RestClientException e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,

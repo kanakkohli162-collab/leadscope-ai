@@ -17,7 +17,6 @@ function Segmented({ legend, value, onChange, options }) {
   )
 }
 
-/** The filter + sort controls. Used in the left panel (desktop) and in the bottom sheet (mobile). */
 export default function ResultFilters({ filters, setFilters, sort, setSort, defaultSort = 'score', hasService = false }) {
   const id = useId()
   const set = (key) => (value) => setFilters((f) => ({ ...f, [key]: value }))

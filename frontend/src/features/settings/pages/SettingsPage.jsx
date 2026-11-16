@@ -10,10 +10,6 @@ import {
   ProfileSection, PasswordSection, AgencySection, PreferencesSection, UsageSection, PrivacySection, SecuritySection,
 } from '../components/SettingsSections'
 
-/**
- * Settings: profile, password, agency profile for messages, default preferences,
- * usage this month, privacy (download / delete) and security.
- */
 export default function SettingsPage() {
   const navigate = useNavigate()
   const toast = useToast()

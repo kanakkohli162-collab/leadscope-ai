@@ -38,7 +38,6 @@ public class AuthController {
     public UserResponse signup(@RequestBody SignupRequest request) {
         String email = request.getEmail() == null ? "" : request.getEmail().trim();
 
-        // Basic checks: real-looking email + password of at least 6 characters
         if (email.isBlank() || !email.contains("@")
                 || request.getPassword() == null || request.getPassword().length() < 6) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -61,10 +60,8 @@ public class AuthController {
     public AuthResponse login(@RequestBody LoginRequest request) {
         String email = request.getEmail() == null ? "" : request.getEmail().trim();
 
-        // 1) Blocked? (5 wrong tries -> 15 minutes) -> 429
         loginAttempts.checkBlocked(email);
 
-        // 2) Check email + password together
         Optional<User> found = userRepository.findByEmail(email);
         boolean ok = found.isPresent()
                 && request.getPassword() != null
@@ -72,22 +69,18 @@ public class AuthController {
 
         if (!ok) {
             loginAttempts.recordFailure(email);
-            // Same message for wrong email AND wrong password,
-            // so attackers can't find out which emails are registered
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password.");
         }
 
-        // 3) Success -> clear the counter and give a token
         loginAttempts.reset(email);
         User user = found.get();
-        user.setPreviousLoginAt(user.getLastLoginAt());   // shown in Settings as "last login"
+        user.setPreviousLoginAt(user.getLastLoginAt());
         user.setLastLoginAt(LocalDateTime.now());
         userRepository.save(user);
         String token = jwtService.generateToken(user.getEmail());
         return new AuthResponse(token, toResponse(user));
     }
 
-    // GET /api/auth/me -> the logged-in user (needs a valid token)
     @GetMapping("/me")
     public UserResponse me(Authentication authentication) {
         User user = userRepository.findByEmail(authentication.getName())

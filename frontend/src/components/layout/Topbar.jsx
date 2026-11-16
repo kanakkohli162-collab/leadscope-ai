@@ -17,7 +17,6 @@ function Topbar({ onOpenMobileNav }) {
   const [open, setOpen] = useState(false)
   const menuRef = useRef(null)
 
-  // Close the menu when clicking outside it
   useEffect(() => {
     if (!open) return
     const onClick = (e) => { if (menuRef.current && !menuRef.current.contains(e.target)) setOpen(false) }
@@ -33,7 +32,6 @@ function Topbar({ onOpenMobileNav }) {
   return (
     <header className="h-16 bg-deepsea border-b border-line flex items-center justify-between gap-3 px-4 sm:px-6 shrink-0">
       <div className="flex items-center gap-2 min-w-0">
-        {/* Hamburger: only on screens where the sidebar is hidden */}
         <button
           type="button"
           onClick={onOpenMobileNav}
@@ -45,7 +43,6 @@ function Topbar({ onOpenMobileNav }) {
         <h2 className="text-lg font-semibold text-slate-800 truncate">{title}</h2>
       </div>
 
-      {/* User menu */}
       <div className="relative" ref={menuRef}>
         <button
           type="button"

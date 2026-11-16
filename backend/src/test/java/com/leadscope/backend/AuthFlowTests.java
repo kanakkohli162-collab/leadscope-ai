@@ -14,8 +14,6 @@ import java.util.regex.Pattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-// Starts the real app on a random free port (with the H2 test database) and sends
-// real HTTP requests to it, exactly like Postman or the React app would.
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class AuthFlowTests {
 
@@ -94,7 +92,6 @@ class AuthFlowTests {
         assertEquals(200, get("/api/dashboard/summary", token).statusCode());
     }
 
-    // ---------- small helpers ----------
 
     private HttpResponse<String> post(String path, String json) throws Exception {
         HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))

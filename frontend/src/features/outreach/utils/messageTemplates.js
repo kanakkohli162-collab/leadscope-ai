@@ -1,8 +1,3 @@
-/**
- * Builds a personalised outreach message from a lead's data.
- * Replace with the backend's /leads/:id/outreach endpoint when it's ready
- * (see generateOutreach in src/services/leadService.js).
- */
 export function buildOutreachMessage(lead, service) {
   const gap = lead.hasWebsite
     ? `your website is ${lead.websiteAnalysis.toLowerCase()} and your online presence could be much stronger`

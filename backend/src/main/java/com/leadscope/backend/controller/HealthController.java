@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.Instant;
 import java.util.Map;
 
-/** Public keep-alive ping for uptime monitors. No database call, no user data. */
 @RestController
 @RequestMapping("/api/health")
 public class HealthController {

@@ -18,11 +18,6 @@ import {
   levelOf, hasLocation, pinColor, pinIcon, clusterIcon, markApproximate, googleRouteUrl,
 } from '../utils/mapHelpers'
 
-/**
- * Opportunity Map: the user's saved leads on an OpenStreetMap map (clustered pins or a heatmap),
- * the areas with the most hot leads, "Find businesses here" around the map centre,
- * and a route plan (up to 5 stops) that opens in Google Maps.
- */
 
 const FILTERS = ['All', 'High', 'Medium', 'Low']
 const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aqua'
@@ -31,7 +26,6 @@ const pill = (active) =>
     active ? 'bg-primary-600 text-white' : 'bg-inset border border-line text-slate-600 hover:bg-line'
   }`
 
-/** Two-option switch, e.g. Pins / Heatmap. */
 function Toggle({ label, value, options, onChange }) {
   return (
     <div className="inline-flex rounded-full border border-line bg-inset p-0.5" role="group" aria-label={label}>
@@ -55,12 +49,11 @@ export default function OpportunityMapPage() {
   const toast = useToast()
   const [level, setLevel] = useState('All')
   const [city, setCity] = useState('All')
-  const [view, setView] = useState('pins')        // pins | heat
-  const [colorMode, setColorMode] = useState('score') // score | website
-  const [focus, setFocus] = useState(null)        // { points, id } → zoom to a top area
-  const [route, setRoute] = useState([])          // lead ids, in visiting order
+  const [view, setView] = useState('pins')
+  const [colorMode, setColorMode] = useState('score')
+  const [focus, setFocus] = useState(null)
+  const [route, setRoute] = useState([])
 
-  // "Find businesses here"
   const [center, setCenter] = useState(null)
   const [findOpen, setFindOpen] = useState(false)
   const [findType, setFindType] = useState(() => {
@@ -96,7 +89,6 @@ export default function OpportunityMapPage() {
   const points = useMemo(() => onMap.map((l) => [l.latitude, l.longitude]), [onMap])
   const heatPoints = useMemo(() => onMap.map((l) => [l.latitude, l.longitude, Math.max(0.05, l.score / 100)]), [onMap])
 
-  // Top areas: most High-priority leads (for the chosen city)
   const topAreas = useMemo(() => {
     const groups = {}
     inCity.forEach((l) => {
@@ -135,7 +127,6 @@ export default function OpportunityMapPage() {
     setFinding(true)
     try {
       const res = await searchNearby(center.lat, center.lng, findType.trim(), { radius })
-      // Hide businesses that are already saved
       const saved = new Set(leads.map((l) => `${l.name}|${l.address}`.toLowerCase()))
       const fresh = res.results.filter((r) => hasLocation(r) && !saved.has(`${r.name}|${r.address}`.toLowerCase()))
       setNearby(fresh)
@@ -198,7 +189,6 @@ export default function OpportunityMapPage() {
         <p className="text-sm text-slate-500 mt-1">See where your leads are and which areas have the most hot leads.</p>
       </div>
 
-      {/* Filters */}
       <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
         <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by priority">
           {FILTERS.map((f) => (
@@ -222,9 +212,7 @@ export default function OpportunityMapPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-6">
-        {/* Map */}
         <WhitePanel as="div" bodyClassName="!p-2 sm:!p-3">
-          {/* Map toolbar */}
           <div className="flex flex-wrap items-center gap-2 px-1 pb-2">
             <Toggle label="Map view" value={view} onChange={setView} options={[['pins', 'Pins'], ['heat', 'Heatmap']]} />
             <Toggle label="Colour pins by" value={colorMode} onChange={setColorMode} options={[['score', 'By score'], ['website', 'By website']]} />
@@ -327,7 +315,6 @@ export default function OpportunityMapPage() {
                 </MarkerClusterGroup>
               )}
 
-              {/* "Find businesses here" results: dashed pins, not saved yet */}
               {nearby.map((r) => (
                 <Marker key={r.id} position={[r.latitude, r.longitude]} icon={pinIcon(pinColor(r, colorMode), { temporary: true })}>
                   <Popup>
@@ -366,7 +353,6 @@ export default function OpportunityMapPage() {
         </WhitePanel>
 
         <div className="space-y-6 min-w-0">
-          {/* Top areas */}
           <WhitePanel as="div" className="h-fit">
             <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
               <Flame size={18} style={{ color: SCORE_COLORS.High.color }} /> Top areas
@@ -405,7 +391,6 @@ export default function OpportunityMapPage() {
             )}
           </WhitePanel>
 
-          {/* Route plan */}
           <WhitePanel as="div" className="h-fit">
             <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
               <Route size={18} className="text-aqua" aria-hidden="true" /> Route plan
@@ -443,7 +428,6 @@ export default function OpportunityMapPage() {
         </div>
       </div>
 
-      {/* Leads without coordinates */}
       {offMap.length > 0 && (
         <WhitePanel as="div">
           <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">

@@ -24,7 +24,6 @@ const FUNNEL_COLORS = ['#447EFC', '#5B8FFD', '#F5A524', '#34A853']
 const INSIGHT_ICONS = { hot: Flame, area: MapPin, action: Target, gap: AlertTriangle, win: Trophy }
 const bucketColor = (min) => (min >= 70 ? PRIORITY_COLORS.High : min >= 40 ? PRIORITY_COLORS.Medium : PRIORITY_COLORS.Low)
 
-/** Horizontal bars on a white card. */
 function HBars({ data, color = LIGHT.accent, empty }) {
   if (!data.some((d) => d.value > 0)) return <EmptyChart>{empty}</EmptyChart>
   return (
@@ -128,7 +127,6 @@ export default function AnalyticsPage() {
 
   return (
     <div className="space-y-6 min-w-0">
-      {/* Header + actions */}
       <div className="flex flex-col sm:flex-row sm:items-end gap-3">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Insights</h1>
@@ -147,7 +145,6 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      {/* Filters */}
       <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
         <label className="flex items-center gap-2 text-sm text-slate-600">
           City
@@ -173,7 +170,6 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      {/* Slim summary row */}
       <div className="grid grid-cols-2 md:grid-cols-4 rounded-xl border border-line bg-card divide-line divide-x divide-y md:divide-y-0 overflow-hidden">
         {summary.map((s) => (
           <div key={s.label} className="px-4 py-3">
@@ -189,7 +185,6 @@ export default function AnalyticsPage() {
         </WhitePanel>
       ) : (
         <>
-          {/* AI summary */}
           {aiError && (
             <p role="alert" className="flex items-start gap-2 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300">
               <AlertTriangle size={16} className="shrink-0 mt-0.5" aria-hidden="true" /> {aiError}
@@ -206,7 +201,6 @@ export default function AnalyticsPage() {
             </div>
           )}
 
-          {/* Smart insight cards */}
           {stats.insights.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {stats.insights.map((ins, i) => {
@@ -229,7 +223,6 @@ export default function AnalyticsPage() {
             </div>
           )}
 
-          {/* Charts (white cards) */}
           <div ref={chartsRef} className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <ChartCard index={0} reportId="histogram" title="Score distribution" caption="Leads in each 10-point score range">
               <ResponsiveContainer width="100%" height={230}>

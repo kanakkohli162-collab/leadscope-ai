@@ -9,11 +9,6 @@ const STYLES = {
   error: { box: 'bg-card border-red-500/40 text-red-300', icon: AlertCircle },
 }
 
-/**
- * Wraps the whole app (see App.jsx) so any page can call useToast().
- * It keeps the list of visible toasts and draws them in the top-right corner.
- * Living above the router means a toast survives the page change after login.
- */
 export default function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([])
   const idRef = useRef(0)
@@ -25,10 +20,9 @@ export default function ToastProvider({ children }) {
   const show = useCallback((message, type) => {
     const id = ++idRef.current
     setToasts((prev) => [...prev, { id, message, type }])
-    setTimeout(() => dismiss(id), AUTO_CLOSE_MS) // auto-close
+    setTimeout(() => dismiss(id), AUTO_CLOSE_MS)
   }, [dismiss])
 
-  // useMemo → the same object every render, so components using useToast() don't re-render needlessly
   const api = useMemo(() => ({
     success: (message) => show(message, 'success'),
     error: (message) => show(message, 'error'),

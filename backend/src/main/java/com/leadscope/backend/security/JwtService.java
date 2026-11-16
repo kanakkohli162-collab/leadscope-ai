@@ -21,7 +21,6 @@ public class JwtService {
         this.expirationMs = expirationMs;
     }
 
-    // Make a token for this email (used at login)
     public String generateToken(String email) {
         Date now = new Date();
         return Jwts.builder()
@@ -32,7 +31,6 @@ public class JwtService {
                 .compact();
     }
 
-    // Read the email back from a token, and check the seal (used in Part 5)
     public String extractEmail(String token) {
         return Jwts.parser()
                 .verifyWith(key)

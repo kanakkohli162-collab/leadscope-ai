@@ -4,7 +4,6 @@ export const INDIA_CENTER = [22.5, 79]
 export const CITY_ZOOM = 12
 export const MAX_ROUTE_STOPS = 5
 
-/** Pin colours. Score mode: High orange, Medium blue, Low grey. Website mode: none red, has website green. */
 export const SCORE_COLORS = {
   High: { color: '#F5A524', label: 'High (70+)' },
   Medium: { color: '#0497F6', label: 'Medium (40–69)' },
@@ -22,10 +21,6 @@ export const pinColor = (lead, mode) =>
     ? (lead.hasWebsite ? WEBSITE_COLORS.has.color : WEBSITE_COLORS.none.color)
     : SCORE_COLORS[levelOf(lead.score)].color
 
-/**
- * Approximate location: the backend says only the city / area was geocoded,
- * or 2+ different leads sit on exactly the same point (usually the city centre).
- */
 export function markApproximate(leads) {
   const count = {}
   leads.forEach((l) => {
@@ -39,11 +34,9 @@ export function markApproximate(leads) {
   }))
 }
 
-// ---- Leaflet icons (cached, so markers don't redraw on every render) ----
 
 const iconCache = {}
 
-/** Round coloured pin; `temporary` = dashed ring for "Find businesses here" results; `inRoute` = route stop number. */
 export function pinIcon(color, { temporary = false, inRoute = null } = {}) {
   const key = `${color}|${temporary}|${inRoute}`
   if (!iconCache[key]) {
@@ -62,7 +55,6 @@ export function pinIcon(color, { temporary = false, inRoute = null } = {}) {
   return iconCache[key]
 }
 
-/** Deep-ocean cluster bubble with the number of leads inside. */
 export function clusterIcon(cluster) {
   const n = cluster.getChildCount()
   const size = n < 10 ? 34 : n < 50 ? 40 : 48
@@ -73,6 +65,5 @@ export function clusterIcon(cluster) {
   })
 }
 
-/** Google Maps directions through the stops in order (no API key needed). */
 export const googleRouteUrl = (stops) =>
   `https://www.google.com/maps/dir/${stops.map((s) => `${s.latitude},${s.longitude}`).join('/')}`

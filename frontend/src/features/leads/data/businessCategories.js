@@ -4,10 +4,6 @@ import {
   Building2, Plane,
 } from 'lucide-react'
 
-/**
- * Business types for the Find Leads chips. Every `label` is matched by the backend
- * (GeoapifyService.CATEGORY_MAP) to a real OpenStreetMap category, so only supported types are listed.
- */
 export const CATEGORY_GROUPS = [
   { group: 'Food', items: [
     { label: 'Restaurants', icon: UtensilsCrossed },

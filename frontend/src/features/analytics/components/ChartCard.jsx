@@ -1,10 +1,5 @@
 import { LIGHT } from '../utils/chartTheme'
 
-/**
- * White chart card with a light blue frame (outer #E9F5FF, 10px padding, 24px corners; inner white, 16px corners).
- * `reportId` marks the card so "Download report (PDF)" can copy its chart.
- * Fades in once (staggered by `index`) and lifts a little on hover; both off with reduced motion.
- */
 export default function ChartCard({ title, caption, index = 0, reportId, className = '', action, children }) {
   return (
     <section
@@ -28,7 +23,6 @@ export default function ChartCard({ title, caption, index = 0, reportId, classNa
   )
 }
 
-/** Shown inside a card when there is nothing to draw yet. */
 export function EmptyChart({ children }) {
   return (
     <div className="h-[200px] flex items-center justify-center text-center rounded-xl border border-dashed px-6 text-sm"

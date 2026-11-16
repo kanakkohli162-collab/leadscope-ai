@@ -8,17 +8,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Scores a lead 0-100 based on digital gaps.
- *   No website                      +30
- *   Profile incomplete (no phone / no opening hours) +15
- *   Rating below 3.5                +15   (only if rating is known)
- *   Fewer than 20 reviews           +10   (only if review count is known)
- * Score = points / points-possible-for-this-lead * 100
- * (so leads without rating data, e.g. from OpenStreetMap, are scored fairly)
- *
- * Each rule is also written to lead.scoreBreakdown, so the search page can show "Why this score?".
- */
 @Service
 public class LeadScoringService {
 
@@ -80,7 +69,6 @@ public class LeadScoringService {
         lead.setScoreBreakdown(breakdown);
     }
 
-    /** One line of "Why this score?": rule, points earned, points possible (0 = not counted), plain-words detail. */
     private static Map<String, Object> rule(String name, boolean applied, int max, String detail) {
         Map<String, Object> r = new LinkedHashMap<>();
         r.put("rule", name);

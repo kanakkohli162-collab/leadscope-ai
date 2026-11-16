@@ -1,7 +1,3 @@
-/**
- * ~100 major Indian cities for the Find Leads city box (suggestions only — any typed city still works).
- * Names use the spelling Geoapify / OpenStreetMap understand.
- */
 export const INDIAN_CITIES = [
   { name: 'Delhi', state: 'Delhi' },
   { name: 'New Delhi', state: 'Delhi' },
@@ -112,7 +108,6 @@ export const INDIAN_CITIES = [
 
 export const POPULAR_CITIES = ['Delhi', 'Mumbai', 'Bengaluru', 'Indore', 'Lucknow', 'Jaipur', 'Chandigarh', 'Noida']
 
-/** Up to `max` cities: names starting with the text first, then names/states containing it. */
 export function matchCities(text, max = 8) {
   const q = text.trim().toLowerCase()
   if (!q) return []

@@ -10,27 +10,21 @@ import java.util.Optional;
 
 public interface LeadRepository extends JpaRepository<Lead, Long> {
 
-    // Lists (only this owner's leads)
     List<Lead> findByOwnerEmail(String ownerEmail);
     List<Lead> findByOwnerEmailAndCityIgnoreCase(String ownerEmail, String city);
     List<Lead> findByOwnerEmailAndStatus(String ownerEmail, String status);
     List<Lead> findByOwnerEmailAndCityIgnoreCaseAndStatus(String ownerEmail, String city, String status);
     List<Lead> findByOwnerEmailAndBusinessNameContainingIgnoreCase(String ownerEmail, String keyword);
 
-    // Same business name (for "Already in My Leads")
     List<Lead> findByOwnerEmailAndBusinessNameIgnoreCase(String ownerEmail, String businessName);
 
-    // Delete my account: remove all of this owner's leads
     @org.springframework.transaction.annotation.Transactional
     long deleteByOwnerEmail(String ownerEmail);
 
-    // Usage this month
     long countByOwnerEmailAndCreatedAtAfter(String ownerEmail, java.time.LocalDateTime after);
 
-    // One lead, only if it belongs to this owner
     Optional<Lead> findByIdAndOwnerEmail(Long id, String ownerEmail);
 
-    // Dashboard counts (only this owner)
     long countByOwnerEmail(String ownerEmail);
     long countByOwnerEmailAndPriority(String ownerEmail, String priority);
     long countByOwnerEmailAndStatus(String ownerEmail, String status);

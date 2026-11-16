@@ -41,7 +41,6 @@ function Field({ label, hint, children }) {
   )
 }
 
-// ---------- 1. Profile ----------
 export function ProfileSection({ user, onSaved }) {
   const toast = useToast()
   const [name, setName] = useState(user.name || '')
@@ -76,7 +75,6 @@ export function ProfileSection({ user, onSaved }) {
   )
 }
 
-// ---------- 2. Password ----------
 export function PasswordSection() {
   const toast = useToast()
   const [form, setForm] = useState({ current: '', next: '', confirm: '' })
@@ -127,7 +125,6 @@ export function PasswordSection() {
   )
 }
 
-// ---------- 3. Agency profile for messages ----------
 export function AgencySection({ agency, serviceOptions, onSaved }) {
   const toast = useToast()
   const [form, setForm] = useState({
@@ -190,7 +187,6 @@ export function AgencySection({ agency, serviceOptions, onSaved }) {
   )
 }
 
-// ---------- 4. Default preferences ----------
 const TONES = ['Friendly', 'Professional', 'Short']
 const LANGUAGES = ['English', 'Hindi', 'Hinglish']
 const CHANNELS = [['whatsapp', 'WhatsApp'], ['email', 'Email'], ['linkedin', 'LinkedIn']]
@@ -245,7 +241,6 @@ export function PreferencesSection({ user, onSaved }) {
   )
 }
 
-// ---------- 5. Usage this month ----------
 export function UsageSection({ usage }) {
   const month = new Date(`${usage.month}-01T00:00:00`).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })
   const items = [
@@ -272,7 +267,6 @@ export function UsageSection({ usage }) {
   )
 }
 
-// ---------- 6. Privacy ----------
 export function PrivacySection({ onDelete }) {
   const toast = useToast()
   const [exporting, setExporting] = useState(false)
@@ -337,7 +331,6 @@ export function PrivacySection({ onDelete }) {
   )
 }
 
-// ---------- 7. Security ----------
 export function SecuritySection({ lastLoginAt, currentLoginAt, onLogout }) {
   const fmt = (d) => new Date(d).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })
   return (
