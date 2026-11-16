@@ -6,14 +6,12 @@ import { useLogout } from '@/hooks/useLogout'
 import { ROUTES } from '@/config/navigation'
 import { getInitials } from '@/utils/format'
 
-/** The avatar + name button in the Topbar, with a dropdown: Settings and Log out. */
 export default function UserMenu() {
   const [open, setOpen] = useState(false)
   const menuRef = useRef(null)
   const user = getCurrentUser()
   const logout = useLogout()
 
-  // Close when the user clicks anywhere else or presses Escape
   useEffect(() => {
     if (!open) return
     const onMouseDown = (e) => {

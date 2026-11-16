@@ -3,10 +3,6 @@ import { MapPin } from 'lucide-react'
 import { matchCities, POPULAR_CITIES } from '../../data/indianCities'
 import { INPUT, chip } from './styles'
 
-/**
- * "Which city?" box with up to 8 suggestions (Up / Down / Enter / Escape) and Popular city chips.
- * Any typed city still works — suggestions only help.
- */
 export default function CityInput({ value, onChange, label = 'Which city?', showPopular = true }) {
   const id = useId()
   const listId = `${id}-list`
@@ -15,7 +11,6 @@ export default function CityInput({ value, onChange, label = 'Which city?', show
 
   const matches = useMemo(() => {
     const list = matchCities(value)
-    // Hide the list once the box already holds exactly that one city
     return list.length === 1 && list[0].name.toLowerCase() === value.trim().toLowerCase() ? [] : list
   }, [value])
   const showList = open && matches.length > 0
@@ -33,7 +28,7 @@ export default function CityInput({ value, onChange, label = 'Which city?', show
     }
     if (e.key === 'ArrowDown') { setActive((i) => (i + 1) % matches.length); e.preventDefault() }
     else if (e.key === 'ArrowUp') { setActive((i) => (i <= 0 ? matches.length - 1 : i - 1)); e.preventDefault() }
-    else if (e.key === 'Enter' && active >= 0) { pick(matches[active].name); e.preventDefault() }   // else: Enter submits the form
+    else if (e.key === 'Enter' && active >= 0) { pick(matches[active].name); e.preventDefault() }
     else if (e.key === 'Escape') { setOpen(false); setActive(-1); e.preventDefault() }
   }
 
@@ -68,7 +63,6 @@ export default function CityInput({ value, onChange, label = 'Which city?', show
                 id={`${id}-opt-${i}`}
                 role="option"
                 aria-selected={i === active}
-                // mousedown (not click) so the input's blur doesn't close the list first
                 onMouseDown={(e) => { e.preventDefault(); pick(c.name) }}
                 onMouseEnter={() => setActive(i)}
                 className={`px-3 py-2 text-sm cursor-pointer flex items-center justify-between gap-3 ${i === active ? 'bg-primary-600 text-white' : 'text-slate-700'}`}

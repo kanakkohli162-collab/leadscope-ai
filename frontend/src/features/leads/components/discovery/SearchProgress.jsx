@@ -4,10 +4,6 @@ import { CircleCheck, Loader2, Circle } from 'lucide-react'
 const STEPS = ['Fetching businesses', 'Cleaning data', 'Checking digital gaps', 'Scoring leads']
 const STEP_MS = 1500
 
-/**
- * Shown while a search runs: 4 steps tick one after another (the last one waits for the server),
- * then all tick when `done`. Animations are switched off for people who prefer reduced motion.
- */
 export default function SearchProgress({ city, done }) {
   const [step, setStep] = useState(0)
 

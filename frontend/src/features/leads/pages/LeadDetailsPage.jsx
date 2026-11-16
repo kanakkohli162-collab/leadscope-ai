@@ -24,7 +24,6 @@ export default function LeadDetailsPage() {
   const [saving, setSaving] = useState(false)
   const [savedMsg, setSavedMsg] = useState('')
 
-  // When the lead arrives from the backend, put its notes in the text box
   useEffect(() => { if (lead) setNotes(lead.notes) }, [lead])
 
   if (loading) return <PageLoader />
@@ -53,12 +52,10 @@ export default function LeadDetailsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Back */}
       <Link to="/my-leads" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700">
         <ArrowLeft size={16} /> Back to My Leads
       </Link>
 
-      {/* Header Card */}
       <WhitePanel>
         <div className="flex flex-col md:flex-row md:items-start gap-6">
           <img src={lead.image} alt={lead.name} className="w-full md:w-48 h-36 object-cover rounded-xl bg-inset" />
@@ -117,9 +114,7 @@ export default function LeadDetailsPage() {
         </div>
       </WhitePanel>
 
-      {/* Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Opportunities */}
         <WhitePanel>
           <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
             <AlertTriangle size={18} className="text-amber-500" />
@@ -138,7 +133,6 @@ export default function LeadDetailsPage() {
           )}
         </WhitePanel>
 
-        {/* Why this lead + action */}
         <div className="space-y-4">
           <WhitePanel>
             <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
@@ -177,16 +171,12 @@ export default function LeadDetailsPage() {
         </WhitePanel>
       </div>
 
-      {/* Contact & social (from the business's own website) */}
       <ContactSocialCard lead={lead} onLeadChange={setLead} />
 
-      {/* Review Sentiment (AI / NLP) */}
       <ReviewSentimentCard lead={lead} />
 
-      {/* Nearby competitors (Geoapify, within 1 km) */}
       <NearbyCompetitorsCard lead={lead} />
 
-      {/* Actions */}
       <WhitePanel as="div" bodyClassName="flex flex-wrap items-center gap-3 !py-4">
         <Link
           to={`/outreach?leadId=${lead.id}`}

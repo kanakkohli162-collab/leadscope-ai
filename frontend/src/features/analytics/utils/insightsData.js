@@ -1,9 +1,6 @@
 import { areaOf } from '@/features/leads/utils/leadArea'
 import { funnelCounts } from '@/features/pipeline/utils/pipelineStats'
 
-/**
- * Everything the Insights page shows, computed in the browser from the user's saved leads.
- */
 
 export const RANGES = [
   { id: 'all', label: 'All time', days: null },
@@ -23,7 +20,6 @@ function countBy(list, getKey) {
   return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value)
 }
 
-/** City / category / date filters. Leads without a saved date only appear in "All time". */
 export function filterLeads(leads, { city, category, range }) {
   const days = RANGES.find((r) => r.id === range)?.days
   const since = days ? Date.now() - days * DAY : null
@@ -33,7 +29,6 @@ export function filterLeads(leads, { city, category, range }) {
     (!since || (l.createdAt && new Date(l.createdAt).getTime() >= since)))
 }
 
-/** Monday 00:00 of the week a date falls in. */
 function weekStart(date) {
   const d = new Date(date)
   d.setHours(0, 0, 0, 0)
@@ -41,7 +36,6 @@ function weekStart(date) {
   return d
 }
 
-/** Leads saved per week (last 12 weeks that have data, gaps filled with 0). */
 function savedByWeek(leads) {
   const dated = leads.filter((l) => l.createdAt)
   if (!dated.length) return []
@@ -68,7 +62,6 @@ export function computeInsights(leads) {
   const contacted = leads.filter((l) => l.status !== 'New').length
   const converted = leads.filter((l) => l.status === 'Converted').length
 
-  // Score histogram: 0–9, 10–19 … 90–100
   const histogram = Array.from({ length: 10 }, (_, i) => ({
     name: i === 9 ? '90–100' : `${i * 10}–${i * 10 + 9}`,
     min: i * 10,
@@ -97,7 +90,6 @@ export function computeInsights(leads) {
     name, value: leads.filter((l) => l.sentimentLabel === name).length,
   }))
 
-  // Opportunity matrix: top 6 categories × top 6 areas, hot leads per cell
   const topCats = countBy(leads, (l) => l.category || 'Other').slice(0, 6).map((c) => c.name)
   const topAreas = countBy(withArea, (l) => l.area).slice(0, 6).map((a) => a.name)
   const cells = {}
@@ -111,7 +103,6 @@ export function computeInsights(leads) {
   const matrixMax = Math.max(1, ...topCats.flatMap((c) => topAreas.map((a) => cells[`${c}|${a}`]?.hot || 0)))
   const matrix = { categories: topCats, areas: topAreas, cells, max: matrixMax }
 
-  // ---- smart insight cards ----
   const insights = []
   const catStats = countBy(leads, (l) => l.category || 'Other')
     .filter((c) => c.value >= 3)
@@ -136,7 +127,6 @@ export function computeInsights(leads) {
   if (gaps[0]?.value) insights.push({ tone: 'gap', text: `The most common gap is “${gaps[0].name.toLowerCase()}” (${gaps[0].value} of ${total} leads). Lead with it in your pitch.` })
   if (contacted >= 5) insights.push({ tone: 'win', text: `${pct(converted, contacted)}% of contacted leads became clients (${converted} of ${contacted}).` })
 
-  // ---- counts only (no names / phones / addresses) for the AI summary ----
   const aiCounts = {
     totalLeads: total,
     averageScore: avg,

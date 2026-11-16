@@ -58,7 +58,6 @@ export default function ChatWidget() {
     return () => window.removeEventListener('keydown', onKey)
   }, [open, close])
 
-  // The full-page Ask AI (/chatbot) has its own chat, so the floating button is hidden there
   if (pathname.startsWith('/chatbot')) return null
 
   const askFromTeaser = (q) => {

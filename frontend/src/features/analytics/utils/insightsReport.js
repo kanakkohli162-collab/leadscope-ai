@@ -1,11 +1,6 @@
-/**
- * "Download report (PDF)": same approach as exportLeadsToPdf — opens a clean printable page and the browser's
- * "Save as PDF" makes the file. Charts are copied from the page as SVG (sharp in the PDF, no extra library).
- */
 
 const esc = (v) => String(v ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
 
-/** Every chart card on the page marked with data-report-chart → { title, caption, svg | html } */
 function collectCharts(root) {
   return [...root.querySelectorAll('[data-report-chart]')].map((card) => {
     const svg = card.querySelector('svg.recharts-surface')

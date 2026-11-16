@@ -11,16 +11,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Finds businesses with the Google Places API (Text Search).
- * If no API key is set, it returns sample businesses (demo mode)
- * so the app still works for development and demos.
- */
 @Service
 public class PlacesService {
 
     private static final String URL = "https://places.googleapis.com/v1/places:searchText";
-    // Only the fields we need (Google charges by the fields requested)
     private static final String FIELDS = "places.displayName,places.formattedAddress,places.nationalPhoneNumber,"
             + "places.websiteUri,places.rating,places.userRatingCount,places.regularOpeningHours";
 
@@ -33,10 +27,6 @@ public class PlacesService {
         this.scoringService = scoringService;
     }
 
-    /**
-     * @param area  optional part of the city (e.g. "Vijay Nagar"), added to the text query
-     * @param limit max businesses (Google returns at most 20 per call)
-     */
     @SuppressWarnings("unchecked")
     public List<Lead> search(String category, String city, String area, int limit) {
         if (apiKey == null || apiKey.isBlank()) {
@@ -78,14 +68,12 @@ public class PlacesService {
             results.add(lead);
         }
 
-        results.sort(Comparator.comparing(Lead::getScore).reversed());   // best opportunities first
+        results.sort(Comparator.comparing(Lead::getScore).reversed());
         return results;
     }
 
-    // Sample businesses used when no Google key is configured
     private List<Lead> demoResults(String category, String city) {
         Object[][] samples = {
-                // name, website, phone, rating, reviews, hasHours
                 {"Smile Care " + category, null, "+91 98765 43210", 4.4, 18, false},
                 {"City " + category + " Centre", "www.citycentre.in", "+91 98765 43211", 3.2, 210, true},
                 {"Sunrise " + category, null, "+91 98765 43212", 4.1, 145, true},

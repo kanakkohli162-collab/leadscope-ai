@@ -1,13 +1,3 @@
-/**
- * White panel on the dark ocean background (same look as the landing page's "Try a search" box):
- * a light blue frame (#E9F5FF, 10px / 8px on phones, 24px corners, soft shadow) around a white card
- * (16px corners, #202124 text).
- *
- * The inner card has the `ls-light` class, which switches the theme colours (see styles/index.css),
- * so existing classes such as text-slate-800, bg-inset, border-line, inputs and badges read dark-on-white inside it.
- *
- * Props: title, subtitle, actions (right side of the header), children, className (outer), bodyClassName (inner).
- */
 export default function WhitePanel({
   title, subtitle, actions, children, className = '', bodyClassName = '', as: Tag = 'section', titleId, ...rest
 }) {

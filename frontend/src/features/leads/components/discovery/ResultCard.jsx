@@ -9,10 +9,6 @@ import SocialIcons from '../SocialIcons'
 
 const ACTION = `inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium border border-line bg-inset text-slate-700 hover:bg-line hover:text-slate-800 disabled:opacity-60 ${FOCUS}`
 
-/**
- * One search result: details, gaps, score (opens "Why this score?") and quick actions.
- * `savedLead` = the same business in My Leads (or undefined), used for "Saved", "Find contacts" and social icons.
- */
 function ResultCard({
   result: r, savedLead, goodFit, saving, enriching, selected,
   onToggleSelect, onSave, onWriteMessage, onShowScore, onFindContacts,
@@ -65,7 +61,6 @@ function ResultCard({
           <MapPin size={12} className="mt-0.5 shrink-0" aria-hidden="true" /> <span className="line-clamp-2 break-words">{r.address}</span>
         </p>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          {/* Rating only when the data source has it (OpenStreetMap doesn't) */}
           {r.raw?.rating != null && (
             <span className="flex items-center gap-1 text-amber-500">
               <Star size={12} fill="currentColor" aria-hidden="true" /> {r.raw.rating} ({r.raw.reviewCount ?? 0} reviews)

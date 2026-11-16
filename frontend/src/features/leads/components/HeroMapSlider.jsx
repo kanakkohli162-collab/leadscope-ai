@@ -4,13 +4,6 @@ import {
   Navigation, Bookmark, Compass, Smartphone, Share2, Tag, ListFilter,
 } from 'lucide-react'
 
-/*
- * Hero "before / after" slider (Octoparse-style).
- * Bottom layer: a map-style listing (list, place panel, map).
- * Top layer: the clean LeadScope sheet, visible to the right of the handle.
- * Drag the round blue handle, or use the arrow keys. It glides until touched.
- * Pictures are drawn in code (no photos), and only data LeadScope really has is shown.
- */
 const K = {
   frame: '#E9F5FF', card: '#FFFFFF', blue: '#447EFC', blueSoft: '#E8F1FF', ink: '#202124',
   muted: '#5F6368', line: '#EBEBEB', head: '#484E53', panel: '#99D0E0', red: '#C5221F', green: '#188038',
@@ -43,7 +36,6 @@ const CSS = `
 @media (prefers-reduced-motion: reduce) { .hms-handle { animation: none; transition: none; } }
 `
 
-/* A small drawn shop front, used instead of a photo */
 function Storefront({ awning, wall, className = '' }) {
   const stripes = Array.from({ length: 8 }, (_, i) => i)
   return (
@@ -127,10 +119,8 @@ export default function HeroMapSlider() {
         onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
         onMouseEnter={() => setPaused(true)} onMouseLeave={() => { setPaused(false); onUp() }}>
 
-        {/* ================= BOTTOM LAYER: map-style listing ================= */}
         <div className="absolute inset-0 flex">
 
-          {/* 1. result list */}
           <div className="w-[48%] sm:w-[34%] h-full overflow-hidden flex flex-col" style={{ borderRight: `1px solid ${K.line}` }}>
             <div className="m-2 flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-[10.5px] shadow-sm" style={{ border: `1px solid ${K.line}`, color: K.ink }}>
               <span className="flex-1 truncate">restaurant</span>
@@ -155,7 +145,6 @@ export default function HeroMapSlider() {
             ))}
           </div>
 
-          {/* 2. filters + place panel */}
           <div className="w-[52%] sm:w-[36%] h-full overflow-hidden flex flex-col">
             <div className="flex gap-1 px-1.5 py-1.5 overflow-hidden" style={{ background: K.blueSoft }}>
               <Chip icon={Tag}>Category</Chip><Chip icon={Globe}>Website</Chip><Chip icon={Phone}>Phone</Chip><Chip icon={Clock}>Hours</Chip>
@@ -197,7 +186,6 @@ export default function HeroMapSlider() {
             </div>
           </div>
 
-          {/* 3. drawn map */}
           <div className="hidden sm:block flex-1 h-full relative overflow-hidden" style={{ background: '#EEF1F4' }}>
             <svg viewBox="0 0 100 200" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full" aria-hidden="true">
               <rect x="8" y="20" width="38" height="30" rx="3" fill="#CDE8C8" />
@@ -213,7 +201,6 @@ export default function HeroMapSlider() {
           </div>
         </div>
 
-        {/* ================= TOP LAYER: LeadScope sheet ================= */}
         <div className="absolute inset-0" style={{ background: K.card, clipPath: `inset(0 0 0 ${pos}%)` }} aria-label="Lead sheet made by LeadScope">
           <table className="w-full text-[10px] text-left table-fixed">
             <colgroup>
@@ -243,7 +230,6 @@ export default function HeroMapSlider() {
           </table>
         </div>
 
-        {/* ================= divider + round handle ================= */}
         <div className="absolute top-0 bottom-0 w-[2px] -ml-px pointer-events-none" style={{ left: `${pos}%`, background: K.blue }} />
         <button type="button" role="slider" aria-label="Compare map listing and lead sheet"
           aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pos)} onKeyDown={onKey}

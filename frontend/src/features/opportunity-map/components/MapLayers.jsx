@@ -3,10 +3,6 @@ import L from 'leaflet'
 import { useMap, useMapEvents } from 'react-leaflet'
 import { INDIA_CENTER, CITY_ZOOM } from '../utils/mapHelpers'
 
-/**
- * Fits the map to the visible pins (with padding) whenever `fitKey` changes (filters / first load).
- * If every pin is on the same point, zooms to city level instead of region level.
- */
 export function FitToPins({ points, fitKey }) {
   const map = useMap()
   const pointsRef = useRef(points)
@@ -22,7 +18,6 @@ export function FitToPins({ points, fitKey }) {
   return null
 }
 
-/** Zooms to a group of points (e.g. a clicked "Top area"). `focus` = { points, id } — a new id re-zooms. */
 export function FocusOn({ focus }) {
   const map = useMap()
   useEffect(() => {
@@ -34,17 +29,12 @@ export function FocusOn({ focus }) {
   return null
 }
 
-/** Tells the page where the map centre is (for "Find businesses here"). */
 export function CenterTracker({ onChange }) {
   const map = useMapEvents({ moveend: () => onChange(map.getCenter()) })
   useEffect(() => { onChange(map.getCenter()) }, [map, onChange])
   return null
 }
 
-/**
- * Heatmap layer (leaflet.heat), weighted by lead score.
- * The plugin attaches itself to the global `L`, so it is loaded after Leaflet, only when Heatmap is chosen.
- */
 export function HeatLayer({ points }) {
   const map = useMap()
   const layerRef = useRef(null)

@@ -1,8 +1,3 @@
-/**
- * Area (locality) of a lead = the address part just before the city,
- * e.g. "…, Palasia, Indore, MP 452001" → "Palasia".
- * Falls back to the city when the address has no clear locality.
- */
 export function areaOf(lead) {
   const city = (lead.location || '').trim()
   const parts = (lead.address || '').split(',').map((p) => p.trim()).filter(Boolean)

@@ -39,7 +39,6 @@ public class LeadController {
         return findMine(id, auth);
     }
 
-    /** Saves a lead. If the same business (name + address) is already saved, returns that one with alreadySaved = true. */
     @PostMapping
     public Lead addLead(@RequestBody Lead lead, Authentication auth) {
         String me = auth.getName();
@@ -72,7 +71,6 @@ public class LeadController {
         return leadRepository.save(lead);
     }
 
-    /** PUT /api/leads/1/deal-value { "dealValue": 15000 }  (null clears it). Rupees, whole numbers. */
     @PutMapping("/{id}/deal-value")
     public Lead updateDealValue(@PathVariable Long id, @RequestBody Map<String, Object> body, Authentication auth) {
         Lead lead = findMine(id, auth);

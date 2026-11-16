@@ -9,10 +9,6 @@ const NETWORKS = [
   { key: 'whatsappUrl', label: 'WhatsApp', icon: MessageCircle },
 ]
 
-/**
- * Small social icons for a lead after "Find contacts": green = found (opens the profile), grey = not found.
- * Only links the business shows on its own website.
- */
 export default function SocialIcons({ lead, size = 14 }) {
   return (
     <ul className="flex flex-wrap items-center gap-1.5" aria-label="Social profiles">

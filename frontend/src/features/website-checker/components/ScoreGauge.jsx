@@ -3,10 +3,6 @@ import { scoreColor, scoreLabel } from '../utils/checkItems'
 
 const reduced = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
-/**
- * Half-circle health gauge. Fills once from 0 to the score; colour goes red (low) → green (high).
- * No animation for people who prefer reduced motion.
- */
 export default function ScoreGauge({ score, size = 180 }) {
   const value = Math.max(0, Math.min(100, Number(score) || 0))
   const [shown, setShown] = useState(() => (reduced() ? value : 0))

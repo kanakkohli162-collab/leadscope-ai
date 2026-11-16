@@ -1,8 +1,3 @@
-/**
- * "Best way to contact" for a saved lead.
- * Same rules as the backend (LeadEnrichmentService.bestChannel), so the answer is the same after a page reload:
- * WhatsApp if they have a WhatsApp link or a phone, else Email if one was found, else a visit in person.
- */
 export function bestChannel(lead) {
   const hasPhone = lead.phone && lead.phone !== '—'
   if (lead.whatsappUrl) return { channel: 'WhatsApp', reason: 'Their website has a WhatsApp chat link, so they expect messages there.' }
@@ -11,10 +6,9 @@ export function bestChannel(lead) {
   return { channel: 'Visit in person', reason: 'No phone, WhatsApp or email is shown online, so a short visit works best.' }
 }
 
-/** Phone text -> digits in international format for wa.me (Indian numbers get 91 in front). */
 export function toWhatsAppNumber(phone) {
   if (!phone || phone === '—') return null
-  const first = phone.split(/[;,/]/)[0]          // OpenStreetMap sometimes lists several numbers
+  const first = phone.split(/[;,/]/)[0]
   let digits = first.replace(/\D/g, '')
   if (first.trim().startsWith('+')) return digits.length >= 8 ? digits : null
   if (digits.startsWith('00')) digits = digits.slice(2)

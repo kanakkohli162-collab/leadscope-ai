@@ -44,7 +44,6 @@ function Sidebar({ collapsed, onToggleCollapsed, mobileOpen, onCloseMobile }) {
         style={{ backgroundImage: 'radial-gradient(120% 60% at 0% 0%, rgba(4,151,246,.22) 0%, rgba(4,151,246,0) 60%), radial-gradient(90% 50% at 100% 100%, rgba(78,185,229,.14) 0%, rgba(78,185,229,0) 65%)' }}
       >
         <div className={clsx('flex items-center h-16 px-4', collapsed ? 'lg:justify-center lg:px-0' : 'justify-between')}>
-          {/* Collapsed (desktop): only the mark; otherwise the full logo + tagline */}
           <div className={clsx('hidden', collapsed && 'lg:block')}>
             <LogoMark size={36} label="LeadScope" />
           </div>
@@ -77,7 +76,6 @@ function Sidebar({ collapsed, onToggleCollapsed, mobileOpen, onCloseMobile }) {
         <nav className="flex-1 px-3 py-3 overflow-y-auto overflow-x-hidden">
           {NAV_GROUPS.map((group, gi) => (
             <div key={group.label} className={gi > 0 ? 'mt-4' : ''}>
-              {/* Section label: hidden when collapsed (a thin line keeps the groups apart instead) */}
               <p className={clsx('px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#6F8FAA]', collapsed && 'lg:hidden')}>
                 {group.label}
               </p>

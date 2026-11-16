@@ -1,9 +1,4 @@
-/**
- * Quick client-side check of a message before sending: personal, mentions a gap,
- * clear call to action, and length right for the channel. Each check: { ok, label, tip }.
- */
 
-// Words that show a gap was mentioned (English, Hindi, Hinglish)
 const GAP_WORDS = {
   website: ['website', 'site', 'वेबसाइट'],
   incomplete: ['profile', 'listing', 'google', 'phone', 'number', 'hours', 'details', 'timing', 'प्रोफाइल', 'लिस्टिंग'],

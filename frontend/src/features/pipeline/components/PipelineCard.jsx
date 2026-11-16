@@ -9,7 +9,6 @@ import { staleDays } from '../utils/pipelineStats'
 
 const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aqua'
 const ACTION = `inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium border border-line bg-inset text-slate-600 hover:bg-line hover:text-slate-800 ${FOCUS}`
-/** Deal value: shows "₹15,000" (click to edit) or "+ Add deal value". Enter / leaving the box saves, Escape cancels. */
 function DealValue({ lead, onSave, onEditingChange }) {
   const [editing, setEditing] = useState(false)
   const [text, setText] = useState('')

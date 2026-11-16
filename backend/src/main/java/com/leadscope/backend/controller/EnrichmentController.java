@@ -22,7 +22,6 @@ public class EnrichmentController {
         this.enrichmentService = enrichmentService;
     }
 
-    // POST /api/leads/1/enrich -> emails, social links, WhatsApp, socialPresence, bestChannel (+ the updated lead)
     @PostMapping("/{id}/enrich")
     public Map<String, Object> enrich(@PathVariable Long id, Authentication auth) {
         Lead lead = leadRepository.findByIdAndOwnerEmail(id, auth.getName())

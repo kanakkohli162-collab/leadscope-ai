@@ -22,7 +22,6 @@ public class CompetitorController {
         this.competitorService = competitorService;
     }
 
-    // GET /api/leads/1/competitors  -> how this lead compares with similar businesses within 1 km
     @GetMapping("/{id}/competitors")
     public Map<String, Object> competitors(@PathVariable Long id, Authentication auth) {
         Lead lead = leadRepository.findByIdAndOwnerEmail(id, auth.getName())

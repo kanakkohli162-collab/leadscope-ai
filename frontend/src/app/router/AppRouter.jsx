@@ -4,7 +4,6 @@ import AppLayout from '@/components/layout/AppLayout'
 import PageLoader from '@/components/ui/PageLoader'
 import PrivateRoute from './PrivateRoute'
 
-// Each page loads only when it is opened (code splitting)
 const LandingPage = lazy(() => import('@/features/landing/pages/LandingPage'))
 const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage'))
 const DashboardPage = lazy(() => import('@/features/dashboard/pages/DashboardPage'))
@@ -24,7 +23,6 @@ const ExportReportsPage = lazy(() => import('@/features/reports/pages/ExportRepo
 export default function AppRouter() {
   return (
     <Routes>
-      {/* Public pages */}
       <Route
         path="/"
         element={
@@ -42,7 +40,6 @@ export default function AppRouter() {
         }
       />
 
-      {/* Logged-in pages: share the sidebar + topbar + Ask AI */}
       <Route
         element={
           <PrivateRoute>
@@ -64,12 +61,10 @@ export default function AppRouter() {
         <Route path="/export" element={<ExportReportsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
 
-        {/* Old pages → merged into other screens */}
         <Route path="/saved-searches" element={<Navigate to="/lead-discovery" replace />} />
         <Route path="/ai-analysis/:id" element={<Navigate to="/my-leads" replace />} />
       </Route>
 
-      {/* Unknown address → front page */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

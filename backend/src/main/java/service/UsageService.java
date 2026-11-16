@@ -9,10 +9,6 @@ import java.time.YearMonth;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * "Usage this month" counters on the user: searches, AI messages, website checks.
- * The counters start at 0 when a new month begins. Counting never blocks the real action.
- */
 @Service
 public class UsageService {
 
@@ -38,11 +34,9 @@ public class UsageService {
                 userRepository.save(user);
             });
         } catch (RuntimeException ignored) {
-            // a missed count must never break a search / message / check
         }
     }
 
-    /** { month, searches, aiMessages, websiteChecks } for this month (0 if nothing yet). */
     public Map<String, Object> thisMonth(User user) {
         boolean current = YearMonth.now().toString().equals(user.getUsageMonth());
         Map<String, Object> u = new LinkedHashMap<>();

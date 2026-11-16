@@ -10,11 +10,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
-/**
- * Nearby Competitor Check: compares a lead with similar businesses within 1 km.
- * e.g. "4 of 5 nearby cafes have a website. Cafe Mocha Point does not – a website would help it compete."
- * Uses Geoapify (OpenStreetMap). Leads without coordinates are geocoded once and saved.
- */
 @Service
 public class CompetitorService {
 
@@ -48,7 +43,6 @@ public class CompetitorService {
                     "The map service is not responding. Please try again in a minute.");
         }
 
-        // Leave out the lead itself (same name), then nearest first
         String ownName = normalise(lead.getBusinessName());
         List<Map<String, Object>> others = new ArrayList<>();
         for (Map<String, Object> p : places) {
@@ -89,7 +83,6 @@ public class CompetitorService {
         return result;
     }
 
-    /** Old leads have no coordinates: geocode the address once and remember it. */
     private void ensureCoordinates(Lead lead) {
         if (lead.getLatitude() != null && lead.getLongitude() != null) return;
 
@@ -105,7 +98,7 @@ public class CompetitorService {
         if (point == null) throw noLocation();
         lead.setLatitude(point.lat());
         lead.setLongitude(point.lon());
-        lead.setLocationApproximate(point.approximate());   // only the city / area was found -> "Approximate location" on the map
+        lead.setLocationApproximate(point.approximate());
         leadRepository.save(lead);
     }
 
@@ -136,7 +129,6 @@ public class CompetitorService {
         return count + " " + name + " has one too – offer a better, faster website to beat them.";
     }
 
-    /** "Cafe" -> "cafes", "Pharmacy" -> "pharmacies", empty -> "businesses" */
     private String plural(String category) {
         String c = category == null ? "" : category.trim().toLowerCase();
         if (c.isEmpty()) return "businesses";
@@ -154,7 +146,6 @@ public class CompetitorService {
         return s == null ? "" : s.toLowerCase().replaceAll("[^a-z0-9]", "");
     }
 
-    /** Straight-line distance in metres (haversine). */
     private double distance(double lat1, double lon1, double lat2, double lon2) {
         double r = 6_371_000;
         double dLat = Math.toRadians(lat2 - lat1);

@@ -8,7 +8,6 @@ import { login, register, forgotPassword, saveSession } from '@/services/authSer
 import Logo from '@/components/ui/Logo'
 import LogoMark from '@/components/ui/LogoMark'
 
-/* All sizes scale with screen height: clamp(min, vh, max) */
 const CSS = `
 .lp-logo { font-size: clamp(20px, 3.4vh, 36px); }
 .lp-nav  { font-size: clamp(13px, 1.8vh, 19px); }
@@ -51,7 +50,6 @@ const CSS = `
 }
 `
 
-/* Pins: x, y = tip position in % of the page */
 const PINS = [
   { label: 'Cafes', icon: UtensilsCrossed, x: 39.7, y: 54, c1: '#75DFFF', c2: '#4EB9E5', glow: 'rgba(117,223,255,.7)', delay: 0.6 },
   { label: 'Clinics', icon: Plus, x: 52.6, y: 59, c1: '#22A6F7', c2: '#0080DD', glow: 'rgba(4,151,246,.7)', delay: 0.8 },
@@ -59,7 +57,6 @@ const PINS = [
   { label: 'Gyms', icon: Dumbbell, x: 51, y: 85, c1: '#4EB9E5', c2: '#0B5C93', glow: 'rgba(78,185,229,.75)', delay: 1.2 },
 ]
 
-/* Glowing road trails (viewBox 0–100) */
 const TRAILS = [
   { d: 'M 28 100 Q 36 88 44 86 T 60 74 T 62 56', color: '#4EB9E5', delay: 0 },
   { d: 'M 34 100 Q 44 92 52 94 T 64 82', color: '#75DFFF', delay: 1.2 },
@@ -155,26 +152,21 @@ export default function LoginPage() {
       style={{ background: 'linear-gradient(135deg, #01081A 0%, #001C36 40%, #01081A 100%)' }}>
       <style>{CSS}</style>
 
-      {/* ===== Animated background (desktop) ===== */}
       <div aria-hidden="true" className="hidden lg:block absolute inset-0 pointer-events-none">
-        {/* city image with slow drift */}
         <div className="lp-drift absolute inset-0"
           style={{
             backgroundImage: 'url(/login-city.png), radial-gradient(60% 70% at 48% 70%, #0B4A7A 0%, transparent 70%)',
             backgroundSize: 'cover, cover', backgroundPosition: '60% center, center',
           }} />
-        {/* blend so text and card stay readable */}
         <div className="absolute inset-0"
           style={{ background: 'linear-gradient(90deg, rgba(1,8,26,.97) 0%, rgba(1,8,26,.85) 26%, rgba(1,8,26,.15) 45%, rgba(1,8,26,.1) 60%, rgba(1,8,26,.55) 100%)' }} />
         <div className="absolute inset-x-0 top-0 h-[22%]" style={{ background: 'linear-gradient(180deg, rgba(1,8,26,.9), transparent)' }} />
 
-        {/* twinkling window lights */}
         {LIGHTS.map((l, i) => (
           <span key={i} className="lp-twinkle absolute rounded-[1px]"
             style={{ left: `${l.x}%`, top: `${l.y}%`, width: l.s, height: l.s, background: l.c, animationDelay: `${l.d}s`, boxShadow: `0 0 6px ${l.c}` }} />
         ))}
 
-        {/* glowing road trails */}
         <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
           {TRAILS.map((t, i) => (
             <g key={i}>
@@ -185,30 +177,25 @@ export default function LoginPage() {
           ))}
         </svg>
 
-        {/* floating particles */}
         {PARTICLES.map((p, i) => (
           <span key={i} className="lp-up absolute rounded-full"
             style={{ left: `${p.x}%`, bottom: '-2vh', width: p.s, height: p.s, background: '#CFEFFF', boxShadow: '0 0 8px #4EB9E5', animationDelay: `${p.d}s` }} />
         ))}
 
-        {/* coloured pins with labels */}
         {PINS.map((p, i) => {
           const Icon = p.icon
           const size = 'clamp(42px, 7.6vh, 82px)'
           return (
             <div key={p.label} className="absolute" style={{ left: `${p.x}%`, top: `${p.y}%` }}>
-              {/* ground glow + pulsing ring */}
               <span className="absolute left-0 top-0 rounded-full"
                 style={{ width: `calc(${size} * .5)`, height: `calc(${size} * .18)`, transform: 'translate(-50%,-50%)', background: p.c1, boxShadow: `0 0 18px 6px ${p.glow}` }} />
               <span className="lp-ring absolute left-0 top-0 rounded-full"
                 style={{ width: `calc(${size} * .9)`, height: `calc(${size} * .32)`, border: `2px solid ${p.c1}`, animationDelay: `${i * 0.5}s` }} />
               <div className="lp-pin absolute left-0 top-0" style={{ animationDelay: `${i * 0.45}s` }}>
-                {/* label chip */}
                 <span className="lp-pop lp-chip absolute left-1/2 whitespace-nowrap rounded-xl bg-[#113E62] border border-[#1B4C74] font-semibold text-[#E6F1F7] shadow-lg"
                   style={{ bottom: `calc(${size} * 1.3)`, padding: 'clamp(3px,.6vh,7px) clamp(10px,1.4vh,16px)', animationDelay: `${p.delay}s` }}>
                   {p.label}
                 </span>
-                {/* pin body */}
                 <div className="flex items-center justify-center rounded-full rounded-br-none rotate-45"
                   style={{
                     width: size, height: size,
@@ -226,7 +213,6 @@ export default function LoginPage() {
         })}
       </div>
 
-      {/* ===== Top nav ===== */}
       <header className="relative z-20 flex items-center justify-between"
         style={{ padding: 'clamp(16px,3.4vh,36px) clamp(20px,4.6vw,72px) 0' }}>
         <Link to="/" aria-label="LeadScope" className="flex items-center lp-rise rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4EB9E5]">
@@ -239,11 +225,9 @@ export default function LoginPage() {
         </nav>
       </header>
 
-      {/* ===== Content ===== */}
       <main className="relative z-10 grid lg:grid-cols-[1fr_minmax(380px,38%)] items-center lg:h-[calc(100vh-clamp(60px,10vh,110px))]"
         style={{ padding: 'clamp(12px,2vh,24px) clamp(20px,2.6vw,40px) clamp(16px,3vh,36px) clamp(20px,4.6vw,72px)', gap: 'clamp(20px,3vw,48px)' }}>
 
-        {/* Left text */}
         <section className="hidden lg:flex flex-col justify-center self-stretch" style={{ maxWidth: '44vw' }}>
           <h1 className="lp-h1 lp-rise font-extrabold tracking-tight" style={{ animationDelay: '100ms' }}>
             Find Local<br />Businesses <span className="text-[#4EB9E5]">Easily</span>
@@ -266,7 +250,6 @@ export default function LoginPage() {
           </div>
         </section>
 
-        {/* Right: white card */}
         <section className="lp-rise w-full bg-[#113E62] text-[#E6F1F7] border border-[#1B4C74] rounded-[24px] mx-auto"
           style={{ maxWidth: 640, padding: 'clamp(24px,5vh,56px) clamp(22px,3.4vw,64px)', boxShadow: '0 40px 80px -30px rgba(0,0,0,.7), 0 0 60px -24px rgba(78,185,229,.45)', animationDelay: '250ms' }}>
           <div className="flex items-center justify-center" style={{ gap: 'clamp(10px,1.8vh,20px)' }}>

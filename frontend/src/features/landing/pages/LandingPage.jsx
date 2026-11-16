@@ -12,25 +12,23 @@ import InsideMapSheet from '@/features/leads/components/InsideMapSheet'
 import HeroMapSlider from '@/features/leads/components/HeroMapSlider'
 import Logo from '@/components/ui/Logo'
 
-/* ---------- colours: deep ocean theme (taken from the reference image) ---------- */
 const C = {
-  night: '#01081A',    // abyss: page background
-  indigo: '#001C36',   // deep sea: sections
-  blue: '#0497F6',     // azure: buttons, links
-  blueDark: '#0080DD', // azure hover
-  violet: '#4EB9E5',   // aqua glow
-  glow: '#75DFFF',     // light aqua glow
-  lavender: '#001C36', // section panels (dark)
-  card: '#113E62',     // cards
-  inset: '#0B3354',    // boxes inside cards
-  ink: '#E6F1F7',      // headings / main text
-  muted: '#9DB8CF',    // secondary text
-  line: '#1B4C74',     // borders
-  hot: '#F5A524',      // ONLY for hot lead scores
+  night: '#01081A',
+  indigo: '#001C36',
+  blue: '#0497F6',
+  blueDark: '#0080DD',
+  violet: '#4EB9E5',
+  glow: '#75DFFF',
+  lavender: '#001C36',
+  card: '#113E62',
+  inset: '#0B3354',
+  ink: '#E6F1F7',
+  muted: '#9DB8CF',
+  line: '#1B4C74',
+  hot: '#F5A524',
 }
 const display = "font-['Bricolage_Grotesque',_Figtree,_system-ui,_sans-serif]"
 
-/* ---------- animations ---------- */
 const CSS = `
 @keyframes ls-rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 @keyframes ls-slide { from { opacity: 0; transform: translateX(-14px); } to { opacity: 1; transform: none; } }
@@ -76,7 +74,6 @@ html { scroll-behavior: smooth; }
 const reducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
-/* ---------- helpers ---------- */
 function Reveal({ children, className = '', delay = 0, as: Tag = 'div', style, ...rest }) {
   const ref = useRef(null)
   const [visible, setVisible] = useState(false)
@@ -145,7 +142,6 @@ function Label({ children, light = false }) {
   return <p className="text-xs font-semibold tracking-[0.14em] uppercase" style={{ color: light ? '#75DFFF' : C.blue }}>{children}</p>
 }
 
-/* ---------- content ---------- */
 const LEADS = [
   { name: 'Neelkamal Restaurant', area: 'RNT Marg, Indore', score: 100, gap: 'No website' },
   { name: 'Shree Sweets & Snacks', area: 'Vijay Nagar, Indore', score: 86, gap: 'No website' },
@@ -217,7 +213,6 @@ const FAQS = [
   { q: 'What else can LeadScope do?', a: 'Check if a business website is old or not secure, compare a business with nearby competitors, see hot leads on a map, and track every lead on a pipeline board.' },
 ]
 
-/* ---------- mini app screens (white, like the "See it in action" box) ---------- */
 const W = { frame: '#E9F5FF', card: '#FFFFFF', head: '#F8F9FA', line: '#EBEBEB', ink: '#202124', muted: '#5F6368', blue: '#447EFC', blueSoft: '#E8F1FF' }
 
 function MiniLeadList({ delayBase = 900 }) {
@@ -293,7 +288,6 @@ function TabPreview({ id }) {
   ))
 }
 
-/* ---------- page ---------- */
 export default function LandingPage() {
   const navigate = useNavigate()
   const loggedIn = Boolean(getCurrentUser()?.email)
@@ -317,9 +311,7 @@ export default function LandingPage() {
     <div className="min-h-screen font-['Figtree',_system-ui,_sans-serif] overflow-x-hidden" style={{ background: C.night, color: C.ink }}>
       <style>{CSS}</style>
 
-      {/* ================= DARK HERO ================= */}
       <section className="relative overflow-hidden" style={{ background: 'radial-gradient(70% 85% at 72% 40%, #0B4A7A 0%, #001C36 45%, #01081A 85%)' }}>
-        {/* Top bar */}
         <header className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
           <Link to="/" aria-label="LeadScope" className="inline-flex rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4EB9E5]">
             <Logo size={40} textClassName="text-2xl" />
@@ -346,7 +338,6 @@ export default function LandingPage() {
         </header>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-24 lg:pb-32 grid lg:grid-cols-2 gap-14 items-center">
-          {/* Left text */}
           <div>
             <div className="ls-rise"><Label light>For agencies, freelancers and sales teams</Label></div>
             <h1 className={`ls-rise mt-5 text-4xl sm:text-6xl font-bold leading-[1.08] tracking-tight text-white ${display}`} style={{ animationDelay: '120ms' }}>
@@ -367,18 +358,15 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Right: map listing -> lead sheet slider */}
           <div className="ls-rise relative min-w-0" style={{ animationDelay: '500ms' }}>
             <HeroMapSlider />
           </div>
         </div>
       </section>
 
-      {/* ================= LIGHT PANEL ================= */}
       <section id="about" className="relative z-10 px-3 sm:px-6 -mt-10 scroll-mt-10">
         <div className="max-w-7xl mx-auto rounded-[28px] px-5 sm:px-12 py-16" style={{ background: C.lavender }}>
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* left */}
             <Reveal>
               <Label>What LeadScope does</Label>
               <h2 className={`mt-4 text-3xl sm:text-4xl font-bold leading-tight ${display}`}>
@@ -390,7 +378,6 @@ export default function LandingPage() {
               <BlueButton to={startTo} state={startState} className="mt-7 px-5 py-2.5 text-sm">Create free account <ArrowRight size={15} /></BlueButton>
             </Reveal>
 
-            {/* right: mini features */}
             <Reveal delay={120} className="grid sm:grid-cols-3 gap-6">
               {MINI_FEATURES.map(({ icon: Icon, title, text }) => (
                 <div key={title}>
@@ -402,7 +389,6 @@ export default function LandingPage() {
             </Reveal>
           </div>
 
-          {/* full width: inside the app */}
           <div className="mt-14">
             <Reveal className="flex items-center justify-between">
               <Label>See it in action</Label>
@@ -411,7 +397,6 @@ export default function LandingPage() {
             <div className="mt-5 min-w-0"><InsideMapSheet /></div>
           </div>
 
-          {/* stats strip */}
           <Reveal className="mt-14 rounded-2xl bg-[#113E62] border border-[#1B4C74] px-6 py-6 grid grid-cols-2 lg:grid-cols-4 gap-6" style={{ border: `1px solid ${C.line}` }}>
             {STATS.map(({ icon: Icon, big, small }, i) => (
               <div key={small} className={`flex items-center gap-3 ${i > 0 ? 'lg:border-l lg:pl-6' : ''}`} style={{ borderColor: C.line }}>
@@ -426,7 +411,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ================= FEATURE TABS (dark) ================= */}
       <section id="features" className="max-w-7xl mx-auto px-4 sm:px-6 py-24 scroll-mt-10">
         <Reveal className="text-center max-w-2xl mx-auto">
           <Label light>How it works</Label>
@@ -464,7 +448,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ================= TRY IT ================= */}
       <section id="try" className="px-4 sm:px-6 pb-24 scroll-mt-10">
         <Reveal className="max-w-5xl mx-auto rounded-[28px] px-4 sm:px-10 py-12 sm:py-14 relative overflow-hidden"
           style={{ background: `radial-gradient(80% 120% at 50% 0%, #0B4A7A 0%, ${C.indigo} 60%, #01142B 100%)`, border: '1px solid rgba(255,255,255,.08)' }}>
@@ -473,11 +456,9 @@ export default function LandingPage() {
             <p className="mt-3 text-lg" style={{ color: '#B5CBDD' }}>Pick an example, or type a city and a business type.</p>
           </div>
 
-          {/* white card, same style as the app previews */}
           <div className="mt-8 rounded-[24px] p-2.5 sm:p-3" style={{ background: W.frame, boxShadow: '0 30px 70px -30px rgba(0,0,0,.7)' }}>
             <div className="rounded-2xl p-4 sm:p-6" style={{ background: W.card, color: W.ink }}>
 
-              {/* examples */}
               <p className="text-sm font-semibold" style={{ color: W.muted }}>Quick examples</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {EXAMPLES.map((ex) => {
@@ -493,7 +474,6 @@ export default function LandingPage() {
                 })}
               </div>
 
-              {/* search form */}
               <form key={flash} onSubmit={handleTry} className="mt-5 grid sm:grid-cols-[1fr_1fr_auto] gap-3">
                 <label className={`ls-field flex flex-col rounded-xl px-4 py-2.5 ${flash ? 'ls-flash' : ''}`} style={{ border: `1px solid ${W.line}` }}>
                   <span className="text-[11px] font-semibold" style={{ color: W.muted }}>City</span>
@@ -517,7 +497,6 @@ export default function LandingPage() {
                 </button>
               </form>
 
-              {/* what you get */}
               <div className="mt-6 pt-5 grid sm:grid-cols-3 gap-3" style={{ borderTop: `1px solid ${W.line}` }}>
                 {[
                   { icon: MapPin, t: 'Name and address', s: 'Real businesses from map data' },
@@ -542,7 +521,6 @@ export default function LandingPage() {
         </Reveal>
       </section>
 
-      {/* ================= SECURITY + STACK ================= */}
       <section className="px-3 sm:px-6 pb-24">
         <div className="max-w-7xl mx-auto rounded-[28px] px-5 sm:px-12 py-14 relative overflow-hidden" style={{ background: C.lavender }}>
           <div aria-hidden="true" className="absolute -top-32 -right-24 w-80 h-80 rounded-full" style={{ background: 'radial-gradient(circle, rgba(4,151,246,.18), transparent 70%)' }} />
@@ -581,7 +559,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ================= FAQ (dark) ================= */}
       <section id="faq" className="max-w-3xl mx-auto px-4 sm:px-6 pb-24 scroll-mt-10">
         <Reveal className="text-center">
           <Label light>FAQ</Label>
@@ -607,7 +584,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ================= CLOSING CTA ================= */}
       <section className="px-4 sm:px-6 pb-20">
         <Reveal className="relative max-w-7xl mx-auto rounded-[28px] text-center px-6 py-20 overflow-hidden"
           style={{ background: `radial-gradient(70% 120% at 50% 0%, #0B5C93 0%, ${C.indigo} 55%, ${C.night} 100%)`, border: '1px solid rgba(255,255,255,.08)' }}>
@@ -627,10 +603,8 @@ export default function LandingPage() {
         </Reveal>
       </section>
 
-      {/* ================= FOOTER ================= */}
       <footer className="relative" style={{ background: '#010D20', borderTop: `1px solid ${C.line}`, color: '#9DB8CF' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-10 grid gap-10 sm:grid-cols-2 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
-          {/* brand */}
           <div>
             <Link to="/" aria-label="LeadScope" className="inline-flex rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4EB9E5]">
               <Logo size={40} textClassName="text-2xl" />
@@ -641,7 +615,6 @@ export default function LandingPage() {
             </BlueButton>
           </div>
 
-          {/* link columns */}
           {[
             { title: 'Product', links: [['Find businesses', '#features'], ['Score leads', '#features'], ['Write messages', '#features'], ['Try a search', '#try']] },
             { title: 'Help', links: [['What it does', '#about'], ['How it works', '#features'], ['FAQ', '#faq']] },
@@ -656,7 +629,6 @@ export default function LandingPage() {
             </div>
           ))}
 
-          {/* account */}
           <div>
             <p className="text-sm font-semibold text-white">Account</p>
             <ul className="mt-4 space-y-2.5 text-sm">
@@ -676,7 +648,6 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* project credit */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-8">
           <div className="rounded-2xl px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-sm" style={{ background: 'rgba(255,255,255,.03)', border: `1px solid ${C.line}` }}>
             <span className="font-semibold text-white">MCA major project, Chandigarh University</span>
@@ -685,7 +656,6 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* bottom bar */}
         <div style={{ borderTop: '1px solid rgba(255,255,255,.06)' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row gap-3 items-center justify-between text-xs">
             <p>© {new Date().getFullYear()} LeadScope · Map data © OpenStreetMap contributors</p>

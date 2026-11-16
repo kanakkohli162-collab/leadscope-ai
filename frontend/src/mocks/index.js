@@ -1,20 +1,7 @@
-/**
- * Single entry point for all mock data.
- *
- * Pages import from '@/mocks' instead of reaching into individual files.
- * When the real backend is connected, you swap these imports for calls in
- * src/services/* and nothing else in the app needs to know.
- *
- * leads.json is GENERATED — don't edit it by hand.
- * Run `npm run mock:generate` (see scripts/generate-mock-leads.mjs).
- */
 import leadsData from './data/leads.json'
 
-// Object.freeze → accidental mutation (e.g. leads.sort()) throws in dev instead of silently
-// reordering the shared array for every page.
 export const leads = Object.freeze(leadsData)
 
-/** Week-over-week changes are not derivable from a static list, so they stay hard-coded. */
 export const weeklyChanges = {
   total: '+12% from last week',
   highPriority: '+16% from last week',

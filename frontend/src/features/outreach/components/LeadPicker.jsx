@@ -4,10 +4,6 @@ import { Search, ChevronDown } from 'lucide-react'
 const MAX_OPTIONS = 50
 const scoreTone = (s) => (s >= 70 ? 'bg-marigold-500 text-abyss' : s >= 40 ? 'bg-primary-600 text-white' : 'bg-line text-slate-700')
 
-/**
- * Searchable lead picker: type to filter by name or city, Up / Down / Enter / Escape.
- * Each option shows a score badge and the city.
- */
 export default function LeadPicker({ leads, value, onChange }) {
   const id = useId()
   const inputRef = useRef(null)

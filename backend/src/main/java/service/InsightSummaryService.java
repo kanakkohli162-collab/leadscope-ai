@@ -8,10 +8,6 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.util.*;
 
-/**
- * Insights "AI summary": Gemini reads the page's aggregated counts (totals, percentages, top categories / areas —
- * never names, phones or addresses) and returns a short paragraph + 3 recommendations.
- */
 @Service
 public class InsightSummaryService {
 
@@ -59,7 +55,6 @@ public class InsightSummaryService {
         }
     }
 
-    /** Keeps only numbers, booleans, short text and small lists / maps (so nothing big or odd reaches the AI). */
     private Object clean(Object value, int depth) {
         if (value == null || value instanceof Number || value instanceof Boolean) return value;
         if (value instanceof String s) return s.length() > 60 ? s.substring(0, 60) : s;

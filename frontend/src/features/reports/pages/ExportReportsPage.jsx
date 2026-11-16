@@ -14,10 +14,6 @@ const PREVIEW_ROWS = 8
 const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aqua'
 const SELECT = 'w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-600'
 
-/**
- * Reports & Export: filter the saved leads by city, priority and status, then download Excel or PDF
- * (same export code as My Leads).
- */
 export default function ExportReportsPage() {
   const { leads, loading, error } = useLeads()
   const toast = useToast()

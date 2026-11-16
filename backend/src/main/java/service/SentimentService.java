@@ -9,11 +9,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
-/**
- * Review Sentiment Analysis (Synopsis 6.3 / 8.6).
- * Gemini reads the reviews and COUNTS positive / neutral / negative ones.
- * Our code then applies the formula: Sentiment Score = Positive − Negative (as % of total).
- */
 @Service
 public class SentimentService {
 
@@ -33,7 +28,6 @@ public class SentimentService {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI key is not configured.");
         }
 
-        // Keep the request small (fast + inside free limits)
         String text = reviews.length() > 6000 ? reviews.substring(0, 6000) : reviews;
 
         String prompt = """
@@ -70,7 +64,6 @@ public class SentimentService {
         return parse(reply);
     }
 
-    /** Gemini response → candidates[0].content.parts[0].text */
     @SuppressWarnings("unchecked")
     private String extractText(Map<?, ?> res) {
         try {
@@ -83,7 +76,6 @@ public class SentimentService {
         }
     }
 
-    /** Read the 5 lines and apply the sentiment formula */
     private Map<String, Object> parse(String reply) {
         int pos = 0, neu = 0, neg = 0;
         String concerns = "", summary = "";
@@ -104,7 +96,6 @@ public class SentimentService {
                     "Couldn't find reviews in that text. Paste one review per line.");
         }
 
-        // Synopsis 6.3: Sentiment Score = Positive − Negative  (scaled to −100 … +100)
         int score = Math.round((pos - neg) * 100f / total);
         String overall = score > 20 ? "Positive" : score < -20 ? "Negative" : "Neutral";
 

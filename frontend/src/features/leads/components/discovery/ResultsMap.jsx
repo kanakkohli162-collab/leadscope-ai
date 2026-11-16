@@ -8,7 +8,6 @@ import { LEVEL_COLORS } from './styles'
 const INDIA_CENTER = [22.5, 79]
 const hasLocation = (r) => Number.isFinite(r.latitude) && Number.isFinite(r.longitude)
 
-/** Zooms the map to fit the pins every time the visible pins change. */
 function FitToPins({ points }) {
   const map = useMap()
   useEffect(() => {
@@ -19,10 +18,6 @@ function FitToPins({ points }) {
   return null
 }
 
-/**
- * Search results on an OpenStreetMap map. Pins: High = orange, Medium = blue, Low = grey.
- * Loaded only when the user opens the Map view (keeps the page fast).
- */
 export default function ResultsMap({ results, savedIdOf, savingId, onSave }) {
   const onMap = useMemo(() => results.filter(hasLocation), [results])
   const offMap = useMemo(() => results.filter((r) => !hasLocation(r)), [results])

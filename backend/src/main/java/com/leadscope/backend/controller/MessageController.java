@@ -30,12 +30,6 @@ public class MessageController {
         this.usageService = usageService;
     }
 
-    /**
-     * POST /api/leads/1/message
-     * body: { "service": "...", "channel": "email|whatsapp|linkedin", "tone": "Friendly|Professional|Short",
-     *         "language": "English|Hindi|Hinglish", "versions": 1|2,
- *         "context": "extra facts for the AI, e.g. website problems from the Website Checker" (optional) }
-     */
     @PostMapping("/{id}/message")
     public Map<String, Object> writeMessage(@PathVariable Long id,
                                             @RequestBody Map<String, Object> body,
@@ -46,7 +40,6 @@ public class MessageController {
         return result;
     }
 
-    // POST /api/leads/1/message/sequence  same body -> Day 1 / Day 3 / Day 7 messages
     @PostMapping("/{id}/message/sequence")
     public Map<String, Object> writeSequence(@PathVariable Long id,
                                              @RequestBody Map<String, Object> body,

@@ -18,7 +18,6 @@ public class SentimentController {
         this.sentimentService = sentimentService;
         this.leadRepository = leadRepository;
     }
-    // leadId is optional: when given (and it is the user's own lead), the result is saved on that lead for Insights
     public record SentimentRequest(String reviews, Long leadId) {}
 
     @PostMapping("/sentiment")

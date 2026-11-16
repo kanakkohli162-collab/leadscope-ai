@@ -1,4 +1,3 @@
-/** Find Leads helpers: client-side filter / sort of search results. */
 
 export const DEFAULT_FILTERS = { priority: '', website: 'any', phone: 'any', minScore: 0 }
 export const SORTS = [
@@ -8,10 +7,6 @@ export const SORTS = [
   { value: 'gaps', label: 'Most gaps' },
 ]
 
-/**
- * Applies the filters + sort to the current search results (all in the browser, no new search).
- * `fitRank(result)` (from the chosen "What do you sell?" service) is used by the "fit" sort.
- */
 export function applyFilters(results, filters, sort, fitRank) {
   const list = results.filter((r) =>
     (!filters.priority || r.priority === filters.priority) &&

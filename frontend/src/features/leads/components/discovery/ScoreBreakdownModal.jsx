@@ -4,10 +4,6 @@ import PriorityBadge from '@/components/ui/PriorityBadge'
 import ScoreCircle from '@/components/ui/ScoreCircle'
 import { FOCUS } from './styles'
 
-/**
- * "Why this score?" — each rule from LeadScoringService with its points, the total and the priority.
- * Score = points earned / points possible for this business × 100 (rules without data are not counted).
- */
 export default function ScoreBreakdownModal({ result, onClose }) {
   const closeRef = useRef(null)
 
@@ -18,7 +14,7 @@ export default function ScoreBreakdownModal({ result, onClose }) {
     window.addEventListener('keydown', onKey)
     return () => {
       window.removeEventListener('keydown', onKey)
-      previous?.focus?.()   // back to the score button that opened it
+      previous?.focus?.()
     }
   }, [onClose])
 

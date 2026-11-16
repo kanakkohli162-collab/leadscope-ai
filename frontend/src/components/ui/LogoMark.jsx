@@ -1,8 +1,3 @@
-/**
- * LeadScope logo mark: a white map pin with a "scope" ring on a blue rounded square.
- * size = pixels (number) or any CSS length, e.g. "clamp(30px, 5vh, 56px)". Default 40.
- * Decorative by default; pass `label` when the mark stands alone and should be announced.
- */
 export default function LogoMark({ size = 40, className = '', label }) {
   const px = typeof size === 'number' ? `${size}px` : size
   return (

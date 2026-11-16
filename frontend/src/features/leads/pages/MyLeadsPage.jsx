@@ -17,7 +17,6 @@ export default function MyLeadsPage() {
   const [activeStatus, setActiveStatus] = useState('All')
   const [search, setSearch] = useState('')
   const deferredSearch = useDeferredValue(search)
-  // Optional filters from links (e.g. Insights opportunity matrix): ?category=…&area=…&priority=High
   const [params, setParams] = useSearchParams()
   const linkFilter = { category: params.get('category'), area: params.get('area'), priority: params.get('priority') }
   const hasLinkFilter = Boolean(linkFilter.category || linkFilter.area || linkFilter.priority)
@@ -60,7 +59,6 @@ export default function MyLeadsPage() {
           <p className="text-sm text-slate-500 mt-1">Track and update the leads you've saved</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {/* Export: exports the leads currently shown (respects tab + search) */}
           {filtered.length > 0 && (
             <>
               <button
@@ -102,7 +100,6 @@ export default function MyLeadsPage() {
       )}
 
       <WhitePanel bodyClassName="space-y-5">
-      {/* Status Tabs */}
       <div className="flex flex-wrap gap-2">
         {statuses.map((status) => (
           <button
@@ -119,7 +116,6 @@ export default function MyLeadsPage() {
         ))}
       </div>
 
-      {/* Search */}
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
         <input
@@ -131,7 +127,6 @@ export default function MyLeadsPage() {
         />
       </div>
 
-      {/* Table */}
       <div className="rounded-xl border border-line overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">

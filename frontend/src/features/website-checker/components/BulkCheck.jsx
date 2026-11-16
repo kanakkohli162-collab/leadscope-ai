@@ -9,15 +9,11 @@ const MAX_PER_RUN = 50
 const AT_A_TIME = 3
 const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aqua'
 
-/**
- * "Check all my leads": checks every saved lead that has a website (3 at a time, max 50 per run).
- * Each result is saved on the lead (health score + outdated) by the backend. Cancel stops new checks.
- */
 export default function BulkCheck() {
   const [running, setRunning] = useState(false)
   const [total, setTotal] = useState(0)
-  const [rows, setRows] = useState([])        // { lead, score, issues, error }
-  const [skipped, setSkipped] = useState(0)   // leads with a website beyond the 50 limit
+  const [rows, setRows] = useState([])
+  const [skipped, setSkipped] = useState(0)
   const [message, setMessage] = useState('')
   const cancelled = useRef(false)
 
@@ -56,7 +52,6 @@ export default function BulkCheck() {
     }
   }
 
-  // Worst first; websites that could not be checked go last
   const sorted = [...rows].sort((a, b) => (a.score ?? 101) - (b.score ?? 101))
   const done = rows.length
   const pct = total ? Math.round((done / total) * 100) : 0

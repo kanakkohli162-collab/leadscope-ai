@@ -18,10 +18,6 @@ function friendly(err) {
   return err?.message || 'Something went wrong. Please try again.'
 }
 
-/**
- * Contact & social: email, social profiles and WhatsApp found on the business's own website,
- * the social presence label and the best way to contact them.
- */
 export default function ContactSocialCard({ lead, onLeadChange }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')

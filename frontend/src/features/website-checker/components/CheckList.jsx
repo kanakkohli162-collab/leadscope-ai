@@ -7,7 +7,6 @@ const STATE = {
   unknown: { icon: MinusCircle, cls: 'text-slate-400', label: 'Not checked' },
 }
 
-/** The checks, appearing one after another (no animation with reduced motion), each with a plain-English "why". */
 export default function CheckList({ result }) {
   return (
     <ul className="divide-y divide-line">

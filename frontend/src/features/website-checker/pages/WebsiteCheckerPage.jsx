@@ -14,17 +14,11 @@ import CompareSites from '../components/CompareSites'
 import { addRecent, clearRecent, loadRecent, scoreColor } from '../utils/checkItems'
 import { downloadAuditPdf } from '../utils/auditPdf'
 
-/**
- * Website Checker (Synopsis 8.5 "Digital Presence Analysis").
- * Paste a website address (or open it from a lead with ?url=…&leadId=…) and get a simple health report,
- * an audit PDF, a message about the issues, a competitor comparison, and a bulk check of all saved leads.
- */
 
 const EXAMPLES = ['example.com', 'wikipedia.org', 'neverssl.com']
 const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aqua'
 const BTN = `inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-line text-sm text-slate-700 hover:bg-inset ${FOCUS}`
 
-// Backend messages are already friendly; only network-type errors need rewording
 function friendly(message = '') {
   if (/failed to fetch|networkerror|request failed/i.test(message)) {
     return "We couldn't reach LeadScope right now. Please check your connection and try again."
@@ -37,7 +31,7 @@ export default function WebsiteCheckerPage() {
   const [params] = useSearchParams()
   const [url, setUrl] = useState(params.get('url') || '')
   const [result, setResult] = useState(null)
-  const [checkedFor, setCheckedFor] = useState(null)   // lead id when the result belongs to a lead
+  const [checkedFor, setCheckedFor] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [recent, setRecent] = useState(loadRecent)
@@ -53,7 +47,6 @@ export default function WebsiteCheckerPage() {
     setLoading(true)
     setError('')
     setResult(null)
-    // Save the result on the lead only when checking that lead's own website (not a newly typed one)
     const leadId = params.get('leadId') && value === (params.get('url') || '').trim() ? params.get('leadId') : undefined
     try {
       const res = await checkWebsite(value, leadId)
@@ -67,7 +60,6 @@ export default function WebsiteCheckerPage() {
     }
   }
 
-  // Opened from a lead (?url=…): fill the box and check straight away (once per address)
   useEffect(() => {
     const fromLead = params.get('url')
     if (fromLead && autoChecked.current !== fromLead) {
@@ -95,7 +87,6 @@ export default function WebsiteCheckerPage() {
         </p>
       </div>
 
-      {/* Input */}
       <WhitePanel as="div">
       <form onSubmit={(e) => { e.preventDefault(); runCheck() }}>
         <label htmlFor="website-address" className="block text-sm font-medium text-slate-700 mb-2">Website address</label>
@@ -133,7 +124,6 @@ export default function WebsiteCheckerPage() {
       </form>
       </WhitePanel>
 
-      {/* Loading */}
       {loading && (
         <WhitePanel as="div" bodyClassName="flex flex-col items-center gap-3 text-center !p-8 sm:!p-10" aria-live="polite">
           <Loader2 size={28} className="motion-safe:animate-spin text-aqua" aria-hidden="true" />
@@ -141,7 +131,6 @@ export default function WebsiteCheckerPage() {
         </WhitePanel>
       )}
 
-      {/* Result */}
       {result && !loading && (
         <WhitePanel as="div" bodyClassName="space-y-6">
           <div className="flex flex-col md:flex-row gap-6">
@@ -203,7 +192,6 @@ export default function WebsiteCheckerPage() {
         </WhitePanel>
       )}
 
-      {/* Empty state */}
       {!loading && !result && !error && (
         <WhitePanel as="div" bodyClassName="text-center !p-8 sm:!p-10">
           <Globe size={32} className="mx-auto text-aqua" aria-hidden="true" />
@@ -214,7 +202,6 @@ export default function WebsiteCheckerPage() {
         </WhitePanel>
       )}
 
-      {/* Recent checks */}
       {recent.length > 0 && (
         <WhitePanel aria-labelledby="recent-title">
           <div className="flex items-center justify-between gap-3">

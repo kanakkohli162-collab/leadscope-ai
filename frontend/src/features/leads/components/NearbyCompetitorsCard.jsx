@@ -3,7 +3,6 @@ import WhitePanel from '@/components/ui/WhitePanel'
 import { MapPinned, Loader2, CheckCircle, XCircle, RefreshCw } from 'lucide-react'
 import { getCompetitors } from '@/services/leadService'
 
-// Backend messages are already friendly; only network-type errors need rewording
 function friendly(message = '') {
   if (/failed to fetch|networkerror|request failed/i.test(message)) {
     return "We couldn't reach LeadScope right now. Please check your connection and try again."
@@ -35,7 +34,6 @@ export default function NearbyCompetitorsCard({ lead }) {
 
   return (
     <WhitePanel bodyClassName="space-y-4">
-      {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
@@ -58,7 +56,6 @@ export default function NearbyCompetitorsCard({ lead }) {
 
       {error && <p className="text-sm text-red-400">{error}</p>}
 
-      {/* Loading */}
       {loading && !result && (
         <div className="space-y-2" aria-hidden="true">
           <div className="h-4 w-3/4 rounded bg-inset animate-pulse" />
@@ -67,7 +64,6 @@ export default function NearbyCompetitorsCard({ lead }) {
         </div>
       )}
 
-      {/* Result */}
       {result && (
         <div className="space-y-4">
           <p className="text-sm font-semibold text-slate-800 leading-relaxed">{result.insight}</p>
@@ -115,7 +111,6 @@ export default function NearbyCompetitorsCard({ lead }) {
         </div>
       )}
 
-      {/* Empty state */}
       {!result && !loading && !error && (
         <p className="text-sm text-slate-500 border border-dashed border-line rounded-lg p-4 text-center">
           Press <b>Compare with nearby businesses</b> to see who else is close by and who has a website.

@@ -13,19 +13,14 @@ const MOOD = {
   Negative: { icon: Frown, cls: 'text-red-400' },
 }
 
-/**
- * Review Analyzer (Synopsis: review sentiment / NLP): pick a saved lead (the result is saved on it)
- * or just paste reviews. Uses the same sentiment API and result design as Lead Details.
- */
 export default function ReviewAnalyzerPage() {
   const { leads, setLeads, loading } = useLeads()
-  const [mode, setMode] = useState('lead')   // 'lead' | 'paste'
+  const [mode, setMode] = useState('lead')
   const [leadId, setLeadId] = useState('')
 
   const lead = mode === 'lead' ? leads.find((l) => String(l.id) === String(leadId)) : null
   const mood = lead?.sentimentLabel ? MOOD[lead.sentimentLabel] : null
 
-  // Keep the picked lead's saved sentiment up to date after an analysis
   function onResult(res) {
     if (!lead) return
     setLeads((all) => all.map((l) => (l.id === lead.id ? { ...l, sentimentLabel: res.overall, sentimentScore: res.score } : l)))

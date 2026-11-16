@@ -4,10 +4,6 @@ import { chip } from './styles'
 
 const ICON_BY_LABEL = Object.fromEntries(CATEGORY_GROUPS.flatMap((g) => g.items).map((c) => [c.label, c.icon]))
 
-/**
- * Optional "What do you sell?" chips. Choosing a service suggests business types that usually need it
- * and later highlights the results that fit it best. Clicking the chosen one again clears it.
- */
 export default function SellPicker({ service, onServiceChange, category, onCategoryChange }) {
   const chosen = sellServiceById(service)
 

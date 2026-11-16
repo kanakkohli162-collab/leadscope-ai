@@ -1,9 +1,5 @@
 import { checklist, scoreColor, scoreLabel } from './checkItems'
 
-/**
- * "Download audit PDF": a one-page website audit, made the same way as the other PDF exports
- * (a clean printable page; the browser's "Save as PDF" makes the file).
- */
 const esc = (v) => String(v ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
 
 export function downloadAuditPdf(result, preparedBy) {
