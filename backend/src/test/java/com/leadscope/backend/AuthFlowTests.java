@@ -51,11 +51,11 @@ class AuthFlowTests {
     }
 
     @Test
-    void loginWithUnknownEmailReturns404() throws Exception {
+    void loginWithUnknownEmailReturns401() throws Exception {
         HttpResponse<String> login = post("/api/auth/login",
                 "{\"email\":\"nobody@test.com\",\"password\":\"secret123\"}");
-        assertEquals(404, login.statusCode());
-        assertTrue(login.body().contains("No account found with this email. Please sign up first."));
+        assertEquals(401, login.statusCode());
+        assertTrue(login.body().contains("Invalid email or password."));
     }
 
     @Test
@@ -65,7 +65,7 @@ class AuthFlowTests {
         HttpResponse<String> login = post("/api/auth/login",
                 "{\"email\":\"ravi@test.com\",\"password\":\"wrong-password\"}");
         assertEquals(401, login.statusCode());
-        assertTrue(login.body().contains("Incorrect password. Please try again."));
+        assertTrue(login.body().contains("Invalid email or password."));
     }
 
     @Test

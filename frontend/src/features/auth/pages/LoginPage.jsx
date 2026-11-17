@@ -312,7 +312,6 @@ export default function LoginPage() {
                     className="accent-[#0497F6]" style={{ width: 'clamp(15px,2.2vh,21px)', height: 'clamp(15px,2.2vh,21px)' }} />
                   Remember me
                 </label>
-                <button type="button" onClick={() => switchMode('forgot')} className="font-medium text-[#0497F6] hover:text-[#4EB9E5] hover:underline">Forgot password?</button>
               </div>
             )}
 
