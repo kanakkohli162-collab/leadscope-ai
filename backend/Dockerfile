@@ -1,14 +1,12 @@
 # Step 1: build the app with Maven
 FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
+# Maven Central rate-limits shared cloud build servers (HTTP 429 Too Many
+# Requests), so read it through Google's public mirror instead.
+COPY docker-settings.xml .
 COPY pom.xml .
 COPY src ./src
-RUN for i in 1 2 3 4 5; do \
-      mvn -q -DskipTests package && exit 0; \
-      echo "Maven build failed (try $i of 5)"; \
-      if [ "$i" -lt 5 ]; then echo "Retrying in 60 seconds..."; sleep 60; fi; \
-    done; \
-    echo "Maven build failed after 5 tries"; exit 1
+RUN mvn -q -s docker-settings.xml -DskipTests package
 
 # Step 2: run it with a small Java 21 image
 FROM eclipse-temurin:21-jre
