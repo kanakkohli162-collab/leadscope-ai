@@ -32,7 +32,7 @@ public class WebsiteCheckService {
     private static final Pattern DESCRIPTION = Pattern.compile("<meta[^>]*name\\s*=\\s*[\"']?description", Pattern.CASE_INSENSITIVE);
     private static final Pattern TITLE = Pattern.compile("<title[^>]*>(.*?)</title>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     private static final Pattern COPYRIGHT = Pattern.compile("(©|&copy;|&#169;|copyright)(.{0,80})", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-    private static final Pattern YEAR = Pattern.compile("\\b(19[9]\\d|20\\d\\d)\\b");
+    private static final Pattern YEAR = Pattern.compile("\\b(19\\d\\d|20\\d\\d)\\b");
 
     private final HttpClient http = HttpClient.newBuilder()
             .followRedirects(HttpClient.Redirect.NEVER)

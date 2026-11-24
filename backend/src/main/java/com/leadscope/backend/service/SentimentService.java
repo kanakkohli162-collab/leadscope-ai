@@ -51,7 +51,8 @@ public class SentimentService {
         String reply;
         try {
             Map<?, ?> res = http.post()
-                    .uri("https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={k}", model, apiKey)
+                    .uri("https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent", model)
+                    .header("x-goog-api-key", apiKey)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(body)
                     .retrieve()

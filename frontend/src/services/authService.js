@@ -22,8 +22,10 @@ export async function register({ name, email, password, company }) {
   return login(email, password)
 }
 
-export const forgotPassword = (email) =>
-  request('/auth/forgot-password', { method: 'POST', body: JSON.stringify({ email }) })
+// Password reset is not built yet, so fail with a clear message instead of calling a missing endpoint.
+export const forgotPassword = async () => {
+  throw new Error('Password reset is not available yet. Please contact your admin.')
+}
 
 export const saveSession = (user) => {
   storage.set(STORAGE_KEYS.token, user.token)

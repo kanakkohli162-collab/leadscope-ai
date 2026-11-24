@@ -56,7 +56,7 @@ export default function MyLeadsPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-slate-800">My Leads</h1>
-          <p className="text-sm text-slate-500 mt-1">Track and update the leads you've saved</p>
+          <p className="text-sm text-slate-500 mt-1">Track and update the leads you&apos;ve saved</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {filtered.length > 0 && (
