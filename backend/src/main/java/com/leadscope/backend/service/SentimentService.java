@@ -1,9 +1,12 @@
 package com.leadscope.backend.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -11,6 +14,8 @@ import java.util.*;
 
 @Service
 public class SentimentService {
+
+    private static final Logger log = LoggerFactory.getLogger(SentimentService.class);
 
     private final RestClient http = RestClient.create();
 
@@ -58,7 +63,21 @@ public class SentimentService {
                     .retrieve()
                     .body(Map.class);
             reply = extractText(res);
+        } catch (HttpStatusCodeException e) {
+            log.error("Gemini call failed. model={} status={} body={}",
+                    model, e.getStatusCode(), e.getResponseBodyAsString());
+            if (e.getStatusCode().value() == 404) {
+                throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                        "The AI model \"" + model + "\" is not available. Please update the GEMINI_MODEL setting.");
+            }
+            if (e.getStatusCode().value() == 429) {
+                throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,
+                        "The AI's free limit is reached. Please try again in a minute.");
+            }
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "AI is busy right now. Please try again in a minute.");
         } catch (Exception e) {
+            log.error("Gemini call failed. model={}", model, e);
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
                     "AI is busy right now. Please try again in a minute.");
         }
